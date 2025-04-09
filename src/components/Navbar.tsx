@@ -3,9 +3,13 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { BookOpen, MenuIcon, MessageCircle, User, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/context/AuthContext";
+import SignInDialog from "@/components/auth/SignInDialog";
+import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
   const navLinks = [
     { href: "#features", label: "Features" },
@@ -40,10 +44,17 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="hidden sm:flex">
-            <User size={18} className="mr-2" />
-            Sign In
-          </Button>
+          {user ? (
+            <UserProfileDropdown />
+          ) : (
+            <SignInDialog>
+              <Button variant="outline" className="hidden sm:flex">
+                <User size={18} className="mr-2" />
+                Sign In
+              </Button>
+            </SignInDialog>
+          )}
+          
           <Button className="bg-wedding-red hover:bg-wedding-deepred">
             <MessageCircle size={18} className="mr-2" />
             Start Planning
@@ -81,10 +92,26 @@ const Navbar = () => {
                   </nav>
                 </div>
                 <div className="mt-auto space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <User size={18} className="mr-2" />
-                    Sign In
-                  </Button>
+                  {user ? (
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        const { signOut } = useAuth();
+                        signOut();
+                      }}
+                    >
+                      <User size={18} className="mr-2" />
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <SignInDialog>
+                      <Button variant="outline" className="w-full justify-start">
+                        <User size={18} className="mr-2" />
+                        Sign In
+                      </Button>
+                    </SignInDialog>
+                  )}
                   <Button className="w-full justify-start bg-wedding-red hover:bg-wedding-deepred">
                     <MessageCircle size={18} className="mr-2" />
                     Start Planning
