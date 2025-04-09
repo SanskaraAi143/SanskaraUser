@@ -3,7 +3,9 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
+import RitualGuide from '@/components/RitualGuide';
 import ChatDemo from '@/components/ChatDemo';
+import Pricing from '@/components/Pricing';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -13,7 +15,9 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <RitualGuide />
         <ChatDemo />
+        <Pricing />
         
         {/* Testimonials Section */}
         <section id="testimonials" className="py-16 md:py-24 bg-wedding-cream">

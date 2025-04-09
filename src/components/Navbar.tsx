@@ -20,8 +20,14 @@ const Navbar = () => {
           <a href="#features" className="font-medium text-gray-700 hover:text-wedding-red transition-colors">
             Features
           </a>
+          <a href="#ritual-guide" className="font-medium text-gray-700 hover:text-wedding-red transition-colors">
+            Rituals
+          </a>
           <a href="#how-it-works" className="font-medium text-gray-700 hover:text-wedding-red transition-colors">
             How It Works
+          </a>
+          <a href="#pricing" className="font-medium text-gray-700 hover:text-wedding-red transition-colors">
+            Pricing
           </a>
           <a href="#testimonials" className="font-medium text-gray-700 hover:text-wedding-red transition-colors">
             Testimonials
