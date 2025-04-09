@@ -46,8 +46,8 @@ const Hero = () => {
             <div className="relative z-10 bg-white p-4 rounded-2xl shadow-lg max-w-md mx-auto">
               <div className="aspect-[4/5] rounded-xl overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1617975251517-49fae37aeabc?w=800&auto=format&fit=crop"
-                  alt="Hindu wedding ceremony" 
+                  src="/lovable-uploads/89ffba58-4862-4bf8-b505-e54b0c6fd052.png"
+                  alt="Beautiful wedding decoration with floral arch and fairy lights" 
                   className="w-full h-full object-cover"
                 />
               </div>
