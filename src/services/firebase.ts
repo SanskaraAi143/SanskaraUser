@@ -1,4 +1,3 @@
-
 import { auth, db, storage } from "../config/firebase";
 import { 
   collection, 
@@ -148,13 +147,13 @@ export const addTask = async (userId: string, task: Record<string, any>) => {
   try {
     const tasksCollection = collection(db, "tasks");
     const docRef = await addDoc(tasksCollection, {
-      ...task,
+      ...(typeof task === 'object' ? task : {}),
       userId,
       completed: false,
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...task, userId, completed: false };
+    return { id: docRef.id, ...(typeof task === 'object' ? task : {}), userId, completed: false };
   } catch (error) {
     console.error("Error adding task", error);
     return null;
@@ -268,12 +267,12 @@ export const addExpense = async (userId: string, expense: Record<string, any>) =
   try {
     const expensesCollection = collection(db, "expenses");
     const docRef = await addDoc(expensesCollection, {
-      ...expense,
+      ...(typeof expense === 'object' ? expense : {}),
       userId,
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...expense, userId };
+    return { id: docRef.id, ...(typeof expense === 'object' ? expense : {}), userId };
   } catch (error) {
     console.error("Error adding expense", error);
     return null;
