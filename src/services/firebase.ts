@@ -143,17 +143,20 @@ export const getTasks = async (userId: string) => {
   }
 };
 
-export const addTask = async (userId: string, task: Record<string, any>) => {
+export const addTask = async (userId: string, task: any) => {
   try {
     const tasksCollection = collection(db, "tasks");
+    
+    const taskData = task && typeof task === 'object' && !Array.isArray(task) ? task : {};
+    
     const docRef = await addDoc(tasksCollection, {
-      ...(typeof task === 'object' ? task : {}),
+      ...taskData,
       userId,
       completed: false,
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...(typeof task === 'object' ? task : {}), userId, completed: false };
+    return { id: docRef.id, ...taskData, userId, completed: false };
   } catch (error) {
     console.error("Error adding task", error);
     return null;
@@ -263,16 +266,19 @@ export const getExpenses = async (userId: string) => {
   }
 };
 
-export const addExpense = async (userId: string, expense: Record<string, any>) => {
+export const addExpense = async (userId: string, expense: any) => {
   try {
     const expensesCollection = collection(db, "expenses");
+    
+    const expenseData = expense && typeof expense === 'object' && !Array.isArray(expense) ? expense : {};
+    
     const docRef = await addDoc(expensesCollection, {
-      ...(typeof expense === 'object' ? expense : {}),
+      ...expenseData,
       userId,
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...(typeof expense === 'object' ? expense : {}), userId };
+    return { id: docRef.id, ...expenseData, userId };
   } catch (error) {
     console.error("Error adding expense", error);
     return null;
@@ -313,11 +319,9 @@ export const uploadImage = async (userId: string, file: File, category: string) 
     const fileName = `${userId}_${Date.now()}.${fileExtension}`;
     const storageRef = ref(storage, `moodboard/${userId}/${fileName}`);
     
-    // Upload file
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
     
-    // Save reference in Firestore
     const moodboardCollection = collection(db, "moodboard");
     const docRef = await addDoc(moodboardCollection, {
       userId,
@@ -361,11 +365,9 @@ export const getMoodboardImages = async (userId: string, category?: string) => {
 
 export const deleteMoodboardImage = async (userId: string, imageId: string, fileName: string) => {
   try {
-    // Delete from Firestore
     const imageRef = doc(db, "moodboard", imageId);
     await deleteDoc(imageRef);
     
-    // Delete from Storage
     const storageRef = ref(storage, `moodboard/${userId}/${fileName}`);
     await deleteObject(storageRef);
     
@@ -417,7 +419,6 @@ export const getChatHistory = async (userId: string, category?: string, limitCou
     }
     
     const snapshot = await getDocs(q);
-    // Return in chronological order
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).reverse();
   } catch (error) {
     console.error("Error getting chat history", error);
