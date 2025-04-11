@@ -39,7 +39,6 @@ const App = () => {
                 <Route path="timeline" element={<TimelinePage />} />
                 <Route path="moodboard" element={<MoodBoardPage />} />
                 <Route path="budget" element={<BudgetPage />} />
-                <Route path="rituals" element={<Dashboard />} />
                 <Route path="guests" element={<Dashboard />} />
                 <Route path="checklist" element={<Dashboard />} />
                 <Route path="vendors" element={<Dashboard />} />

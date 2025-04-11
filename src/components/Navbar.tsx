@@ -21,7 +21,11 @@ const Navbar = () => {
   ];
 
   const handleStartPlanning = () => {
-    navigate('/dashboard');
+    if (user) {
+      navigate('/dashboard/chat');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
@@ -67,7 +71,7 @@ const Navbar = () => {
             onClick={handleStartPlanning}
           >
             <MessageCircle size={18} className="mr-2" />
-            Start Planning
+            Chat Now
           </Button>
           
           <Sheet>
@@ -126,7 +130,7 @@ const Navbar = () => {
                     onClick={handleStartPlanning}
                   >
                     <MessageCircle size={18} className="mr-2" />
-                    Start Planning
+                    Chat Now
                   </Button>
                 </div>
               </div>

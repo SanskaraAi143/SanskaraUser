@@ -1,8 +1,10 @@
 
 import axios from 'axios';
 
-// This is a placeholder for the actual API endpoint which will be provided later
-const API_BASE_URL = '/api';
+// Set the API base URL to your Python backend
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://api.sanskara-ai.com/api'  // Replace with your actual production API URL
+  : 'http://localhost:5000/api';       // Replace with your actual development API URL
 
 // Create an axios instance
 const api = axios.create({
@@ -121,6 +123,39 @@ export const generateText = async (
     return response.data;
   } catch (error) {
     console.error('Error generating text:', error);
+    throw error;
+  }
+};
+
+// Sentiment analysis for guest comments
+export const analyzeSentiment = async (text: string) => {
+  try {
+    const response = await api.post('/analyze/sentiment', { text });
+    return response.data;
+  } catch (error) {
+    console.error('Error analyzing sentiment:', error);
+    throw error;
+  }
+};
+
+// Image analysis for mood board suggestions
+export const analyzeImage = async (imageUrl: string) => {
+  try {
+    const response = await api.post('/analyze/image', { image_url: imageUrl });
+    return response.data;
+  } catch (error) {
+    console.error('Error analyzing image:', error);
+    throw error;
+  }
+};
+
+// Generate color palette from image
+export const generateColorPalette = async (imageUrl: string) => {
+  try {
+    const response = await api.post('/generate/color-palette', { image_url: imageUrl });
+    return response.data;
+  } catch (error) {
+    console.error('Error generating color palette:', error);
     throw error;
   }
 };
