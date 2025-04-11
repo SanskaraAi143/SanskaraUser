@@ -1,4 +1,3 @@
-
 import { auth, db, storage } from "../config/firebase";
 import { 
   collection, 
@@ -219,13 +218,23 @@ export const getEvents = async (userId: string) => {
 export const addEvent = async (userId: string, event: Record<string, any>) => {
   try {
     const eventsCollection = collection(db, "events");
+    // Create a new object explicitly instead of spreading
+    const eventData = event && typeof event === 'object' && !Array.isArray(event) ? event : {};
+    
     const docRef = await addDoc(eventsCollection, {
-      ...event,
+      // Only spread if it's a valid object
+      ...(typeof eventData === 'object' ? eventData : {}),
       userId,
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...event, userId };
+    // Create a new object with specific properties instead of spreading
+    return { 
+      id: docRef.id, 
+      userId,
+      // Only spread verified object properties
+      ...(typeof eventData === 'object' ? eventData : {})
+    };
   } catch (error) {
     console.error("Error adding event", error);
     return null;
@@ -283,7 +292,8 @@ export const addExpense = async (userId: string, expense: any) => {
     const expenseData = expense && typeof expense === 'object' && !Array.isArray(expense) ? expense : {};
     
     const docRef = await addDoc(expensesCollection, {
-      ...expenseData,
+      // Only spread if it's a valid object
+      ...(typeof expenseData === 'object' ? expenseData : {}),
       userId,
       createdAt: serverTimestamp()
     });
