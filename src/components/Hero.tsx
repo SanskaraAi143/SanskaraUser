@@ -2,8 +2,15 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, Calendar, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+  
+  const handleStartPlanning = () => {
+    navigate('/dashboard');
+  };
+  
   return (
     <div className="pattern-bg pt-28 pb-16 md:pt-32 md:pb-24">
       <div className="container mx-auto px-4">
@@ -17,7 +24,10 @@ const Hero = () => {
               rituals, vendors, and traditions to create your perfect ceremony.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button className="bg-wedding-red hover:bg-wedding-deepred text-white h-12 px-6 text-lg">
+              <Button 
+                className="bg-wedding-red hover:bg-wedding-deepred text-white h-12 px-6 text-lg"
+                onClick={handleStartPlanning}
+              >
                 <Sparkles size={20} className="mr-2" />
                 Chat with Sanskara
               </Button>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, Clock, Plus, Heart, Bell, MessageSquare, CalendarClock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -212,8 +213,8 @@ const Dashboard = () => {
             <p className="text-sm text-gray-600 mb-4">
               Have questions about your wedding planning? Ask our AI assistant for help!
             </p>
-            <Button className="w-full bg-wedding-red hover:bg-wedding-deepred">
-              Ask SanskaraAI
+            <Button className="w-full bg-wedding-red hover:bg-wedding-deepred" asChild>
+              <Link to="/dashboard/chat">Ask SanskaraAI</Link>
             </Button>
           </CardContent>
         </Card>

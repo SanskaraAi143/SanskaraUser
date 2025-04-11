@@ -6,10 +6,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import SignInDialog from "@/components/auth/SignInDialog";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const navLinks = [
     { href: "#features", label: "Features" },
@@ -19,12 +21,16 @@ const Navbar = () => {
     { href: "#testimonials", label: "Testimonials" },
   ];
 
+  const handleStartPlanning = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <nav className="bg-white/90 backdrop-blur-sm fixed w-full top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="h-10 w-10 bg-wedding-red rounded-full flex items-center justify-center">
-            <span className="text-white font-playfair text-xl font-bold">S</span>
+          <div className="h-10 w-10 flex items-center justify-center">
+            <img src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" alt="Ganesha Logo" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-2xl font-playfair font-semibold text-wedding-maroon">
             Sanskara<span className="text-wedding-red">AI</span>
@@ -55,7 +61,10 @@ const Navbar = () => {
             </SignInDialog>
           )}
           
-          <Button className="bg-wedding-red hover:bg-wedding-deepred">
+          <Button 
+            className="bg-wedding-red hover:bg-wedding-deepred"
+            onClick={handleStartPlanning}
+          >
             <MessageCircle size={18} className="mr-2" />
             Start Planning
           </Button>

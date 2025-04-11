@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +11,8 @@ import {
   ShoppingCart, 
   Heart, 
   User,
-  LogOut 
+  LogOut,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -39,6 +39,7 @@ const DashboardLayout = () => {
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
+    { name: "Chat with AI", icon: MessageCircle, href: "/dashboard/chat" },
     { name: "Rituals", icon: Heart, href: "/dashboard/rituals" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
     { name: "Guest List", icon: Users, href: "/dashboard/guests" },
