@@ -1,3 +1,4 @@
+
 import { auth, db, storage } from "../config/firebase";
 import { 
   collection, 
@@ -147,6 +148,7 @@ export const addTask = async (userId: string, task: any) => {
   try {
     const tasksCollection = collection(db, "tasks");
     
+    // Make sure task is an object before spreading
     const taskData = task && typeof task === 'object' && !Array.isArray(task) ? task : {};
     
     const docRef = await addDoc(tasksCollection, {
@@ -156,7 +158,14 @@ export const addTask = async (userId: string, task: any) => {
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...taskData, userId, completed: false };
+    // Create a new object instead of spreading to avoid TypeScript error
+    return { 
+      id: docRef.id, 
+      userId, 
+      completed: false,
+      // Add taskData properties individually
+      ...(typeof taskData === 'object' ? taskData : {})
+    };
   } catch (error) {
     console.error("Error adding task", error);
     return null;
@@ -270,6 +279,7 @@ export const addExpense = async (userId: string, expense: any) => {
   try {
     const expensesCollection = collection(db, "expenses");
     
+    // Make sure expense is an object before spreading
     const expenseData = expense && typeof expense === 'object' && !Array.isArray(expense) ? expense : {};
     
     const docRef = await addDoc(expensesCollection, {
@@ -278,7 +288,13 @@ export const addExpense = async (userId: string, expense: any) => {
       createdAt: serverTimestamp()
     });
     
-    return { id: docRef.id, ...expenseData, userId };
+    // Create a new object instead of spreading to avoid TypeScript error
+    return { 
+      id: docRef.id, 
+      userId,
+      // Add expenseData properties individually
+      ...(typeof expenseData === 'object' ? expenseData : {})
+    };
   } catch (error) {
     console.error("Error adding expense", error);
     return null;
