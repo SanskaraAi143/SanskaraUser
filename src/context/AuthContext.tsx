@@ -3,12 +3,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   updateProfile,
   User as FirebaseUser
 } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { auth, googleProvider } from "@/config/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 // Types for our authentication context
@@ -16,6 +17,7 @@ type User = {
   id: string;
   email: string | null;
   name?: string;
+  photoURL?: string;
 };
 
 type AuthContextType = {
@@ -23,6 +25,7 @@ type AuthContextType = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -32,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => {},
   signUp: async () => {},
+  signInWithGoogle: async () => {},
   signOut: async () => {},
 });
 
@@ -52,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: firebaseUser.uid,
           email: firebaseUser.email,
           name: firebaseUser.displayName || undefined,
+          photoURL: firebaseUser.photoURL || undefined,
         });
       } else {
         // User is signed out
@@ -115,6 +120,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Sign in with Google function
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      toast({
+        title: "Signed in successfully",
+        description: `Welcome, ${user.displayName || "User"}!`,
+      });
+    } catch (error: any) {
+      const errorMessage = error.message || "An unknown error occurred";
+      toast({
+        variant: "destructive",
+        title: "Google sign in failed",
+        description: errorMessage,
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sign out function
   const signOut = async () => {
     try {
@@ -138,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

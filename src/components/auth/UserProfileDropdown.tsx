@@ -9,7 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
 
 const UserProfileDropdown = () => {
@@ -26,15 +27,18 @@ const UserProfileDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="relative h-10 w-10 rounded-full p-0"
+        <Avatar 
+          className="h-10 w-10 cursor-pointer border-2 border-gray-200 hover:border-wedding-red transition-colors"
           aria-label="User profile"
         >
-          <div className="flex h-full w-full items-center justify-center bg-muted rounded-full">
-            <User size={20} />
-          </div>
-        </Button>
+          {user?.photoURL ? (
+            <AvatarImage src={user.photoURL} alt={user.name || "User"} />
+          ) : (
+            <AvatarFallback className="bg-wedding-red/10 text-wedding-red">
+              {user?.name ? user.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+            </AvatarFallback>
+          )}
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
@@ -44,13 +48,17 @@ const UserProfileDropdown = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>My Profile</span>
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/profile" className="flex items-center cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>My Profile</span>
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Wedding Settings</span>
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/settings" className="flex items-center cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Wedding Settings</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>

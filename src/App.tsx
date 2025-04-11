@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
+import ProfilePage from "./pages/dashboard/ProfilePage";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -27,6 +28,7 @@ const App = () => {
               {/* Dashboard Routes */}
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="rituals" element={<Dashboard />} />
                 <Route path="timeline" element={<Dashboard />} />
                 <Route path="guests" element={<Dashboard />} />

@@ -11,9 +11,11 @@ import {
   FileText, 
   ShoppingCart, 
   Heart, 
+  User,
   LogOut 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 
 const DashboardLayout = () => {
@@ -36,6 +38,7 @@ const DashboardLayout = () => {
 
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { name: "Profile", icon: User, href: "/dashboard/profile" },
     { name: "Rituals", icon: Heart, href: "/dashboard/rituals" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
     { name: "Guest List", icon: Users, href: "/dashboard/guests" },
@@ -49,23 +52,25 @@ const DashboardLayout = () => {
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-white">
-        <div className="flex h-14 items-center justify-between border-b px-4">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-wedding-red rounded-full flex items-center justify-center">
-              <span className="text-white font-playfair text-base font-bold">S</span>
-            </div>
+        <div className="flex h-16 items-center justify-between border-b px-4">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
+              alt="Ganesha Logo" 
+              className="h-10 w-10"
+            />
             <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
               Sanskara<span className="text-wedding-red">AI</span>
             </h1>
-          </div>
+          </Link>
         </div>
         <nav className="flex-1 space-y-1 px-2 py-4">
           {sidebarLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium ${
                   isActive
                     ? "bg-wedding-red/10 text-wedding-red"
@@ -74,7 +79,7 @@ const DashboardLayout = () => {
               >
                 <link.icon className={`mr-3 h-5 w-5 ${isActive ? "text-wedding-red" : "text-gray-500"}`} />
                 {link.name}
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -90,14 +95,18 @@ const DashboardLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Topbar */}
         <header className="bg-white shadow-sm z-10">
-          <div className="flex h-14 items-center justify-between px-4">
+          <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center md:hidden">
-              <div className="h-8 w-8 bg-wedding-red rounded-full flex items-center justify-center">
-                <span className="text-white font-playfair text-base font-bold">S</span>
-              </div>
-              <h1 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
-                Sanskara<span className="text-wedding-red">AI</span>
-              </h1>
+              <Link to="/dashboard" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
+                  alt="Ganesha Logo" 
+                  className="h-8 w-8"
+                />
+                <h1 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
+                  Sanskara<span className="text-wedding-red">AI</span>
+                </h1>
+              </Link>
             </div>
             <div className="hidden md:block">
               <h2 className="text-lg font-semibold text-gray-700">
@@ -124,9 +133,9 @@ const DashboardLayout = () => {
               {sidebarLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
-                  <a
+                  <Link
                     key={link.name}
-                    href={link.href}
+                    to={link.href}
                     className={`flex flex-col items-center py-1 px-3 rounded-md ${
                       isActive
                         ? "bg-wedding-red/10 text-wedding-red"
@@ -135,7 +144,7 @@ const DashboardLayout = () => {
                   >
                     <link.icon className="h-5 w-5" />
                     <span className="text-xs mt-1">{link.name}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
