@@ -5,12 +5,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // Replace with your Firebase API key
-  authDomain: "YOUR_AUTH_DOMAIN", // Replace with your Firebase auth domain
-  projectId: "YOUR_PROJECT_ID", // Replace with your Firebase project ID
-  storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your Firebase storage bucket
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your Firebase messaging sender ID
-  appId: "YOUR_APP_ID" // Replace with your Firebase app ID
+  apiKey: "AIzaSyCvmK0BcXuEF0sF_4BjgKXzFNtKNgmsrkc",
+  authDomain: "sanskara-ai-bf581.firebaseapp.com",
+  projectId: "sanskara-ai-bf581",
+  storageBucket: "sanskara-ai-bf581.firebasestorage.app",
+  messagingSenderId: "916557366396",
+  appId: "1:916557366396:web:9b19c3ed4ea6cc06af35f9",
+  measurementId: "G-M0B97SBZFW"
 };
 
 // Initialize Firebase
