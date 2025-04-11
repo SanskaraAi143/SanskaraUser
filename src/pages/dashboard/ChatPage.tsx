@@ -1,14 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatWithAI from '@/components/chat/ChatWithAI';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RitualChat from '@/components/chat/RitualChat';
 
 const ChatPage = () => {
+  const [activeTab, setActiveTab] = useState("ai");
+  
   return (
     <div className="space-y-6">
       <div className="bg-wedding-maroon/5 rounded-xl p-6 border border-wedding-maroon/20">
         <h1 className="text-2xl font-playfair text-wedding-maroon mb-2">
-          Chat with Sanskara AI
+          Chat with Sanskara
         </h1>
         <p className="text-gray-600">
           Ask questions about Hindu wedding rituals, planning tips, vendors, or anything wedding-related.
@@ -17,7 +21,18 @@ const ChatPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 h-[600px]">
-          <ChatWithAI />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="ai">General Assistant</TabsTrigger>
+              <TabsTrigger value="ritual">Ritual Expert</TabsTrigger>
+            </TabsList>
+            <TabsContent value="ai" className="h-[560px]">
+              <ChatWithAI />
+            </TabsContent>
+            <TabsContent value="ritual" className="h-[560px]">
+              <RitualChat />
+            </TabsContent>
+          </Tabs>
         </div>
         
         <div className="lg:col-span-1 space-y-6">
@@ -27,13 +42,19 @@ const ChatPage = () => {
               <CardDescription>Popular questions to ask</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
+              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors"
+                onClick={() => {
+                  setActiveTab("ritual");
+                }}>
                 Explain the Saptapadi ritual
               </div>
               <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
                 How to choose a wedding date?
               </div>
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
+              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors"
+                onClick={() => {
+                  setActiveTab("ai");
+                }}>
                 Create a Mehndi ceremony plan
               </div>
               <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">

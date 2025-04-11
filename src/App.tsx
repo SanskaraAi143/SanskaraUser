@@ -11,6 +11,10 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ProfilePage from "./pages/dashboard/ProfilePage";
 import ChatPage from "./pages/dashboard/ChatPage";
+import TasksPage from "./pages/dashboard/TasksPage";
+import TimelinePage from "./pages/dashboard/TimelinePage";
+import MoodBoardPage from "./pages/dashboard/MoodBoardPage";
+import BudgetPage from "./pages/dashboard/BudgetPage";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -31,11 +35,13 @@ const App = () => {
                 <Route index element={<Dashboard />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="chat" element={<ChatPage />} />
+                <Route path="tasks" element={<TasksPage />} />
+                <Route path="timeline" element={<TimelinePage />} />
+                <Route path="moodboard" element={<MoodBoardPage />} />
+                <Route path="budget" element={<BudgetPage />} />
                 <Route path="rituals" element={<Dashboard />} />
-                <Route path="timeline" element={<Dashboard />} />
                 <Route path="guests" element={<Dashboard />} />
                 <Route path="checklist" element={<Dashboard />} />
-                <Route path="budget" element={<Dashboard />} />
                 <Route path="vendors" element={<Dashboard />} />
                 <Route path="settings" element={<Dashboard />} />
               </Route>

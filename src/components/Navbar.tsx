@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { BookOpen, MenuIcon, MessageCircle, User, X } from 'lucide-react';
@@ -29,12 +28,14 @@ const Navbar = () => {
     <nav className="bg-white/90 backdrop-blur-sm fixed w-full top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="h-10 w-10 flex items-center justify-center">
-            <img src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" alt="Ganesha Logo" className="h-full w-full object-contain" />
-          </div>
-          <h1 className="text-2xl font-playfair font-semibold text-wedding-maroon">
-            Sanskara<span className="text-wedding-red">AI</span>
-          </h1>
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-10 w-10 flex items-center justify-center">
+              <img src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" alt="Ganesha Logo" className="h-full w-full object-contain" />
+            </div>
+            <h1 className="text-2xl font-playfair font-semibold text-wedding-maroon">
+              Sanskara<span className="text-wedding-red">AI</span>
+            </h1>
+          </Link>
         </div>
         
         <div className="hidden md:flex items-center gap-8">
@@ -69,7 +70,6 @@ const Navbar = () => {
             Start Planning
           </Button>
           
-          {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="ml-2">
@@ -80,14 +80,14 @@ const Navbar = () => {
             <SheetContent side="right" className="w-[75vw] sm:w-[350px]">
               <div className="flex flex-col h-full py-6">
                 <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-6">
+                  <Link to="/" className="flex items-center gap-2 mb-6">
                     <div className="h-10 w-10 bg-wedding-red rounded-full flex items-center justify-center">
                       <span className="text-white font-playfair text-xl font-bold">S</span>
                     </div>
                     <h2 className="text-xl font-playfair font-semibold text-wedding-maroon">
                       Sanskara<span className="text-wedding-red">AI</span>
                     </h2>
-                  </div>
+                  </Link>
                   <nav className="flex flex-col space-y-4">
                     {navLinks.map(link => (
                       <a
@@ -121,7 +121,10 @@ const Navbar = () => {
                       </Button>
                     </SignInDialog>
                   )}
-                  <Button className="w-full justify-start bg-wedding-red hover:bg-wedding-deepred">
+                  <Button 
+                    className="w-full justify-start bg-wedding-red hover:bg-wedding-deepred"
+                    onClick={handleStartPlanning}
+                  >
                     <MessageCircle size={18} className="mr-2" />
                     Start Planning
                   </Button>

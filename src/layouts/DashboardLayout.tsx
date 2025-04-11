@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +13,10 @@ import {
   Heart, 
   User,
   LogOut,
-  MessageCircle
+  MessageCircle,
+  PieChart,
+  Paintbrush,
+  CheckSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -40,12 +44,13 @@ const DashboardLayout = () => {
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
     { name: "Chat with AI", icon: MessageCircle, href: "/dashboard/chat" },
-    { name: "Rituals", icon: Heart, href: "/dashboard/rituals" },
+    { name: "Tasks", icon: CheckSquare, href: "/dashboard/tasks" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
+    { name: "Mood Board", icon: Paintbrush, href: "/dashboard/moodboard" },
+    { name: "Budget", icon: PieChart, href: "/dashboard/budget" },
+    { name: "Rituals", icon: Heart, href: "/dashboard/rituals" },
     { name: "Guest List", icon: Users, href: "/dashboard/guests" },
-    { name: "Checklist", icon: FileText, href: "/dashboard/checklist" },
-    { name: "Budget", icon: ShoppingCart, href: "/dashboard/budget" },
-    { name: "Vendors", icon: Clock, href: "/dashboard/vendors" },
+    { name: "Vendors", icon: ShoppingCart, href: "/dashboard/vendors" },
     { name: "Settings", icon: Settings, href: "/dashboard/settings" },
   ];
 
@@ -54,7 +59,7 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-white">
         <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
               alt="Ganesha Logo" 
@@ -98,7 +103,7 @@ const DashboardLayout = () => {
         <header className="bg-white shadow-sm z-10">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center md:hidden">
-              <Link to="/dashboard" className="flex items-center">
+              <Link to="/" className="flex items-center">
                 <img 
                   src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
                   alt="Ganesha Logo" 
@@ -119,9 +124,12 @@ const DashboardLayout = () => {
                 variant="outline"
                 size="sm"
                 className="text-wedding-red border-wedding-red hover:bg-wedding-red/10"
+                asChild
               >
-                <Heart className="mr-1 h-4 w-4" />
-                New Ritual
+                <Link to="/dashboard/chat">
+                  <MessageCircle className="mr-1 h-4 w-4" />
+                  Ask AI
+                </Link>
               </Button>
               <div className="md:hidden">
                 <UserProfileDropdown />
