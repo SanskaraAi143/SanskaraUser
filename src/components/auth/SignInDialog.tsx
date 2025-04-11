@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import SignUpDialog from "./SignUpDialog";
 
 // Schema for form validation
@@ -42,6 +42,7 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
   const { toast } = useToast();
   const { signIn } = useAuth();
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(formSchema),
@@ -52,20 +53,15 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
   });
 
   const onSubmit = async (values: SignInFormValues) => {
+    setIsSubmitting(true);
     try {
       await signIn(values.email, values.password);
-      toast({
-        title: "Sign in successful",
-        description: "Welcome back to SanskaraAI!",
-      });
       setOpen(false);
+      form.reset();
     } catch (error) {
       console.error("Sign in error:", error);
-      toast({
-        variant: "destructive",
-        title: "Sign in failed",
-        description: "Please check your credentials and try again.",
-      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -120,8 +116,19 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
               <Button variant="link" className="text-wedding-red p-0 h-auto" type="button">
                 Forgot password?
               </Button>
-              <Button type="submit" className="bg-wedding-red hover:bg-wedding-deepred">
-                Sign In
+              <Button 
+                type="submit" 
+                className="bg-wedding-red hover:bg-wedding-deepred"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </div>
             <div className="text-center pt-2">

@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import DashboardLayout from "./layouts/DashboardLayout";
+import Dashboard from "./pages/dashboard/Dashboard";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -21,6 +23,19 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              
+              {/* Dashboard Routes */}
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="rituals" element={<Dashboard />} />
+                <Route path="timeline" element={<Dashboard />} />
+                <Route path="guests" element={<Dashboard />} />
+                <Route path="checklist" element={<Dashboard />} />
+                <Route path="budget" element={<Dashboard />} />
+                <Route path="vendors" element={<Dashboard />} />
+                <Route path="settings" element={<Dashboard />} />
+              </Route>
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

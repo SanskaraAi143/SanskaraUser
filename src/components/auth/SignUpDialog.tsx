@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -42,6 +44,10 @@ interface SignUpDialogProps {
 
 const SignUpDialog = ({ children }: SignUpDialogProps) => {
   const { toast } = useToast();
+  const { signUp } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,25 +59,20 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
   });
 
   const onSubmit = async (values: SignUpFormValues) => {
+    setIsSubmitting(true);
     try {
-      // Here we'll add the actual registration code with Supabase in the next step
-      console.log("Sign up data:", values);
-      toast({
-        title: "Account created",
-        description: "Welcome to SanskaraAI! You can now sign in.",
-      });
+      await signUp(values.email, values.password, values.name);
+      setOpen(false);
+      form.reset();
     } catch (error) {
       console.error("Sign up error:", error);
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "There was an error creating your account. Please try again.",
-      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
           <Button variant="link" className="text-wedding-red p-0 h-auto">
@@ -143,8 +144,19 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
               )}
             />
             <div className="pt-2 flex justify-end">
-              <Button type="submit" className="bg-wedding-red hover:bg-wedding-deepred">
-                Create Account
+              <Button 
+                type="submit" 
+                className="bg-wedding-red hover:bg-wedding-deepred"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </div>
           </form>
