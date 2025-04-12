@@ -3,6 +3,15 @@ import { collection, doc, addDoc, deleteDoc, query, where, getDocs, serverTimest
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "./config";
 
+// Define interface for moodboard document
+interface MoodboardDocument {
+  userId: string;
+  url: string;
+  category: string;
+  fileName: string;
+  createdAt: any; // FirebaseFirestore.Timestamp
+}
+
 // Image Upload for Mood Board
 export const uploadImage = async (userId: string, file: File, category: string) => {
   try {
@@ -49,7 +58,7 @@ export const getMoodboardImages = async (userId: string, category?: string) => {
     const snapshot = await getDocs(q);
     // Create new objects for each document instead of spreading
     return snapshot.docs.map(doc => {
-      const data = doc.data();
+      const data = doc.data() as MoodboardDocument;
       return {
         id: doc.id,
         userId: data.userId,

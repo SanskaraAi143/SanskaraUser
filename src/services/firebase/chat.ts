@@ -2,6 +2,15 @@
 import { collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import { db } from "./config";
 
+// Define interface for chat document
+interface ChatDocument {
+  userId: string;
+  message: string;
+  sender: 'user' | 'ai';
+  category: string;
+  timestamp: any; // FirebaseFirestore.Timestamp
+}
+
 // Chat History
 export const saveChatMessage = async (userId: string, message: string, sender: 'user' | 'ai', category?: string) => {
   try {
@@ -45,7 +54,7 @@ export const getChatHistory = async (userId: string, category?: string, limitCou
     const snapshot = await getDocs(q);
     // Create new objects for each document instead of spreading
     return snapshot.docs.map(doc => {
-      const data = doc.data();
+      const data = doc.data() as ChatDocument;
       return {
         id: doc.id,
         userId: data.userId,

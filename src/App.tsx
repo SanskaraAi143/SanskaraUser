@@ -15,6 +15,9 @@ import TasksPage from "./pages/dashboard/TasksPage";
 import TimelinePage from "./pages/dashboard/TimelinePage";
 import MoodBoardPage from "./pages/dashboard/MoodBoardPage";
 import BudgetPage from "./pages/dashboard/BudgetPage";
+import VendorsPage from "./pages/dashboard/VendorsPage";
+import GuestsPage from "./pages/dashboard/GuestsPage";
+import SettingsPage from "./pages/dashboard/SettingsPage";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -39,10 +42,9 @@ const App = () => {
                 <Route path="timeline" element={<TimelinePage />} />
                 <Route path="moodboard" element={<MoodBoardPage />} />
                 <Route path="budget" element={<BudgetPage />} />
-                <Route path="guests" element={<Dashboard />} />
-                <Route path="checklist" element={<Dashboard />} />
-                <Route path="vendors" element={<Dashboard />} />
-                <Route path="settings" element={<Dashboard />} />
+                <Route path="guests" element={<GuestsPage />} />
+                <Route path="vendors" element={<VendorsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
               </Route>
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
