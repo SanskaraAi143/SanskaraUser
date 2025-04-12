@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { BookOpen, MenuIcon, MessageCircle, User, X } from 'lucide-react';
+import { MenuIcon, MessageCircle, User, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import SignInDialog from "@/components/auth/SignInDialog";
@@ -14,7 +15,6 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "#features", label: "Features" },
-    { href: "#ritual-guide", label: "Rituals" },
     { href: "#how-it-works", label: "How It Works" },
     { href: "#pricing", label: "Pricing" },
     { href: "#testimonials", label: "Testimonials" },
@@ -24,7 +24,7 @@ const Navbar = () => {
     if (user) {
       navigate('/dashboard/chat');
     } else {
-      navigate('/dashboard');
+      navigate('/dashboard/chat');
     }
   };
 

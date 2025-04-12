@@ -9,7 +9,7 @@ import {
   updateProfile,
   User as FirebaseUser
 } from "firebase/auth";
-import { auth, googleProvider } from "@/config/firebase";
+import { auth, googleProvider } from "@/services/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 
 // Types for our authentication context

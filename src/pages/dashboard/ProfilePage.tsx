@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { auth } from "@/services/firebase/config";
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
 
 const ProfilePage = () => {

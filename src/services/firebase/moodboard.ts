@@ -47,7 +47,18 @@ export const getMoodboardImages = async (userId: string, category?: string) => {
     }
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Create new objects for each document instead of spreading
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        userId: data.userId,
+        url: data.url,
+        category: data.category,
+        fileName: data.fileName,
+        createdAt: data.createdAt
+      };
+    });
   } catch (error) {
     console.error("Error getting moodboard images", error);
     return [];
