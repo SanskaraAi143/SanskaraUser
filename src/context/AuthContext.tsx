@@ -10,7 +10,7 @@ import {
   User as FirebaseUser
 } from "firebase/auth";
 import { auth, googleProvider } from "@/services/firebase/config";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 // Types for our authentication context
 type User = {
@@ -45,7 +45,6 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   // Effect to initialize auth state
   useEffect(() => {

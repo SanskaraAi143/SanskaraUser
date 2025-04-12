@@ -12,6 +12,16 @@ interface MoodboardDocument {
   createdAt: any; // FirebaseFirestore.Timestamp
 }
 
+// Interface for the return type
+interface MoodboardImage {
+  id: string;
+  userId: string;
+  url: string;
+  category: string;
+  fileName: string;
+  createdAt: any;
+}
+
 // Image Upload for Mood Board
 export const uploadImage = async (userId: string, file: File, category: string) => {
   try {
@@ -57,7 +67,7 @@ export const getMoodboardImages = async (userId: string, category?: string) => {
     
     const snapshot = await getDocs(q);
     // Create new objects for each document instead of spreading
-    return snapshot.docs.map(doc => {
+    const images: MoodboardImage[] = snapshot.docs.map(doc => {
       const data = doc.data() as MoodboardDocument;
       return {
         id: doc.id,
@@ -68,6 +78,7 @@ export const getMoodboardImages = async (userId: string, category?: string) => {
         createdAt: data.createdAt
       };
     });
+    return images;
   } catch (error) {
     console.error("Error getting moodboard images", error);
     return [];

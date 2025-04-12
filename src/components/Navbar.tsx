@@ -10,7 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   const navLinks = [
@@ -109,10 +109,7 @@ const Navbar = () => {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => {
-                        const { signOut } = useAuth();
-                        signOut();
-                      }}
+                      onClick={() => signOut()}
                     >
                       <User size={18} className="mr-2" />
                       Sign Out

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, type ChangeEvent } from "react";
 import { 
   Card, 
   CardContent, 
@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface Vendor {
   id: string;
@@ -39,7 +39,6 @@ interface Vendor {
 }
 
 const VendorsPage = () => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   
@@ -130,13 +129,15 @@ const VendorsPage = () => {
       
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <div className="w-full sm:w-64 lg:w-72">
-          <Input
-            placeholder="Search vendors..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-            icon={<Search className="h-4 w-4" />}
-          />
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search vendors..."
+              value={searchTerm}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

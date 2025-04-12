@@ -11,6 +11,16 @@ interface ChatDocument {
   timestamp: any; // FirebaseFirestore.Timestamp
 }
 
+// Interface for the return type
+interface ChatMessage {
+  id: string;
+  userId: string;
+  message: string;
+  sender: 'user' | 'ai';
+  category: string;
+  timestamp: any;
+}
+
 // Chat History
 export const saveChatMessage = async (userId: string, message: string, sender: 'user' | 'ai', category?: string) => {
   try {
@@ -53,7 +63,7 @@ export const getChatHistory = async (userId: string, category?: string, limitCou
     
     const snapshot = await getDocs(q);
     // Create new objects for each document instead of spreading
-    return snapshot.docs.map(doc => {
+    const messages: ChatMessage[] = snapshot.docs.map(doc => {
       const data = doc.data() as ChatDocument;
       return {
         id: doc.id,
@@ -63,7 +73,8 @@ export const getChatHistory = async (userId: string, category?: string, limitCou
         category: data.category,
         timestamp: data.timestamp
       };
-    }).reverse();
+    });
+    return messages.reverse();
   } catch (error) {
     console.error("Error getting chat history", error);
     return [];
