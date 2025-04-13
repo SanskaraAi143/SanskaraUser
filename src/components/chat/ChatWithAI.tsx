@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Send, Mic, Image as ImageIcon, Paperclip, Cube } from 'lucide-react';
+import { Send, Mic, Image as ImageIcon, Paperclip, Box } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import ModelViewer from '../models/ModelViewer';
@@ -31,20 +30,16 @@ const ChatWithAI = () => {
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Simulate AI response
   const generateAIResponse = async (userMessage: string) => {
     setIsLoading(true);
     
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Check if the message is about pandits or priests
     const shouldShowModel = userMessage.toLowerCase().includes('pandit') || 
                           userMessage.toLowerCase().includes('priest') ||
                           userMessage.toLowerCase().includes('3d') ||
                           userMessage.toLowerCase().includes('model');
     
-    // Sample responses based on keywords
     let aiResponse = "I understand you're asking about wedding planning. Could you provide more details about what you'd like to know?";
     
     if (userMessage.toLowerCase().includes('ritual')) {
@@ -102,7 +97,6 @@ const ChatWithAI = () => {
     setShowModel(!showModel);
   };
   
-  // Auto-scroll to the bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -181,7 +175,7 @@ const ChatWithAI = () => {
             onClick={toggleModel}
             title="Toggle 3D model"
           >
-            <Cube size={18} />
+            <Box size={18} />
           </Button>
           <div className="flex-grow relative">
             <Input
