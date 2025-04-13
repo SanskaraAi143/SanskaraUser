@@ -1,12 +1,21 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, Calendar, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "@/context/AuthContext";
+import SignInDialog from "@/components/auth/SignInDialog";
+
 const Hero = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const handleStartPlanning = () => {
-    navigate('/dashboard');
+    if (user) {
+      navigate('/dashboard');
+    }
   };
+  
   return <div className="pattern-bg pt-28 pb-16 md:pt-32 md:pb-24">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
@@ -48,7 +57,7 @@ const Hero = () => {
                 
               </div>
               <div className="aspect-[4/5] rounded-xl overflow-hidden">
-                <img src="/lovable-uploads/89ffba58-4862-4bf8-b505-e54b0c6fd052.png" alt="Beautiful wedding decoration with floral arch and fairy lights" className="w-full h-full object-cover" />
+                <img src="/lovable-uploads/ef091a6d-01c3-422d-9dac-faf459fb74ab.png" alt="Hindu couple holding hands in traditional wedding attire" className="w-full h-full object-cover" />
               </div>
               <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-xl shadow-md flex items-center gap-2">
                 <Heart size={24} className="text-wedding-red" fill="#D62F32" />

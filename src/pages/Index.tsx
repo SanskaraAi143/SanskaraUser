@@ -7,8 +7,21 @@ import RitualGuide from '@/components/RitualGuide';
 import ChatDemo from '@/components/ChatDemo';
 import Pricing from '@/components/Pricing';
 import Footer from '@/components/Footer';
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import SignInDialog from "@/components/auth/SignInDialog";
 
 const Index = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  };
+  
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -35,21 +48,21 @@ const Index = () => {
               {[
                 {
                   name: "Priya & Arjun",
-                  location: "New Jersey",
-                  image: "https://images.unsplash.com/photo-1592055559446-1a8c265f95d0?w=400&auto=format&fit=crop",
+                  location: "Delhi, India",
+                  image: "https://images.unsplash.com/photo-1600260727863-456f6498de33?w=400&auto=format&fit=crop",
                   quote: "Sanskara AI helped us blend traditional rituals with our modern style. Our families were impressed with how authentic our ceremony felt!"
                 },
                 {
                   name: "Ananya & Vikram",
-                  location: "California",
-                  image: "https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=400&auto=format&fit=crop",
+                  location: "Mumbai, India",
+                  image: "https://images.unsplash.com/photo-1626456331499-8b502c3a31dd?w=400&auto=format&fit=crop",
                   quote: "The vendor recommendations saved us so much time! We found an amazing pandit and decorator who understood exactly what we wanted."
                 },
                 {
                   name: "Meera & Raj",
-                  location: "Texas",
-                  image: "https://images.unsplash.com/photo-1620684937434-a5170f8b022f?w=400&auto=format&fit=crop",
-                  quote: "As an interfaith couple, we weren't sure how to incorporate both traditions. Sanskara guided us through creating a meaningful ceremony everyone loved."
+                  location: "Bangalore, India",
+                  image: "https://images.unsplash.com/photo-1621515695381-33a9beff5423?w=400&auto=format&fit=crop",
+                  quote: "As a couple from different regions of India, we weren't sure how to incorporate both traditions. Sanskara guided us through creating a meaningful ceremony everyone loved."
                 }
               ].map((testimonial, index) => (
                 <div 
@@ -101,9 +114,20 @@ const Index = () => {
               Start planning your perfect Hindu wedding with personalized guidance, 
               vendor recommendations, and cultural insights.
             </p>
-            <button className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-3 px-8 rounded-full text-lg font-medium">
-              Get Started For Free
-            </button>
+            {user ? (
+              <Button 
+                className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-3 px-8 rounded-full text-lg font-medium"
+                onClick={handleGetStarted}
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <SignInDialog>
+                <Button className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-3 px-8 rounded-full text-lg font-medium">
+                  Get Started For Free
+                </Button>
+              </SignInDialog>
+            )}
           </div>
         </section>
       </main>

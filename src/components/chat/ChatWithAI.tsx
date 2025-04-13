@@ -1,199 +1,190 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Send, User, Bot, ArrowDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Send, Mic, Image as ImageIcon, Paperclip, Box } from 'lucide-react';
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
-import ModelViewer from '../models/ModelViewer';
 
-type Message = {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-};
+// Mock data for the chat
+const initialMessages = [
+  {
+    id: 1,
+    role: 'bot',
+    content: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
+    timestamp: new Date().toISOString(),
+  }
+];
 
 const ChatWithAI = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: "Namaste! I'm Sanskara, your AI wedding planning assistant. I'm here to help you plan your perfect Hindu wedding. What aspect of your wedding would you like to discuss today?",
-      sender: 'ai',
-      timestamp: new Date(),
-    }
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [messages, setMessages] = useState(initialMessages);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const generateAIResponse = async (userMessage: string) => {
-    setIsLoading(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    let aiResponse = "I understand you're asking about wedding planning. Could you provide more details about what you'd like to know?";
-    
-    if (userMessage.toLowerCase().includes('ritual')) {
-      aiResponse = "Hindu weddings include many beautiful rituals like Mehndi, Sangeet, Haldi, Kanyadaan, and Saptapadi. Each has deep cultural significance. Which one would you like to know more about?";
-    } else if (userMessage.toLowerCase().includes('vendor')) {
-      aiResponse = "Finding the right vendors is crucial. I recommend starting with a venue, caterer, and photographer who understand Hindu wedding traditions. Would you like me to suggest some questions to ask potential vendors?";
-    } else if (userMessage.toLowerCase().includes('budget')) {
-      aiResponse = "Wedding budgets typically include costs for venue, catering, attire, photography, decor, and priest services. A traditional Hindu wedding can range widely in cost. Would you like to create a budget plan?";
-    } else if (userMessage.toLowerCase().includes('pandit') || userMessage.toLowerCase().includes('priest')) {
-      aiResponse = "A traditional Hindu priest (pandit) performs your wedding ceremony. The pandit plays a crucial role in ensuring all rituals are performed correctly according to Hindu traditions. Would you like me to explain more about their role in the ceremony?";
-    }
-    
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: aiResponse,
-      sender: 'ai',
-      timestamp: new Date(),
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    setIsLoading(false);
+  // Auto scroll to bottom whenever messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim() === '') return;
-    
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: inputMessage,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    generateAIResponse(inputMessage);
-    setInputMessage('');
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
-  
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
-  // Adding console logs to debug the rendering issue
-  console.log("Rendering ChatWithAI component");
-  console.log("Number of messages:", messages.length);
+  const handleSendMessage = async () => {
+    if (input.trim() === '') return;
+    
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date().toISOString(),
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    
+    // Simulate bot typing
+    setIsTyping(true);
+    
+    // Simulate response delay
+    setTimeout(() => {
+      const botResponses = [
+        "I'd be happy to help you plan your wedding rituals!",
+        "Here are some popular mandap decoration options for a traditional ceremony.",
+        "For the Sangeet, I recommend these 5 popular songs that guests always enjoy.",
+        "The mehndi ceremony typically occurs 1-2 days before the wedding. Here's a planning checklist.",
+        "I can help you find vendors who specialize in traditional Hindu ceremonies in your area."
+      ];
+      
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+      
+      const botMessage = {
+        id: messages.length + 2,
+        role: 'bot',
+        content: randomResponse,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+    }, 1000);
+  };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-md border border-gray-200">
-      <div className="bg-wedding-maroon/10 p-3 flex items-center">
-        <Avatar className="h-9 w-9 mr-2">
-          <AvatarImage src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara AI" />
-          <AvatarFallback className="bg-wedding-red/20 text-wedding-red">SA</AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="font-semibold text-wedding-maroon">Sanskara AI</h3>
-          <p className="text-xs text-gray-500">Your Hindu Wedding Assistant</p>
-        </div>
+    <div className="flex flex-col h-[85vh] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-wedding-red text-white p-4">
+        <h2 className="text-xl font-medium">Chat with Sanskara AI</h2>
+        <p className="text-sm opacity-90">Your Hindu Wedding Planning Assistant</p>
       </div>
       
-      <Separator />
-      
-      <div className="flex flex-col lg:flex-row h-[calc(100%-112px)]">
-        <div className="flex-grow p-4 overflow-y-auto">
-          <div className="space-y-6">
+      <div className="flex-grow flex flex-col overflow-hidden">
+        <ScrollArea className="flex-grow p-4">
+          <div className="space-y-4">
             {messages.map((message) => (
-              <div 
-                key={message.id} 
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
               >
-                <div 
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.sender === 'user' 
-                      ? 'bg-wedding-red text-white rounded-tr-none' 
-                      : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                <div
+                  className={`flex items-start gap-2.5 max-w-[80%] ${
+                    message.role === 'user' ? 'flex-row-reverse' : ''
                   }`}
                 >
-                  {message.content}
-                  <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <Avatar className={message.role === 'user' ? 'bg-wedding-orange/20' : 'bg-wedding-red/20'}>
+                    <AvatarFallback>
+                      {message.role === 'user' ? <User className="text-wedding-orange" /> : <Bot className="text-wedding-red" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className={`p-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-wedding-orange/10 text-gray-800'
+                        : 'bg-wedding-red/10 text-gray-800'
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
-            {isLoading && (
+            {isTyping && (
               <div className="flex justify-start">
-                <div className="max-w-[80%] bg-gray-100 rounded-lg p-3 rounded-tl-none">
-                  <div className="flex space-x-2">
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="flex items-start gap-2.5 max-w-[80%]">
+                  <Avatar className="bg-wedding-red/20">
+                    <AvatarFallback>
+                      <Bot className="text-wedding-red" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="p-3 rounded-lg bg-wedding-red/10 text-gray-800">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 rounded-full bg-wedding-red animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-wedding-red animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-wedding-red animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
-        </div>
-
-        <div className="hidden lg:block w-1/3 bg-white border-l border-gray-200 p-3">
-          <div className="text-center mb-2">
-            <h4 className="text-sm font-semibold text-wedding-maroon">Hindu Priest (Pandit)</h4>
-            <p className="text-xs text-gray-500">3D Model</p>
-          </div>
-          <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200 h-[350px]">
-            <ModelViewer height="350px" />
-          </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            The pandit performs all religious ceremonies according to Hindu traditions.
-          </p>
-        </div>
-      </div>
-      
-      <Separator />
-      
-      <div className="p-3">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Paperclip size={18} />
-          </Button>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <ImageIcon size={18} />
-          </Button>
-          <div className="flex-grow relative">
-            <Input
-              placeholder="Ask about rituals, vendors, planning..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="pr-12 rounded-full"
-            />
-            <Button 
-              size="icon" 
-              className="absolute right-1 top-1 h-8 w-8 bg-wedding-red hover:bg-wedding-deepred rounded-full"
-              onClick={handleSendMessage}
-              disabled={isLoading || inputMessage.trim() === ''}
+        </ScrollArea>
+        
+        {messages.length > 4 && (
+          <div className="absolute bottom-20 right-6">
+            <Button
+              size="icon"
+              variant="outline"
+              className="rounded-full shadow-md bg-white"
+              onClick={scrollToBottom}
             >
-              <Send size={16} className="text-white" />
+              <ArrowDown className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Mic size={18} />
-          </Button>
-        </div>
-      </div>
-      
-      {/* Mobile view for 3D model */}
-      <div className="block lg:hidden bg-white border-t border-gray-200 p-3">
-        <div className="text-center mb-2">
-          <h4 className="text-sm font-semibold text-wedding-maroon">Hindu Priest (Pandit)</h4>
-          <p className="text-xs text-gray-500">3D Model</p>
-        </div>
-        <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200 h-[200px]">
-          <ModelViewer height="200px" />
+        )}
+        
+        <div className="p-4 border-t">
+          <div className="flex items-end gap-2">
+            <Textarea
+              ref={inputRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message..."
+              rows={1}
+              className="resize-none min-h-[50px]"
+            />
+            <Button 
+              onClick={handleSendMessage} 
+              className="bg-wedding-red hover:bg-wedding-deepred"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Ask me about Hindu wedding traditions, rituals, or planning help!
+          </p>
         </div>
       </div>
     </div>
