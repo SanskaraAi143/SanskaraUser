@@ -83,6 +83,10 @@ const ChatWithAI = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Adding console logs to debug the rendering issue
+  console.log("Rendering ChatWithAI component");
+  console.log("Number of messages:", messages.length);
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-md border border-gray-200">
       <div className="bg-wedding-maroon/10 p-3 flex items-center">
@@ -98,8 +102,8 @@ const ChatWithAI = () => {
       
       <Separator />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100%-112px)]">
-        <div className="lg:col-span-2 p-4 overflow-y-auto">
+      <div className="flex flex-col lg:flex-row h-[calc(100%-112px)]">
+        <div className="flex-grow p-4 overflow-y-auto">
           <div className="space-y-6">
             {messages.map((message) => (
               <div 
@@ -135,13 +139,13 @@ const ChatWithAI = () => {
           </div>
         </div>
 
-        <div className="hidden lg:block bg-white border-l border-gray-200 p-3">
+        <div className="hidden lg:block w-1/3 bg-white border-l border-gray-200 p-3">
           <div className="text-center mb-2">
             <h4 className="text-sm font-semibold text-wedding-maroon">Hindu Priest (Pandit)</h4>
             <p className="text-xs text-gray-500">3D Model</p>
           </div>
-          <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200">
-            <ModelViewer height="400px" />
+          <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200 h-[350px]">
+            <ModelViewer height="350px" />
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center">
             The pandit performs all religious ceremonies according to Hindu traditions.
@@ -179,6 +183,17 @@ const ChatWithAI = () => {
           <Button variant="outline" size="icon" className="rounded-full">
             <Mic size={18} />
           </Button>
+        </div>
+      </div>
+      
+      {/* Mobile view for 3D model */}
+      <div className="block lg:hidden bg-white border-t border-gray-200 p-3">
+        <div className="text-center mb-2">
+          <h4 className="text-sm font-semibold text-wedding-maroon">Hindu Priest (Pandit)</h4>
+          <p className="text-xs text-gray-500">3D Model</p>
+        </div>
+        <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200 h-[200px]">
+          <ModelViewer height="200px" />
         </div>
       </div>
     </div>
