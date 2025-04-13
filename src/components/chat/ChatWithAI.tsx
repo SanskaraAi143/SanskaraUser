@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +13,6 @@ type Message = {
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
-  showModel?: boolean;
 };
 
 const ChatWithAI = () => {
@@ -26,7 +26,6 @@ const ChatWithAI = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showModel, setShowModel] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,11 +33,6 @@ const ChatWithAI = () => {
     setIsLoading(true);
     
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const shouldShowModel = userMessage.toLowerCase().includes('pandit') || 
-                          userMessage.toLowerCase().includes('priest') ||
-                          userMessage.toLowerCase().includes('3d') ||
-                          userMessage.toLowerCase().includes('model');
     
     let aiResponse = "I understand you're asking about wedding planning. Could you provide more details about what you'd like to know?";
     
@@ -48,8 +42,8 @@ const ChatWithAI = () => {
       aiResponse = "Finding the right vendors is crucial. I recommend starting with a venue, caterer, and photographer who understand Hindu wedding traditions. Would you like me to suggest some questions to ask potential vendors?";
     } else if (userMessage.toLowerCase().includes('budget')) {
       aiResponse = "Wedding budgets typically include costs for venue, catering, attire, photography, decor, and priest services. A traditional Hindu wedding can range widely in cost. Would you like to create a budget plan?";
-    } else if (shouldShowModel) {
-      aiResponse = "Here's a visualization of a traditional Hindu priest (pandit) who would perform your wedding ceremony. The pandit plays a crucial role in ensuring all rituals are performed correctly according to Hindu traditions. Would you like me to explain more about their role in the ceremony?";
+    } else if (userMessage.toLowerCase().includes('pandit') || userMessage.toLowerCase().includes('priest')) {
+      aiResponse = "A traditional Hindu priest (pandit) performs your wedding ceremony. The pandit plays a crucial role in ensuring all rituals are performed correctly according to Hindu traditions. Would you like me to explain more about their role in the ceremony?";
     }
     
     const newMessage: Message = {
@@ -57,7 +51,6 @@ const ChatWithAI = () => {
       content: aiResponse,
       sender: 'ai',
       timestamp: new Date(),
-      showModel: shouldShowModel
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -85,17 +78,6 @@ const ChatWithAI = () => {
       handleSendMessage();
     }
   };
-
-  const toggleModel = () => {
-    toast({
-      title: showModel ? "3D Model hidden" : "3D Model will appear in the next relevant response",
-      description: showModel 
-        ? "The 3D model has been hidden from the chat" 
-        : "Ask about a pandit or priest to see the 3D model",
-      duration: 3000,
-    });
-    setShowModel(!showModel);
-  };
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -116,45 +98,54 @@ const ChatWithAI = () => {
       
       <Separator />
       
-      <div className="flex-1 p-4 overflow-y-auto">
-        <div className="space-y-6">
-          {messages.map((message) => (
-            <div 
-              key={message.id} 
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+      <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100%-112px)]">
+        <div className="lg:col-span-2 p-4 overflow-y-auto">
+          <div className="space-y-6">
+            {messages.map((message) => (
               <div 
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === 'user' 
-                    ? 'bg-wedding-red text-white rounded-tr-none' 
-                    : 'bg-gray-100 text-gray-800 rounded-tl-none'
-                }`}
+                key={message.id} 
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.content}
-                {message.showModel && (
-                  <div className="mt-3 bg-white rounded-md p-2">
-                    <p className="text-xs text-gray-500 mb-2">3D Model of a Hindu priest (pandit)</p>
-                    <ModelViewer height="250px" />
+                <div 
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    message.sender === 'user' 
+                      ? 'bg-wedding-red text-white rounded-tr-none' 
+                      : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                  }`}
+                >
+                  {message.content}
+                  <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                )}
-                <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="max-w-[80%] bg-gray-100 rounded-lg p-3 rounded-tl-none">
-                <div className="flex space-x-2">
-                  <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] bg-gray-100 rounded-lg p-3 rounded-tl-none">
+                  <div className="flex space-x-2">
+                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        <div className="hidden lg:block bg-white border-l border-gray-200 p-3">
+          <div className="text-center mb-2">
+            <h4 className="text-sm font-semibold text-wedding-maroon">Hindu Priest (Pandit)</h4>
+            <p className="text-xs text-gray-500">3D Model</p>
+          </div>
+          <div className="rounded-md overflow-hidden bg-gray-50 border border-gray-200">
+            <ModelViewer height="400px" />
+          </div>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            The pandit performs all religious ceremonies according to Hindu traditions.
+          </p>
         </div>
       </div>
       
@@ -167,15 +158,6 @@ const ChatWithAI = () => {
           </Button>
           <Button variant="outline" size="icon" className="rounded-full">
             <ImageIcon size={18} />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className={`rounded-full ${showModel ? 'bg-wedding-red/10 text-wedding-red' : ''}`}
-            onClick={toggleModel}
-            title="Toggle 3D model"
-          >
-            <Box size={18} />
           </Button>
           <div className="flex-grow relative">
             <Input
