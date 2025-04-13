@@ -16,7 +16,8 @@ const Hero = () => {
     }
   };
   
-  return <div className="pattern-bg pt-28 pb-16 md:pt-32 md:pb-24">
+  return (
+    <div className="pattern-bg pt-28 pb-16 md:pt-32 md:pb-24">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
           <div className="lg:w-1/2 animate-fade-in">
@@ -28,10 +29,22 @@ const Hero = () => {
               rituals, vendors, and traditions to create your perfect ceremony.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button className="bg-wedding-red hover:bg-wedding-deepred text-white h-12 px-6 text-lg" onClick={handleStartPlanning}>
-                <Sparkles size={20} className="mr-2" />
-                Chat with Sanskara
-              </Button>
+              {user ? (
+                <Button 
+                  className="bg-wedding-red hover:bg-wedding-deepred text-white h-12 px-6 text-lg" 
+                  onClick={handleStartPlanning}
+                >
+                  <Sparkles size={20} className="mr-2" />
+                  Chat with Sanskara
+                </Button>
+              ) : (
+                <SignInDialog>
+                  <Button className="bg-wedding-red hover:bg-wedding-deepred text-white h-12 px-6 text-lg">
+                    <Sparkles size={20} className="mr-2" />
+                    Chat with Sanskara
+                  </Button>
+                </SignInDialog>
+              )}
               <Button variant="outline" className="h-12 px-6 text-lg border-wedding-red text-wedding-red hover:bg-wedding-red/10">
                 <Calendar size={20} className="mr-2" />
                 See Sample Plan
@@ -67,6 +80,8 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Hero;

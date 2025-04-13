@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bookmark, ChevronRight, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "@/context/AuthContext";
+import SignInDialog from "@/components/auth/SignInDialog";
 import {
   Carousel,
   CarouselContent,
@@ -15,7 +18,7 @@ const rituals = [
     id: 1,
     name: "Mehndi",
     description: "A pre-wedding celebration where the bride's hands and feet are adorned with intricate henna designs symbolizing beauty, joy, and spiritual awakening.",
-    image: "https://images.unsplash.com/photo-1599033769078-74a669fb4710?w=800&auto=format&fit=crop",
+    image: "/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png",
   },
   {
     id: 2,
@@ -51,6 +54,20 @@ const rituals = [
 
 const RitualGuide = () => {
   const [selectedRitual, setSelectedRitual] = useState(rituals[0]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const handleViewDetails = (ritual) => {
+    if (user) {
+      navigate('/dashboard/chat', { state: { initialTab: 'ritual', ritualName: ritual.name } });
+    }
+  };
+  
+  const handleLearnMore = () => {
+    if (user) {
+      navigate('/dashboard/chat', { state: { initialTab: 'ritual', ritualName: selectedRitual.name } });
+    }
+  };
 
   return (
     <section id="ritual-guide" className="py-16 md:py-24 bg-wedding-cream pattern-bg">
@@ -96,10 +113,22 @@ const RitualGuide = () => {
                   <Bookmark size={18} className="mr-2" />
                   Save to Planner
                 </Button>
-                <Button className="bg-wedding-red hover:bg-wedding-deepred text-white">
-                  Learn More
-                  <ChevronRight size={18} className="ml-1" />
-                </Button>
+                {user ? (
+                  <Button 
+                    className="bg-wedding-red hover:bg-wedding-deepred text-white"
+                    onClick={handleLearnMore}
+                  >
+                    Learn More
+                    <ChevronRight size={18} className="ml-1" />
+                  </Button>
+                ) : (
+                  <SignInDialog>
+                    <Button className="bg-wedding-red hover:bg-wedding-deepred text-white">
+                      Learn More
+                      <ChevronRight size={18} className="ml-1" />
+                    </Button>
+                  </SignInDialog>
+                )}
               </div>
             </div>
           </div>
@@ -148,14 +177,26 @@ const RitualGuide = () => {
                         </p>
                       </div>
                       <div className="p-4 pt-0">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full border-wedding-red text-wedding-red hover:bg-wedding-red/10"
-                          onClick={() => setSelectedRitual(ritual)}
-                        >
-                          View Details
-                        </Button>
+                        {user ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full border-wedding-red text-wedding-red hover:bg-wedding-red/10"
+                            onClick={() => handleViewDetails(ritual)}
+                          >
+                            View Details
+                          </Button>
+                        ) : (
+                          <SignInDialog>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-wedding-red text-wedding-red hover:bg-wedding-red/10"
+                            >
+                              View Details
+                            </Button>
+                          </SignInDialog>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -1,12 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatWithAI from '@/components/chat/ChatWithAI';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RitualChat from '@/components/chat/RitualChat';
+import { useLocation } from 'react-router-dom';
+import VendorChat from '@/components/chat/VendorChat';
 
 const ChatPage = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("ai");
+  
+  useEffect(() => {
+    // Check if there's state passed from navigation
+    if (location.state) {
+      const { initialTab, ritualName } = location.state as { initialTab?: string; ritualName?: string };
+      if (initialTab) {
+        setActiveTab(initialTab);
+      }
+    }
+  }, [location]);
   
   return (
     <div className="space-y-6">
@@ -22,15 +35,19 @@ const ChatPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 h-[600px]">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="ai">General Assistant</TabsTrigger>
               <TabsTrigger value="ritual">Ritual Expert</TabsTrigger>
+              <TabsTrigger value="vendor">Vendor Chat</TabsTrigger>
             </TabsList>
             <TabsContent value="ai" className="h-[560px]">
               <ChatWithAI />
             </TabsContent>
             <TabsContent value="ritual" className="h-[560px]">
-              <RitualChat />
+              <RitualChat initialRitual={location.state?.ritualName} />
+            </TabsContent>
+            <TabsContent value="vendor" className="h-[560px]">
+              <VendorChat />
             </TabsContent>
           </Tabs>
         </div>

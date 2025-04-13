@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Send, Mic, Image } from 'lucide-react';
+import { Send, Mic, Image, Check, ArrowRight } from 'lucide-react';
 
 const ChatDemo = () => {
   return (
@@ -27,51 +27,122 @@ const ChatDemo = () => {
             </div>
           </div>
           
-          <div className="h-[400px] md:h-[500px] p-4 flex flex-col overflow-y-auto">
+          <div className="h-[500px] md:h-[600px] p-4 flex flex-col overflow-y-auto">
             <div className="flex flex-col flex-grow space-y-4">
               <div className="chat-message ai-message animate-slide-up">
                 <p className="font-medium text-wedding-maroon">Sanskara AI</p>
-                <p>Namaste! I'm Sanskara, your AI wedding planning assistant. I'm here to help you plan your perfect Hindu wedding. What aspect of your wedding would you like to discuss today?</p>
+                <p>Namaste! I'm Sanskara, your AI wedding planning assistant. To help you find the perfect vendors for your wedding, I'll need some information. Could you please share your location, wedding traditions, and desired wedding date?</p>
               </div>
               
               <div className="chat-message user-message animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                <p>We're planning our wedding for next summer and want to include traditional rituals. Can you explain what Saptapadi is?</p>
+                <p>We're planning our wedding in Mumbai for March 15, 2026. We're following Gujarati traditions.</p>
               </div>
               
               <div className="chat-message ai-message animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <p className="font-medium text-wedding-maroon">Sanskara AI</p>
-                <p>Saptapadi (or "Seven Steps") is one of the most important rituals in a Hindu wedding. The couple takes seven steps together around the sacred fire (Agni), with each step representing a vow and blessing:</p>
-                <ol className="list-decimal pl-5 mt-2 space-y-1">
-                  <li>For food and nourishment</li>
-                  <li>For strength</li>
-                  <li>For prosperity</li>
-                  <li>For wisdom</li>
-                  <li>For progeny</li>
-                  <li>For health</li>
-                  <li>For friendship and loyalty</li>
-                </ol>
-                <p className="mt-2">This ritual legally solemnizes the marriage. Would you like suggestions on how to incorporate it into your ceremony?</p>
+                <p>Thank you for sharing those details! For a Gujarati wedding in Mumbai in March 2026, here are some recommended venues:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div className="border border-wedding-red/20 rounded-lg p-3 hover:bg-wedding-red/5 cursor-pointer transition">
+                    <h4 className="font-semibold text-wedding-maroon">Royal Garden Resort</h4>
+                    <p className="text-sm text-gray-600 mt-1">Andheri West, Mumbai</p>
+                    <div className="flex items-center text-sm mt-1">
+                      <span className="text-yellow-500">★★★★★</span>
+                      <span className="text-gray-600 ml-1">(124 reviews)</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-1">₹2,50,000 - ₹4,00,000</p>
+                  </div>
+                  <div className="border border-wedding-red/20 rounded-lg p-3 hover:bg-wedding-red/5 cursor-pointer transition">
+                    <h4 className="font-semibold text-wedding-maroon">The Grand Pavilion</h4>
+                    <p className="text-sm text-gray-600 mt-1">Juhu, Mumbai</p>
+                    <div className="flex items-center text-sm mt-1">
+                      <span className="text-yellow-500">★★★★☆</span>
+                      <span className="text-gray-600 ml-1">(98 reviews)</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-1">₹3,00,000 - ₹5,50,000</p>
+                  </div>
+                </div>
+                <p className="mt-3">Would you like more information about either of these venues, or would you prefer to see more options?</p>
               </div>
               
               <div className="chat-message user-message animate-slide-up" style={{ animationDelay: '0.6s' }}>
-                <p>Yes, that would be helpful! Also, can you suggest some pandits near Boston?</p>
+                <p>I'm interested in The Grand Pavilion. Do they specialize in Gujarati weddings?</p>
               </div>
               
               <div className="chat-message ai-message animate-slide-up" style={{ animationDelay: '0.8s' }}>
                 <p className="font-medium text-wedding-maroon">Sanskara AI</p>
-                <p>I'd be happy to suggest ways to incorporate Saptapadi and recommend pandits in Boston. First, for Saptapadi:</p>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Consider having the seven vows printed in both Sanskrit and English for guests</li>
-                  <li>You can personalize each step with your own promises to each other</li>
-                  <li>Many couples use rose petals or rice to mark each step</li>
-                </ul>
-                <p className="mt-2">For pandits in the Boston area, I recommend checking with:</p>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Sri Lakshmi Temple in Ashland</li>
-                  <li>Pandit Sharma at the Hindu Cultural Center</li>
-                  <li>Boston Vedic Center</li>
-                </ul>
-                <p className="mt-2">Would you like me to help you create a task list for preparing for this ritual?</p>
+                <div className="border border-wedding-red/20 rounded-lg p-4 bg-wedding-red/5 mb-3">
+                  <h4 className="font-semibold text-wedding-maroon text-lg">The Grand Pavilion</h4>
+                  <p className="text-gray-700 mt-1">Yes, The Grand Pavilion has extensive experience hosting traditional Gujarati weddings. They offer:</p>
+                  <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">
+                    <li>Dedicated spaces for Garba and Sangeet</li>
+                    <li>In-house catering with authentic Gujarati cuisine options</li>
+                    <li>Special mandap decoration packages</li>
+                    <li>Accommodation for up to 150 out-of-town guests</li>
+                  </ul>
+                  <p className="mt-2 text-gray-700">Available on your preferred date: March 15, 2026</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="font-semibold text-wedding-maroon">₹3,75,000 for full package</span>
+                    <Button size="sm" className="bg-wedding-red hover:bg-wedding-deepred text-white">
+                      View Complete Details
+                    </Button>
+                  </div>
+                </div>
+                <p>Here are two similar venues that might also interest you:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div className="border border-wedding-red/20 rounded-lg p-3 hover:bg-wedding-red/5 cursor-pointer transition">
+                    <h4 className="font-semibold text-wedding-maroon">Saffron Banquet Hall</h4>
+                    <p className="text-sm text-gray-600 mt-1">Worli, Mumbai</p>
+                    <div className="flex items-center text-sm mt-1">
+                      <span className="text-yellow-500">★★★★★</span>
+                      <span className="text-gray-600 ml-1">(87 reviews)</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-1">₹3,25,000 - ₹4,50,000</p>
+                  </div>
+                  <div className="border border-wedding-red/20 rounded-lg p-3 hover:bg-wedding-red/5 cursor-pointer transition">
+                    <h4 className="font-semibold text-wedding-maroon">Lakeside Gardens</h4>
+                    <p className="text-sm text-gray-600 mt-1">Powai, Mumbai</p>
+                    <div className="flex items-center text-sm mt-1">
+                      <span className="text-yellow-500">★★★★☆</span>
+                      <span className="text-gray-600 ml-1">(112 reviews)</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-1">₹2,80,000 - ₹4,20,000</p>
+                  </div>
+                </div>
+                <p className="mt-3">Would you like to check The Grand Pavilion's availability and proceed with booking?</p>
+              </div>
+              
+              <div className="chat-message user-message animate-slide-up" style={{ animationDelay: '1.0s' }}>
+                <p>Yes, please check if The Grand Pavilion is available on March 15, 2026 and what deposit is required to book.</p>
+              </div>
+              
+              <div className="chat-message ai-message animate-slide-up" style={{ animationDelay: '1.2s' }}>
+                <p className="font-medium text-wedding-maroon">Sanskara AI</p>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                  <div className="flex items-center">
+                    <div className="bg-green-100 p-2 rounded-full">
+                      <Check className="h-5 w-5 text-green-600" />
+                    </div>
+                    <p className="ml-2 font-medium text-green-800">The Grand Pavilion is available on March 15, 2026!</p>
+                  </div>
+                  <div className="mt-3 space-y-2 text-gray-700">
+                    <p><span className="font-medium">Deposit required:</span> ₹1,00,000 (non-refundable)</p>
+                    <p><span className="font-medium">Payment options:</span> Credit/Debit cards, Net Banking, UPI</p>
+                    <p><span className="font-medium">Cancellation policy:</span> Full refund (minus deposit) if cancelled 90+ days before event</p>
+                  </div>
+                </div>
+                
+                <p>To secure this venue for your wedding date, you can make the booking with the required deposit. Would you like to proceed with the payment?</p>
+                
+                <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                  <Button className="bg-wedding-red hover:bg-wedding-deepred text-white">
+                    Proceed to Payment
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" className="border-wedding-red text-wedding-red hover:bg-wedding-red/10">
+                    Chat with Venue Manager
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">After booking, you'll be connected with the venue manager to discuss your specific requirements.</p>
               </div>
             </div>
           </div>
@@ -87,7 +158,7 @@ const ChatDemo = () => {
               <div className="flex-grow relative">
                 <input 
                   type="text" 
-                  placeholder="Ask about any Hindu wedding ritual or tradition..." 
+                  placeholder="Ask about vendors, traditions, or planning tips..." 
                   className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-300 focus:border-wedding-red focus:ring-1 focus:ring-wedding-red focus:outline-none"
                 />
                 <Button size="icon" className="absolute right-1 top-1 h-8 w-8 bg-wedding-red hover:bg-wedding-deepred rounded-full">

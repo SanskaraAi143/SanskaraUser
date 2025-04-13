@@ -47,21 +47,21 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  name: "Priya & Arjun",
-                  location: "Delhi, India",
-                  image: "https://images.unsplash.com/photo-1600260727863-456f6498de33?w=400&auto=format&fit=crop",
-                  quote: "Sanskara AI helped us blend traditional rituals with our modern style. Our families were impressed with how authentic our ceremony felt!"
-                },
-                {
-                  name: "Ananya & Vikram",
+                  name: "Ananya & Rohan",
                   location: "Mumbai, India",
-                  image: "https://images.unsplash.com/photo-1626456331499-8b502c3a31dd?w=400&auto=format&fit=crop",
-                  quote: "The vendor recommendations saved us so much time! We found an amazing pandit and decorator who understood exactly what we wanted."
+                  image: "https://images.unsplash.com/photo-1624537137100-b5b7be701ef4?w=400&auto=format&fit=crop",
+                  quote: "Sanskara AI helped us blend North and South Indian traditions for our wedding. Our families were impressed with how authentic our ceremony felt!"
                 },
                 {
-                  name: "Meera & Raj",
-                  location: "Bangalore, India",
-                  image: "https://images.unsplash.com/photo-1621515695381-33a9beff5423?w=400&auto=format&fit=crop",
+                  name: "Riya & Vikram",
+                  location: "Delhi, India",
+                  image: "https://images.unsplash.com/photo-1617812191487-74637566b7d6?w=400&auto=format&fit=crop",
+                  quote: "The vendor recommendations saved us so much time! We found an amazing pandit and decorator in our city who understood exactly what we wanted."
+                },
+                {
+                  name: "Divya & Arjun",
+                  location: "Jaipur, India",
+                  image: "https://images.unsplash.com/photo-1620481679288-89479bfd6b1a?w=400&auto=format&fit=crop",
                   quote: "As a couple from different regions of India, we weren't sure how to incorporate both traditions. Sanskara guided us through creating a meaningful ceremony everyone loved."
                 }
               ].map((testimonial, index) => (
