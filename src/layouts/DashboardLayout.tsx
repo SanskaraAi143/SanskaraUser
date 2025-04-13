@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -59,9 +58,9 @@ const DashboardLayout = () => {
         <div className="flex h-16 items-center justify-between border-b px-4">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
-              alt="Ganesha Logo" 
-              className="h-10 w-10"
+              src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
+              alt="Sanskara Logo" 
+              className="h-10 w-10 object-contain"
             />
             <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
               Sanskara<span className="text-wedding-red">AI</span>
@@ -103,9 +102,9 @@ const DashboardLayout = () => {
             <div className="flex items-center md:hidden">
               <Link to="/" className="flex items-center">
                 <img 
-                  src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" 
-                  alt="Ganesha Logo" 
-                  className="h-8 w-8"
+                  src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
+                  alt="Sanskara Logo" 
+                  className="h-8 w-8 object-contain"
                 />
                 <h1 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
                   Sanskara<span className="text-wedding-red">AI</span>
@@ -134,7 +133,6 @@ const DashboardLayout = () => {
               </div>
             </div>
           </div>
-          {/* Mobile Navigation */}
           <div className="flex overflow-x-auto border-t md:hidden">
             <nav className="flex space-x-4 px-4 py-2">
               {sidebarLinks.map((link) => {

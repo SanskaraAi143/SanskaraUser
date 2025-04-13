@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Send, Mic, Image, Paperclip } from 'lucide-react';
+import { Send, Mic, Image as ImageIcon, Paperclip } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -94,7 +94,7 @@ const RitualChat = () => {
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-md border border-gray-200">
       <div className="bg-wedding-maroon/10 p-3 flex items-center">
         <Avatar className="h-9 w-9 mr-2">
-          <AvatarImage src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" alt="Ritual Expert" />
+          <AvatarImage src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Ritual Expert" />
           <AvatarFallback className="bg-wedding-deepred text-white">RE</AvatarFallback>
         </Avatar>
         <div>
@@ -149,7 +149,7 @@ const RitualChat = () => {
             <Paperclip size={18} />
           </Button>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Image size={18} />
+            <ImageIcon size={18} />
           </Button>
           <div className="flex-grow relative">
             <Input

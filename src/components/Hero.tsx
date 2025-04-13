@@ -54,6 +54,9 @@ const Hero = () => {
             <div className="absolute -top-6 -left-6 w-40 h-40 bg-wedding-orange/10 rounded-full z-0"></div>
             <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-wedding-red/10 rounded-full z-0"></div>
             <div className="relative z-10 bg-white p-4 rounded-2xl shadow-lg max-w-md mx-auto">
+              <div className="flex justify-center mb-4">
+                <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-16 w-16" />
+              </div>
               <div className="aspect-[4/5] rounded-xl overflow-hidden">
                 <img 
                   src="/lovable-uploads/89ffba58-4862-4bf8-b505-e54b0c6fd052.png"

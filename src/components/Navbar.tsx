@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { MenuIcon, MessageCircle, User, X } from 'lucide-react';
@@ -34,7 +33,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="h-10 w-10 flex items-center justify-center">
-              <img src="/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png" alt="Ganesha Logo" className="h-full w-full object-contain" />
+              <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-full w-full object-contain" />
             </div>
             <h1 className="text-2xl font-playfair font-semibold text-wedding-maroon">
               Sanskara<span className="text-wedding-red">AI</span>
@@ -85,8 +84,8 @@ const Navbar = () => {
               <div className="flex flex-col h-full py-6">
                 <div className="mb-8">
                   <Link to="/" className="flex items-center gap-2 mb-6">
-                    <div className="h-10 w-10 bg-wedding-red rounded-full flex items-center justify-center">
-                      <span className="text-white font-playfair text-xl font-bold">S</span>
+                    <div className="h-10 w-10 flex items-center justify-center">
+                      <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-full w-full object-contain" />
                     </div>
                     <h2 className="text-xl font-playfair font-semibold text-wedding-maroon">
                       Sanskara<span className="text-wedding-red">AI</span>

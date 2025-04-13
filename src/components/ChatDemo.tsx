@@ -19,9 +19,12 @@ const ChatDemo = () => {
         
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden animate-scale-in">
           <div className="bg-wedding-red/10 p-4 border-b border-wedding-red/20">
-            <h3 className="font-playfair text-xl font-semibold text-wedding-maroon text-center">
-              Chat with Sanskara AI
-            </h3>
+            <div className="flex items-center justify-center">
+              <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-8 w-8 mr-2" />
+              <h3 className="font-playfair text-xl font-semibold text-wedding-maroon text-center">
+                Chat with Sanskara AI
+              </h3>
+            </div>
           </div>
           
           <div className="h-[400px] md:h-[500px] p-4 flex flex-col overflow-y-auto">
