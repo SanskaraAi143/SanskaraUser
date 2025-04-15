@@ -10,17 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
 
 const UserProfileDropdown = () => {
   const { user, signOut } = useAuth();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/'); // Redirect to home page after sign out
     } catch (error) {
       console.error("Error signing out:", error);
     }

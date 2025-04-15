@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { MenuIcon, MessageCircle, User, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   const navLinks = [
@@ -24,7 +23,6 @@ const Navbar = () => {
     if (user) {
       navigate('/dashboard/chat');
     } else {
-      // If not logged in, show sign-in dialog
       navigate('/dashboard/chat');
     }
   };
@@ -56,14 +54,9 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          {loading ? (
-            // Show loading state
-            <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-          ) : user ? (
-            // Show user profile dropdown if logged in
+          {user ? (
             <UserProfileDropdown />
           ) : (
-            // Show sign in button if not logged in
             <SignInDialog>
               <Button variant="outline" className="hidden sm:flex">
                 <User size={18} className="mr-2" />
@@ -115,10 +108,10 @@ const Navbar = () => {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => signOut()}
                     >
                       <User size={18} className="mr-2" />
-                      Dashboard
+                      Sign Out
                     </Button>
                   ) : (
                     <SignInDialog>
