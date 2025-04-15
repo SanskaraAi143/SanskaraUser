@@ -12,7 +12,7 @@ import MoodBoard from "@/components/dashboard/MoodBoard";
 import BudgetManager from "@/components/dashboard/BudgetManager";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   
   const [upcomingEvents, setUpcomingEvents] = useState([
@@ -33,7 +33,7 @@ const Dashboard = () => {
       {/* Welcome Section */}
       <div className="bg-wedding-maroon/5 rounded-xl p-6 border border-wedding-maroon/20">
         <h1 className="text-2xl font-playfair text-wedding-maroon mb-2">
-          Welcome back, {user?.name || "Friend"}!
+          Welcome back, {profile?.name || "Friend"}!
         </h1>
         <p className="text-gray-600">
           Your wedding is coming up soon. Here's what you need to know today.
