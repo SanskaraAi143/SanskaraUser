@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
 
 const UserProfileDropdown = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -31,11 +31,11 @@ const UserProfileDropdown = () => {
           className="h-10 w-10 cursor-pointer border-2 border-gray-200 hover:border-wedding-red transition-colors"
           aria-label="User profile"
         >
-          {profile?.avatar_url ? (
-            <AvatarImage src={profile.avatar_url} alt={profile.name || "User"} />
+          {user?.photoURL ? (
+            <AvatarImage src={user.photoURL} alt={user.name || "User"} />
           ) : (
             <AvatarFallback className="bg-wedding-red/10 text-wedding-red">
-              {profile?.name ? profile.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+              {user?.name ? user.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
             </AvatarFallback>
           )}
         </Avatar>
@@ -43,7 +43,7 @@ const UserProfileDropdown = () => {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.name || "User"}</p>
+            <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
             <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
           </div>
         </DropdownMenuLabel>

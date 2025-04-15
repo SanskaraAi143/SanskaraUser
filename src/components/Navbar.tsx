@@ -20,7 +20,11 @@ const Navbar = () => {
   ];
 
   const handleStartPlanning = () => {
-    navigate('/dashboard/chat');
+    if (user) {
+      navigate('/dashboard/chat');
+    } else {
+      navigate('/dashboard/chat');
+    }
   };
 
   return (

@@ -6,25 +6,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { updateProfile } from "@/services/supabase/config";
+import { useToast } from "@/hooks/use-toast";
+import { updateProfile } from "firebase/auth";
+import { auth } from "@/services/firebase/config";
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
 
 const ProfilePage = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [displayName, setDisplayName] = useState(profile?.name || "");
+  const [displayName, setDisplayName] = useState(user?.name || "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!auth.currentUser) return;
 
     setIsLoading(true);
     try {
-      await updateProfile({
-        id: user.id,
-        name: displayName,
+      await updateProfile(auth.currentUser, {
+        displayName: displayName,
       });
 
       toast({
@@ -45,8 +45,8 @@ const ProfilePage = () => {
 
   // Calculate when the account was created
   const formatAccountCreationDate = () => {
-    if (!user?.created_at) return "N/A";
-    return new Date(user.created_at).toLocaleDateString();
+    if (!auth.currentUser?.metadata.creationTime) return "N/A";
+    return new Date(auth.currentUser.metadata.creationTime).toLocaleDateString();
   };
 
   return (
@@ -58,15 +58,15 @@ const ProfilePage = () => {
         <Card className="md:col-span-1">
           <CardHeader className="text-center">
             <Avatar className="w-24 h-24 mx-auto mb-2">
-              {profile?.avatar_url ? (
-                <AvatarImage src={profile.avatar_url} alt={profile?.name || "User"} />
+              {user?.photoURL ? (
+                <AvatarImage src={user.photoURL} alt={user.name || "User"} />
               ) : (
                 <AvatarFallback className="bg-wedding-red/10 text-wedding-red text-xl">
-                  {profile?.name ? profile.name.charAt(0).toUpperCase() : <UserIcon className="h-8 w-8" />}
+                  {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="h-8 w-8" />}
                 </AvatarFallback>
               )}
             </Avatar>
-            <CardTitle className="text-xl">{profile?.name || "User"}</CardTitle>
+            <CardTitle className="text-xl">{user?.name || "User"}</CardTitle>
             <CardDescription className="text-sm">{user?.email}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">

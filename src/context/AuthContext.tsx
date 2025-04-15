@@ -1,14 +1,27 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase, Profile, getProfile } from "@/services/supabase/config";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser
+} from "firebase/auth";
+import { auth, googleProvider } from "@/services/firebase/config";
 import { toast } from "@/hooks/use-toast";
 
 // Types for our authentication context
+type User = {
+  id: string;
+  email: string | null;
+  name?: string;
+  photoURL?: string;
+};
+
 type AuthContextType = {
   user: User | null;
-  profile: Profile | null;
-  session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
@@ -19,8 +32,6 @@ type AuthContextType = {
 // Create the context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  profile: null,
-  session: null,
   loading: true,
   signIn: async () => {},
   signUp: async () => {},
@@ -33,70 +44,46 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Effect to initialize auth state
   useEffect(() => {
-    // Set up the session listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          const profile = await getProfile(session.user.id);
-          setProfile(profile);
-        } else {
-          setProfile(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        getProfile(session.user.id).then(profile => {
-          setProfile(profile);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in
+        setUser({
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || undefined,
+          photoURL: firebaseUser.photoURL || undefined,
         });
+      } else {
+        // User is signed out
+        setUser(null);
       }
-      
       setLoading(false);
     });
 
     // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   // Sign up function
   const signUp = async (email: string, password: string, name: string) => {
     try {
       setLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
       
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            name: name
-          }
-        }
+      // Update the user's profile with their name
+      await updateProfile(firebaseUser, {
+        displayName: name
       });
-      
-      if (error) throw error;
       
       toast({
         title: "Account created successfully",
-        description: "Please check your email for a confirmation link.",
+        description: `Welcome, ${name}!`,
       });
-      
     } catch (error: any) {
       const errorMessage = error.message || "An unknown error occurred";
       toast({
@@ -114,19 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
+      await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Signed in successfully",
         description: "Welcome back!",
       });
-      
     } catch (error: any) {
       const errorMessage = error.message || "An unknown error occurred";
       toast({
@@ -144,18 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      toast({
+        title: "Signed in successfully",
+        description: `Welcome, ${user.displayName || "User"}!`,
       });
-      
-      if (error) throw error;
-      
-      // Note: Toast is not shown here as the user will be redirected to Google
-      
     } catch (error: any) {
       const errorMessage = error.message || "An unknown error occurred";
       toast({
@@ -173,16 +146,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
+      await firebaseSignOut(auth);
       toast({
         title: "Signed out successfully",
         description: "You have been logged out.",
       });
-      
     } catch (error: any) {
       const errorMessage = error.message || "An unknown error occurred";
       toast({
@@ -197,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

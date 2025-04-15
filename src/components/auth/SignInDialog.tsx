@@ -71,9 +71,10 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
     setIsGoogleSubmitting(true);
     try {
       await signInWithGoogle();
-      // Note: dialog will close automatically due to redirect
+      setOpen(false);
     } catch (error) {
       console.error("Google sign in error:", error);
+    } finally {
       setIsGoogleSubmitting(false);
     }
   };
