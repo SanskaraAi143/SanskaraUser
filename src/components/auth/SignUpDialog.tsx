@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -47,6 +48,7 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
   const { signUp } = useAuth();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(formSchema),
@@ -64,6 +66,8 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
       await signUp(values.email, values.password, values.name);
       setOpen(false);
       form.reset();
+      // Redirect to dashboard after successful signup
+      navigate('/dashboard');
     } catch (error) {
       console.error("Sign up error:", error);
     } finally {

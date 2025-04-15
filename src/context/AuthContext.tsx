@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider } from "@/services/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import { createUserProfile, getUserProfile } from "@/services/firebase/auth";
 
 // Types for our authentication context
 type User = {
@@ -48,9 +49,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Effect to initialize auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // User is signed in
+        // Create or update user profile in Firestore
+        await createUserProfile(firebaseUser);
+
+        // Get the user profile from Firestore
+        const userProfile = await getUserProfile(firebaseUser.uid);
+        
         setUser({
           id: firebaseUser.uid,
           email: firebaseUser.email,
@@ -79,6 +86,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await updateProfile(firebaseUser, {
         displayName: name
       });
+      
+      // Create a user profile in Firestore
+      await createUserProfile(firebaseUser, { name });
       
       toast({
         title: "Account created successfully",
@@ -125,6 +135,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      
+      // Create or update user profile in Firestore
+      await createUserProfile(user);
+      
       toast({
         title: "Signed in successfully",
         description: `Welcome, ${user.displayName || "User"}!`,

@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { User, Loader2, LogIn } from "lucide-react";
 import SignUpDialog from "./SignUpDialog";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -45,6 +46,7 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(formSchema),
@@ -60,6 +62,8 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
       await signIn(values.email, values.password);
       setOpen(false);
       form.reset();
+      // Redirect to dashboard after successful login
+      navigate('/dashboard');
     } catch (error) {
       console.error("Sign in error:", error);
     } finally {
@@ -72,6 +76,8 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
     try {
       await signInWithGoogle();
       setOpen(false);
+      // Redirect to dashboard after successful login
+      navigate('/dashboard');
     } catch (error) {
       console.error("Google sign in error:", error);
     } finally {
