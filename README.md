@@ -11,6 +11,47 @@ This project follows a three-tier architecture:
 2. **Backend**: Python FastAPI application with AutoGen for AI orchestration
 3. **Database**: Supabase (PostgreSQL) for data storage
 
+## API Endpoints
+
+The API is expected to run at http://localhost:8000 (or your custom URL configured via VITE_API_BASE_URL).
+
+The following endpoints need to be implemented in your FastAPI backend:
+
+### Authentication
+- All endpoints require a valid Firebase ID token in the Authorization header: `Bearer <token>`
+
+### Chat Endpoints
+- `POST /chat` - Send a message to AutoGen-powered AI
+  - Request: `{ message: string, session_id?: string, category?: string }`
+  - Response: `{ messages: ChatMessage[], session_id: string }`
+
+### Ritual Endpoints
+- `GET /rituals/:ritualName` - Get information about a specific ritual
+  - Response: RitualInfo object
+- `GET /rituals/suggested?tradition=:tradition` - Get suggested rituals for a tradition
+  - Response: Array of RitualInfo objects
+- `GET /rituals/search?query=:query` - Search for rituals
+  - Response: Array of RitualInfo objects
+
+### Vendor Endpoints
+- `GET /vendors/recommend` - Get vendor recommendations
+  - Query params: category, location, budget
+  - Response: Array of Vendor objects
+- `GET /vendors/:vendorId` - Get details for a specific vendor
+  - Response: Vendor object
+
+### Task Endpoints
+- `GET /tasks` - Get all tasks for the current user
+  - Response: Array of Task objects
+- `POST /tasks` - Create a new task
+  - Request: Task object (without id)
+  - Response: Created Task object
+- `PUT /tasks/:taskId` - Update a task
+  - Request: Task object
+  - Response: Updated Task object
+- `DELETE /tasks/:taskId` - Delete a task
+  - Response: 200 OK
+
 ## AI Architecture
 
 The AI system uses AutoGen 0.4+ to orchestrate multiple specialized agents:
@@ -32,7 +73,7 @@ The AI system uses AutoGen 0.4+ to orchestrate multiple specialized agents:
 
 2. Create a `.env` file in the root directory with the following variables:
    ```
-   VITE_API_BASE_URL=your_api_url
+   VITE_API_BASE_URL=http://localhost:8000
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    VITE_FIREBASE_API_KEY=your_firebase_api_key
@@ -67,7 +108,7 @@ The AI system uses AutoGen 0.4+ to orchestrate multiple specialized agents:
 
 5. Run the FastAPI server:
    ```
-   uvicorn main:app --reload
+   uvicorn main:app --reload --port 8000
    ```
 
 ### Database (Supabase)
@@ -75,38 +116,3 @@ The AI system uses AutoGen 0.4+ to orchestrate multiple specialized agents:
 1. Create a Supabase project
 2. Run the SQL scripts in `schema.sql` to set up the database schema
 3. Set up Row Level Security (RLS) policies
-
-## Backend Implementation
-
-### Core Components
-
-1. **Authentication Middleware**: Verifies Firebase ID tokens, gets/creates internal user_id from users table
-2. **AutoGen Agents**: Set up specialized agents with specific tools and capabilities
-3. **API Endpoints**: Connect frontend to backend via RESTful APIs
-4. **Database Operations**: Handle CRUD operations for various resources (users, vendors, rituals, etc.)
-
-### API Endpoints
-
-The following API endpoints should be implemented in the Python FastAPI backend:
-
-```
-/api/chat - Handle AI conversations via AutoGen
-/api/rituals - Get information about Hindu wedding rituals
-/api/rituals/suggested - Get suggested rituals based on tradition
-/api/rituals/search - Search for rituals
-/api/vendors/recommend - Get vendor recommendations
-/api/vendors/{vendor_id} - Get details for a specific vendor
-/api/tasks - Manage wedding planning tasks
-/api/user/vendors - Manage user-tracked vendors
-```
-
-## Features
-
-- Chat with AI for wedding planning assistance
-- Explore and learn about Hindu wedding rituals
-- Find and manage vendors
-- Create and track wedding tasks
-- Build mood boards
-- Manage guest list
-- Track budget
-- Create wedding timeline

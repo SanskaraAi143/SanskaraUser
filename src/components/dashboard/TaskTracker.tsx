@@ -1,57 +1,90 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Calendar, Edit, Trash2, X, Check } from 'lucide-react';
+import { Plus, Calendar, Edit, Trash2, X, Check, Loader2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
-
-type Task = {
-  id: string;
-  title: string;
-  completed: boolean;
-  dueDate: string;
-  priority: 'low' | 'medium' | 'high';
-};
+import { getTasks, createTask, updateTask, deleteTask, Task } from '@/services/api/taskApi';
 
 const TaskTracker = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Book venue', completed: true, dueDate: '2025-03-15', priority: 'high' },
-    { id: '2', title: 'Find caterer', completed: false, dueDate: '2025-03-30', priority: 'high' },
-    { id: '3', title: 'Order invitations', completed: false, dueDate: '2025-04-15', priority: 'medium' },
-    { id: '4', title: 'Book photographer', completed: true, dueDate: '2025-03-20', priority: 'medium' },
-    { id: '5', title: 'Select mandap decorations', completed: false, dueDate: '2025-05-01', priority: 'low' },
-  ]);
-  
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newTask, setNewTask] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTaskText, setEditingTaskText] = useState('');
   const { toast } = useToast();
 
-  const handleAddTask = () => {
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load your tasks. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddTask = async () => {
     if (newTask.trim() === '') return;
     
-    const task: Task = {
-      id: Date.now().toString(),
-      title: newTask,
-      completed: false,
-      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
-      priority: 'medium',
-    };
-    
-    setTasks(prev => [...prev, task]);
-    setNewTask('');
-    toast({
-      title: "Task added",
-      description: "New task has been added to your list.",
-    });
+    try {
+      const task: Omit<Task, 'id'> = {
+        title: newTask,
+        completed: false,
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
+        priority: 'medium',
+      };
+      
+      const createdTask = await createTask(task);
+      setTasks(prev => [...prev, createdTask]);
+      setNewTask('');
+      
+      toast({
+        title: "Task added",
+        description: "New task has been added to your list.",
+      });
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
-  const handleToggleComplete = (id: string) => {
-    setTasks(prev => prev.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+  const handleToggleComplete = async (id: string) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      const updatedTask = { ...task, completed: !task.completed };
+      await updateTask(updatedTask);
+      
+      setTasks(prev => prev.map(task => 
+        task.id === id ? { ...task, completed: !task.completed } : task
+      ));
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleStartEdit = (task: Task) => {
@@ -59,20 +92,35 @@ const TaskTracker = () => {
     setEditingTaskText(task.title);
   };
   
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingTaskText.trim() === '' || !editingTaskId) return;
     
-    setTasks(prev => prev.map(task => 
-      task.id === editingTaskId ? { ...task, title: editingTaskText } : task
-    ));
-    
-    setEditingTaskId(null);
-    setEditingTaskText('');
-    
-    toast({
-      title: "Task updated",
-      description: "The task has been updated successfully.",
-    });
+    try {
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (!task) return;
+      
+      const updatedTask = { ...task, title: editingTaskText };
+      await updateTask(updatedTask);
+      
+      setTasks(prev => prev.map(task => 
+        task.id === editingTaskId ? { ...task, title: editingTaskText } : task
+      ));
+      
+      setEditingTaskId(null);
+      setEditingTaskText('');
+      
+      toast({
+        title: "Task updated",
+        description: "The task has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleCancelEdit = () => {
@@ -80,18 +128,37 @@ const TaskTracker = () => {
     setEditingTaskText('');
   };
   
-  const handleDeleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
-    
-    toast({
-      title: "Task deleted",
-      description: "The task has been removed from your list.",
-    });
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await deleteTask(id);
+      setTasks(prev => prev.filter(task => task.id !== id));
+      
+      toast({
+        title: "Task deleted",
+        description: "The task has been removed from your list.",
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   // Filter tasks
   const completedTasks = tasks.filter(task => task.completed);
   const incompleteTasks = tasks.filter(task => !task.completed);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 text-wedding-red animate-spin" />
+        <span className="ml-2 text-lg text-gray-600">Loading tasks...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

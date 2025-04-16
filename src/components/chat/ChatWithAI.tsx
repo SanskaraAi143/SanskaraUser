@@ -5,23 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { sendChatMessage, ChatMessage } from '@/services/api/chatApi';
+import { useToast } from "@/components/ui/use-toast";
 
-// Mock data for the chat
 const initialMessages = [
   {
-    id: 1,
-    role: 'bot',
-    content: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
-    timestamp: new Date().toISOString(),
+    id: crypto.randomUUID(),
+    message: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
+    sender_type: 'assistant',
+    sender_name: 'PlannerAgent',
+    content: {
+      type: 'text',
+      text: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
+    },
+    timestamp: new Date(),
   }
 ];
 
 const ChatWithAI = () => {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
 
   // Auto scroll to bottom whenever messages change
   useEffect(() => {
@@ -46,42 +54,46 @@ const ChatWithAI = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
     
-    // Add user message
-    const userMessage = {
-      id: messages.length + 1,
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date().toISOString(),
+    // Add user message to chat interface immediately
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      message: input.trim(),
+      sender_type: 'user',
+      sender_name: 'user',
+      content: {
+        type: 'text',
+        text: input.trim(),
+      },
+      timestamp: new Date(),
     };
     
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     
-    // Simulate bot typing
+    // Show typing indicator
     setIsTyping(true);
     
-    // Simulate response delay
-    setTimeout(() => {
-      const botResponses = [
-        "I'd be happy to help you plan your wedding rituals!",
-        "Here are some popular mandap decoration options for a traditional ceremony.",
-        "For the Sangeet, I recommend these 5 popular songs that guests always enjoy.",
-        "The mehndi ceremony typically occurs 1-2 days before the wedding. Here's a planning checklist.",
-        "I can help you find vendors who specialize in traditional Hindu ceremonies in your area."
-      ];
+    try {
+      // Send message to API
+      const response = await sendChatMessage(input.trim(), sessionId);
       
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+      // Update session ID for conversation continuity
+      if (response.session_id) {
+        setSessionId(response.session_id);
+      }
       
-      const botMessage = {
-        id: messages.length + 2,
-        role: 'bot',
-        content: randomResponse,
-        timestamp: new Date().toISOString(),
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
+      // Add response messages to chat
+      setMessages(prev => [...prev.filter(m => m.sender_type !== 'user' || m.id !== userMessage.id), userMessage, ...response.messages]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get response from AI. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -98,27 +110,27 @@ const ChatWithAI = () => {
               <div
                 key={message.id}
                 className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                  message.sender_type === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 <div
                   className={`flex items-start gap-2.5 max-w-[80%] ${
-                    message.role === 'user' ? 'flex-row-reverse' : ''
+                    message.sender_type === 'user' ? 'flex-row-reverse' : ''
                   }`}
                 >
-                  <Avatar className={message.role === 'user' ? 'bg-wedding-orange/20' : 'bg-wedding-red/20'}>
+                  <Avatar className={message.sender_type === 'user' ? 'bg-wedding-orange/20' : 'bg-wedding-red/20'}>
                     <AvatarFallback>
-                      {message.role === 'user' ? <User className="text-wedding-orange" /> : <Bot className="text-wedding-red" />}
+                      {message.sender_type === 'user' ? <User className="text-wedding-orange" /> : <Bot className="text-wedding-red" />}
                     </AvatarFallback>
                   </Avatar>
                   <div
                     className={`p-3 rounded-lg ${
-                      message.role === 'user'
+                      message.sender_type === 'user'
                         ? 'bg-wedding-orange/10 text-gray-800'
                         : 'bg-wedding-red/10 text-gray-800'
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm">{message.content.text}</p>
                     <p className="text-[10px] text-gray-500 mt-1">
                       {new Date(message.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -178,6 +190,7 @@ const ChatWithAI = () => {
             <Button 
               onClick={handleSendMessage} 
               className="bg-wedding-red hover:bg-wedding-deepred"
+              disabled={isTyping || input.trim() === ''}
             >
               <Send className="h-4 w-4" />
             </Button>
