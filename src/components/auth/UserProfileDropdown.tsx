@@ -12,9 +12,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const UserProfileDropdown = () => {
   const { user, signOut } = useAuth();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     try {
@@ -28,19 +30,22 @@ const UserProfileDropdown = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar 
-          className="h-10 w-10 cursor-pointer border-2 border-gray-200 hover:border-wedding-red transition-colors"
+          className="h-9 w-9 cursor-pointer border-2 border-gray-200 hover:border-wedding-red transition-colors"
           aria-label="User profile"
         >
           {user?.photoURL ? (
             <AvatarImage src={user.photoURL} alt={user.name || "User"} />
           ) : (
             <AvatarFallback className="bg-wedding-red/10 text-wedding-red">
-              {user?.name ? user.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+              {user?.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
             </AvatarFallback>
           )}
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent 
+        align={isMobile ? "center" : "end"} 
+        className="w-56 z-50"
+      >
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
