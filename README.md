@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
 
-## Project info
+# Sanskara AI - Hindu Wedding Planning Assistant
 
-**URL**: https://lovable.dev/projects/faefcf2b-a765-410c-a6ea-1ef7aca8e608
+A comprehensive wedding planning platform with AI assistance tailored for Hindu weddings.
 
-## How can I edit this code?
+## Project Setup
 
-There are several ways of editing your application.
+### Frontend (React)
 
-**Use Lovable**
+1. Install dependencies:
+   ```
+   npm install
+   ```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/faefcf2b-a765-410c-a6ea-1ef7aca8e608) and start prompting.
+2. Create a `.env` file in the root directory with the following variables:
+   ```
+   VITE_API_BASE_URL=your_api_url
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-Changes made via Lovable will be committed automatically to this repo.
+3. Run the development server:
+   ```
+   npm run dev
+   ```
 
-**Use your preferred IDE**
+### Backend (Python FastAPI)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the backend repository (separate from this frontend)
+2. Set up a Python environment (Python 3.9+ recommended)
+3. Install dependencies:
+   ```
+   pip install fastapi uvicorn sqlalchemy pydantic pyautogen openai firebase-admin python-dotenv
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+4. Create a `.env` file with:
+   ```
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_SERVICE_KEY=your_supabase_service_key
+   OPENAI_API_KEY=your_openai_api_key
+   FIREBASE_CREDENTIALS=path/to/firebase-credentials.json
+   ```
 
-Follow these steps:
+5. Run the FastAPI server:
+   ```
+   uvicorn main:app --reload
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Database (Supabase)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Create a Supabase project
+2. Run the SQL scripts in `schema.sql` to set up the database schema
+3. Set up Row Level Security (RLS) policies
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Architecture
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+This project follows a three-tier architecture:
 
-**Edit a file directly in GitHub**
+1. **Frontend**: React application with Vite, shadcn/ui, and TailwindCSS
+2. **Backend**: Python FastAPI application with AutoGen for AI orchestration
+3. **Database**: Supabase (PostgreSQL) for data storage
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## AI Architecture
 
-**Use GitHub Codespaces**
+The AI system uses AutoGen to orchestrate multiple specialized agents:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Planner Agent**: Coordinates other agents
+- **Vendor Agent**: Handles vendor search and recommendations
+- **Ritual Agent**: Provides information about Hindu wedding rituals
+- **Booking Agent**: Manages vendor booking process
+- **Task Manager Agent**: Handles wedding planning tasks
 
-## What technologies are used for this project?
+## Features
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/faefcf2b-a765-410c-a6ea-1ef7aca8e608) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Chat with AI for wedding planning assistance
+- Explore and learn about Hindu wedding rituals
+- Find and manage vendors
+- Create and track wedding tasks
+- Build mood boards
+- Manage guest list
+- Track budget
+- Create wedding timeline
