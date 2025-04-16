@@ -46,39 +46,60 @@ export const sendChatMessage = async (
   category?: string
 ): Promise<{ messages: ChatMessage[], session_id: string }> => {
   try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    if (!API_BASE_URL) {
+      throw new Error('API_BASE_URL environment variable is not set');
+    }
+    
     // Get the Firebase ID token
     const user = auth.currentUser;
     if (!user) throw new Error('User not authenticated');
     const idToken = await user.getIdToken();
     
-    // For now, we're simulating the backend API call that would use AutoGen
-    // In production, this would be a real API call to your Python backend
+    // Prepare request to AutoGen-powered backend
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        session_id: sessionId,
+        category
+      }),
+    });
     
-    // Create mock response (this would come from your Python backend)
-    const mockResponse = {
-      messages: [
-        {
-          id: crypto.randomUUID(),
-          sender_type: 'assistant',
-          sender_name: 'PlannerAgent',
-          content: {
-            type: 'text',
-            text: `I understand you're asking about "${message}". Let me help you with that!`,
-          },
-          timestamp: new Date(),
-        },
-      ],
-      session_id: sessionId || crypto.randomUUID(),
-    };
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
     
-    // In a real implementation, you would:
-    // 1. Call your Python backend API with the message, sessionId, and idToken
-    // 2. The backend would use AutoGen to process the message
-    // 3. Return structured response data
-    
-    return mockResponse as { messages: ChatMessage[], session_id: string };
+    const responseData = await response.json();
+    return responseData;
   } catch (error) {
     console.error('Error sending chat message:', error);
+    
+    // For development without backend, return mock data
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using mock data for development');
+      return {
+        messages: [
+          {
+            id: crypto.randomUUID(),
+            sender_type: 'assistant',
+            sender_name: 'PlannerAgent',
+            content: {
+              type: 'text',
+              text: `I understand you're asking about "${message}". Let me help you with that!`,
+            },
+            timestamp: new Date(),
+            message: `I understand you're asking about "${message}". Let me help you with that!`,
+          },
+        ],
+        session_id: sessionId || crypto.randomUUID(),
+      };
+    }
+    
     throw error;
   }
 };

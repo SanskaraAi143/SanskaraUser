@@ -1,5 +1,6 @@
 
 import { supabase } from '../supabase/config';
+import { auth } from '../firebase/config';
 
 export interface Vendor {
   id: string;
@@ -26,12 +27,58 @@ export interface Vendor {
   portfolioImageUrls: string[];
 }
 
+// Get user ID from current auth
+const getCurrentUserId = async () => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+  
+  // Get internal user_id from Supabase based on firebase_uid
+  const { data, error } = await supabase
+    .from('users')
+    .select('user_id')
+    .eq('firebase_uid', user.uid)
+    .single();
+    
+  if (error) throw error;
+  return data.user_id;
+};
+
 export const getVendorRecommendations = async (
   category: string,
   location: string,
   budget?: number
 ): Promise<Vendor[]> => {
   try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    
+    // If API_BASE_URL is set, try to use the backend API first
+    if (API_BASE_URL) {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(`${API_BASE_URL}/vendors/recommend`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+          // Add query parameters
+          // Use URLSearchParams to handle undefined values
+          body: JSON.stringify({ category, location, budget }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (apiError) {
+        console.error('Error calling backend API, falling back to Supabase:', apiError);
+      }
+    }
+    
+    // Fallback to direct Supabase query if API fails or isn't configured
     let query = supabase
       .from('vendors')
       .select('*')
@@ -73,6 +120,33 @@ export const getVendorRecommendations = async (
 
 export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
   try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    
+    // If API_BASE_URL is set, try to use the backend API first
+    if (API_BASE_URL) {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (apiError) {
+        console.error('Error calling backend API, falling back to Supabase:', apiError);
+      }
+    }
+    
+    // Fallback to direct Supabase query
     const { data, error } = await supabase
       .from('vendors')
       .select('*')
@@ -102,17 +176,7 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
 
 export const getUserVendors = async (): Promise<any[]> => {
   try {
-    // Get the current user's ID from Supabase
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    
-    const { data: userIdData, error: userIdError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('firebase_uid', userData.user.id)
-      .single();
-      
-    if (userIdError) throw userIdError;
+    const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
       .from('user_vendors')
@@ -127,7 +191,7 @@ export const getUserVendors = async (): Promise<any[]> => {
         linked_vendor_id,
         vendors(*)
       `)
-      .eq('user_id', userIdData.user_id);
+      .eq('user_id', userId);
       
     if (error) throw error;
     

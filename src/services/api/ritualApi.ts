@@ -1,5 +1,6 @@
 
 import { supabase } from '../supabase/config';
+import { auth } from '../firebase/config';
 
 export interface RitualInfo {
   id: string;
@@ -12,8 +13,41 @@ export interface RitualInfo {
   category: string;
 }
 
+// Get API base URL
+const getApiBaseUrl = () => {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  return apiBaseUrl;
+};
+
 export const getRitualInformation = async (ritualName: string): Promise<RitualInfo> => {
   try {
+    const apiBaseUrl = getApiBaseUrl();
+    
+    // If API_BASE_URL is set, try to use the backend API first
+    if (apiBaseUrl) {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(`${apiBaseUrl}/rituals/${encodeURIComponent(ritualName)}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (apiError) {
+        console.error('Error calling backend API, falling back to Supabase:', apiError);
+      }
+    }
+    
+    // Fallback to direct Supabase query
     const { data, error } = await supabase
       .from('rituals')
       .select('*')
@@ -40,6 +74,33 @@ export const getRitualInformation = async (ritualName: string): Promise<RitualIn
 
 export const getSuggestedRituals = async (tradition: string): Promise<RitualInfo[]> => {
   try {
+    const apiBaseUrl = getApiBaseUrl();
+    
+    // If API_BASE_URL is set, try to use the backend API first
+    if (apiBaseUrl) {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(`${apiBaseUrl}/rituals/suggested?tradition=${encodeURIComponent(tradition)}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (apiError) {
+        console.error('Error calling backend API, falling back to Supabase:', apiError);
+      }
+    }
+    
+    // Fallback to direct Supabase query
     const { data, error } = await supabase
       .from('rituals')
       .select('*')
@@ -66,6 +127,33 @@ export const getSuggestedRituals = async (tradition: string): Promise<RitualInfo
 
 export const searchRituals = async (query: string): Promise<RitualInfo[]> => {
   try {
+    const apiBaseUrl = getApiBaseUrl();
+    
+    // If API_BASE_URL is set, try to use the backend API first
+    if (apiBaseUrl) {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(`${apiBaseUrl}/rituals/search?query=${encodeURIComponent(query)}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (apiError) {
+        console.error('Error calling backend API, falling back to Supabase:', apiError);
+      }
+    }
+    
+    // Fallback to direct Supabase query
     const { data, error } = await supabase
       .from('rituals')
       .select('*')
