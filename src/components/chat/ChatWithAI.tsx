@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, ArrowDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -19,10 +18,10 @@ interface ChatMessage {
 }
 
 // Initial welcome message
-const initialMessages = [
+const initialMessages: ChatMessage[] = [
   {
     id: 1,
-    role: 'bot',
+    role: 'bot' as const,
     content: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
     timestamp: new Date().toISOString(),
   }
@@ -68,7 +67,7 @@ const ChatWithAI = () => {
           
           if (chatMessages && chatMessages.length > 0) {
             // Convert the database messages to our format
-            const formattedMessages = chatMessages.map((msg: any) => ({
+            const formattedMessages: ChatMessage[] = chatMessages.map((msg: any) => ({
               id: msg.message_id,
               role: msg.sender_type === 'user' ? 'user' : 'bot',
               content: typeof msg.content === 'object' ? msg.content.text : msg.content,
@@ -137,9 +136,9 @@ const ChatWithAI = () => {
     if (input.trim() === '' || !user || !sessionId) return;
     
     // Add user message to UI
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: Date.now(),
-      role: 'user' as const,
+      role: 'user',
       content: input.trim(),
       timestamp: new Date().toISOString(),
     };
@@ -182,9 +181,9 @@ const ChatWithAI = () => {
       
       if (response.data && response.data.messages) {
         // Process and add bot response to UI
-        const botResponse = {
+        const botResponse: ChatMessage = {
           id: Date.now() + 1,
-          role: 'bot' as const,
+          role: 'bot',
           content: response.data.messages[0].content.text || response.data.messages[0].content,
           timestamp: new Date().toISOString(),
         };
@@ -208,9 +207,9 @@ const ChatWithAI = () => {
       console.error("Error getting AI response:", error);
       
       // Add fallback error message
-      const errorMessage = {
+      const errorMessage: ChatMessage = {
         id: Date.now() + 1,
-        role: 'bot' as const,
+        role: 'bot',
         content: "I'm sorry, but I couldn't process your request right now. Please try again later.",
         timestamp: new Date().toISOString(),
       };
