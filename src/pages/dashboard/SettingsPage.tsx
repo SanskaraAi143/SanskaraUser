@@ -1,27 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { AlertTriangle, Bell, Lock, LogOut, Moon, Shield, User, Loader2 } from "lucide-react";
+import { AlertTriangle, Bell, Lock, LogOut, Moon, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/services/supabase/config";
 
 const SettingsPage = () => {
-  const { user, signOut } = useAuth();
-  const [isSaving, setIsSaving] = useState(false);
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    taskReminders: true,
-    vendorUpdates: true,
-    dataCollection: true,
-    thirdPartySharing: false,
-    darkMode: false,
-  });
+  const { signOut } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -31,42 +21,11 @@ const SettingsPage = () => {
     }
   };
 
-  const handleToggleChange = (key: keyof typeof preferences) => {
-    setPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
-
-  const handleSaveChanges = async () => {
-    if (!user?.id) return;
-    
-    setIsSaving(true);
-    try {
-      // Save preferences to user's record in the database
-      const { error } = await supabase
-        .from('users')
-        .update({
-          preferences: preferences
-        })
-        .eq('user_id', user.id);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Settings saved",
-        description: "Your preferences have been updated successfully.",
-      });
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-      toast({
-        variant: "destructive",
-        title: "Save failed",
-        description: "There was a problem saving your preferences.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSaveChanges = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated successfully.",
+    });
   };
 
   return (
@@ -90,17 +49,14 @@ const SettingsPage = () => {
           <CardContent className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="you@example.com" value={user?.email || ""} disabled />
+              <Input id="email" type="email" placeholder="you@example.com" />
               <p className="text-sm text-muted-foreground">
                 We'll use this email to contact you about your wedding planning.
               </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="name">Display Name</Label>
-              <Input id="name" placeholder="Your Name" value={user?.name || ""} disabled />
-              <p className="text-sm text-muted-foreground">
-                To change your profile details, go to the Profile page.
-              </p>
+              <Input id="name" placeholder="Your Name" />
             </div>
           </CardContent>
         </Card>
@@ -121,11 +77,7 @@ const SettingsPage = () => {
                   Receive important updates via email.
                 </p>
               </div>
-              <Switch 
-                id="email-notifications" 
-                checked={preferences.emailNotifications}
-                onCheckedChange={() => handleToggleChange('emailNotifications')}
-              />
+              <Switch id="email-notifications" defaultChecked />
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -135,11 +87,7 @@ const SettingsPage = () => {
                   Get reminded of upcoming tasks and deadlines.
                 </p>
               </div>
-              <Switch 
-                id="task-reminders" 
-                checked={preferences.taskReminders}
-                onCheckedChange={() => handleToggleChange('taskReminders')}
-              />
+              <Switch id="task-reminders" defaultChecked />
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -149,11 +97,7 @@ const SettingsPage = () => {
                   Notifications when vendors respond or update details.
                 </p>
               </div>
-              <Switch 
-                id="vendor-updates" 
-                checked={preferences.vendorUpdates}
-                onCheckedChange={() => handleToggleChange('vendorUpdates')}
-              />
+              <Switch id="vendor-updates" defaultChecked />
             </div>
           </CardContent>
         </Card>
@@ -174,11 +118,7 @@ const SettingsPage = () => {
                   Allow us to collect anonymous usage data to improve the app.
                 </p>
               </div>
-              <Switch 
-                id="data-collection" 
-                checked={preferences.dataCollection}
-                onCheckedChange={() => handleToggleChange('dataCollection')}
-              />
+              <Switch id="data-collection" defaultChecked />
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -188,11 +128,7 @@ const SettingsPage = () => {
                   Share your information with trusted vendors.
                 </p>
               </div>
-              <Switch 
-                id="third-party" 
-                checked={preferences.thirdPartySharing}
-                onCheckedChange={() => handleToggleChange('thirdPartySharing')}
-              />
+              <Switch id="third-party" />
             </div>
           </CardContent>
         </Card>
@@ -206,24 +142,11 @@ const SettingsPage = () => {
             <CardDescription>Manage your account security.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={async () => {
-              const { error } = await supabase.auth.resetPasswordForEmail(user?.email || '', {
-                redirectTo: `${window.location.origin}/reset-password`,
-              });
-              if (!error) {
-                toast({
-                  title: "Password reset email sent",
-                  description: "Check your email for the password reset link"
-                });
-              } else {
-                toast({
-                  variant: "destructive",
-                  title: "Failed to send password reset email",
-                  description: error.message
-                });
-              }
-            }}>
+            <Button variant="outline" className="w-full">
               Change Password
+            </Button>
+            <Button variant="outline" className="w-full">
+              Two-Factor Authentication
             </Button>
           </CardContent>
         </Card>
@@ -244,11 +167,7 @@ const SettingsPage = () => {
                   Switch between light and dark mode.
                 </p>
               </div>
-              <Switch 
-                id="dark-mode" 
-                checked={preferences.darkMode}
-                onCheckedChange={() => handleToggleChange('darkMode')}
-              />
+              <Switch id="dark-mode" />
             </div>
           </CardContent>
         </Card>
@@ -264,30 +183,7 @@ const SettingsPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              variant="destructive" 
-              className="w-full"
-              onClick={async () => {
-                const confirmDelete = window.confirm("Are you sure you want to delete your account? This cannot be undone.");
-                if (confirmDelete) {
-                  const { error } = await supabase.auth.admin.deleteUser(user?.id || '');
-                  if (!error) {
-                    toast({
-                      title: "Account deleted",
-                      description: "Your account has been permanently deleted"
-                    });
-                    // Redirect to home page after account deletion
-                    window.location.href = "/";
-                  } else {
-                    toast({
-                      variant: "destructive",
-                      title: "Failed to delete account",
-                      description: error.message
-                    });
-                  }
-                }
-              }}
-            >
+            <Button variant="destructive" className="w-full">
               Delete Account
             </Button>
             <Button 
@@ -308,19 +204,7 @@ const SettingsPage = () => {
       </div>
 
       <div className="flex justify-end">
-        <Button 
-          onClick={handleSaveChanges}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Save Changes"
-          )}
-        </Button>
+        <Button onClick={handleSaveChanges}>Save Changes</Button>
       </div>
     </div>
   );

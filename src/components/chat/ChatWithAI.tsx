@@ -1,116 +1,27 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, ArrowDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/services/supabase/config";
-import { API_BASE_URL } from "@/services/api";
-import axios from "axios";
 
-// Types for chat messages
-interface ChatMessage {
-  id: number | string;
-  role: 'user' | 'bot';
-  content: string;
-  timestamp: string;
-}
-
-// Initial welcome message
-const initialMessages: ChatMessage[] = [
+// Mock data for the chat
+const initialMessages = [
   {
     id: 1,
-    role: 'bot' as const,
+    role: 'bot',
     content: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
     timestamp: new Date().toISOString(),
   }
 ];
 
 const ChatWithAI = () => {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Fetch or create a chat session when the component loads
-  useEffect(() => {
-    const fetchOrCreateSession = async () => {
-      if (!user) return;
-      
-      try {
-        // Check if there's an active session
-        const { data: sessions, error: fetchError } = await supabase
-          .from('chat_sessions')
-          .select('session_id')
-          .eq('user_id', user.id)
-          .order('last_updated_at', { ascending: false })
-          .limit(1);
-        
-        if (fetchError) throw fetchError;
-        
-        if (sessions && sessions.length > 0) {
-          // Use the most recent session
-          setSessionId(sessions[0].session_id);
-          
-          // Fetch messages for this session
-          const { data: chatMessages, error: messagesError } = await supabase
-            .from('chat_messages')
-            .select('*')
-            .eq('session_id', sessions[0].session_id)
-            .order('timestamp', { ascending: true });
-          
-          if (messagesError) throw messagesError;
-          
-          if (chatMessages && chatMessages.length > 0) {
-            // Convert the database messages to our format
-            const formattedMessages: ChatMessage[] = chatMessages.map((msg: any) => ({
-              id: msg.message_id,
-              role: msg.sender_type === 'user' ? 'user' : 'bot',
-              content: typeof msg.content === 'object' ? msg.content.text : msg.content,
-              timestamp: msg.timestamp,
-            }));
-            
-            setMessages(formattedMessages);
-          }
-        } else {
-          // Create a new session
-          const { data: newSession, error: createError } = await supabase
-            .from('chat_sessions')
-            .insert([
-              { user_id: user.id }
-            ])
-            .select();
-          
-          if (createError) throw createError;
-          
-          if (newSession && newSession.length > 0) {
-            setSessionId(newSession[0].session_id);
-            
-            // Add welcome message to the new session
-            await supabase
-              .from('chat_messages')
-              .insert([
-                { 
-                  session_id: newSession[0].session_id,
-                  sender_type: 'assistant',
-                  sender_name: 'Sanskara',
-                  content: { type: 'text', text: initialMessages[0].content },
-                  timestamp: new Date().toISOString()
-                }
-              ]);
-          }
-        }
-      } catch (error) {
-        console.error("Error managing chat session:", error);
-      }
-    };
-    
-    fetchOrCreateSession();
-  }, [user]);
 
   // Auto scroll to bottom whenever messages change
   useEffect(() => {
@@ -133,11 +44,11 @@ const ChatWithAI = () => {
   };
 
   const handleSendMessage = async () => {
-    if (input.trim() === '' || !user || !sessionId) return;
+    if (input.trim() === '') return;
     
-    // Add user message to UI
-    const userMessage: ChatMessage = {
-      id: Date.now(),
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
       role: 'user',
       content: input.trim(),
       timestamp: new Date().toISOString(),
@@ -146,78 +57,31 @@ const ChatWithAI = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     
-    // Save user message to Supabase
-    try {
-      await supabase
-        .from('chat_messages')
-        .insert([
-          { 
-            session_id: sessionId,
-            sender_type: 'user',
-            sender_name: user.name || 'User',
-            content: { type: 'text', text: userMessage.content },
-            timestamp: userMessage.timestamp
-          }
-        ]);
-        
-      // Update session last_updated_at
-      await supabase
-        .from('chat_sessions')
-        .update({ last_updated_at: new Date().toISOString() })
-        .eq('session_id', sessionId);
-    } catch (error) {
-      console.error("Error saving message:", error);
-    }
-    
     // Simulate bot typing
     setIsTyping(true);
     
-    try {
-      // Send the message to our backend API
-      const response = await axios.post(`${API_BASE_URL}/chat`, {
-        message: userMessage.content,
-        session_id: sessionId
-      });
+    // Simulate response delay
+    setTimeout(() => {
+      const botResponses = [
+        "I'd be happy to help you plan your wedding rituals!",
+        "Here are some popular mandap decoration options for a traditional ceremony.",
+        "For the Sangeet, I recommend these 5 popular songs that guests always enjoy.",
+        "The mehndi ceremony typically occurs 1-2 days before the wedding. Here's a planning checklist.",
+        "I can help you find vendors who specialize in traditional Hindu ceremonies in your area."
+      ];
       
-      if (response.data && response.data.messages) {
-        // Process and add bot response to UI
-        const botResponse: ChatMessage = {
-          id: Date.now() + 1,
-          role: 'bot',
-          content: response.data.messages[0].content.text || response.data.messages[0].content,
-          timestamp: new Date().toISOString(),
-        };
-        
-        setMessages(prev => [...prev, botResponse]);
-        
-        // Save bot message to Supabase
-        await supabase
-          .from('chat_messages')
-          .insert([
-            { 
-              session_id: sessionId,
-              sender_type: 'assistant',
-              sender_name: 'Sanskara',
-              content: { type: 'text', text: botResponse.content },
-              timestamp: botResponse.timestamp
-            }
-          ]);
-      }
-    } catch (error) {
-      console.error("Error getting AI response:", error);
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
       
-      // Add fallback error message
-      const errorMessage: ChatMessage = {
-        id: Date.now() + 1,
+      const botMessage = {
+        id: messages.length + 2,
         role: 'bot',
-        content: "I'm sorry, but I couldn't process your request right now. Please try again later.",
+        content: randomResponse,
         timestamp: new Date().toISOString(),
       };
       
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
+      setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -314,13 +178,12 @@ const ChatWithAI = () => {
             <Button 
               onClick={handleSendMessage} 
               className="bg-wedding-red hover:bg-wedding-deepred"
-              disabled={!user}
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center">
-            {user ? "Ask me about Hindu wedding traditions, rituals, or planning help!" : "Please sign in to chat with Sanskara AI"}
+            Ask me about Hindu wedding traditions, rituals, or planning help!
           </p>
         </div>
       </div>

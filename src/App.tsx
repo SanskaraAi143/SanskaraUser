@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -13,7 +12,6 @@ import BudgetPage from './pages/dashboard/BudgetPage';
 import GuestsPage from './pages/dashboard/GuestsPage';
 import VendorsPage from './pages/dashboard/VendorsPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
-import AuthCallback from './pages/auth/AuthCallback';
 import NotFound from './pages/NotFound';
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 import { Toaster } from './components/ui/toaster';
@@ -24,7 +22,6 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard" element={<MobileDashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="profile" element={<ProfilePage />} />
