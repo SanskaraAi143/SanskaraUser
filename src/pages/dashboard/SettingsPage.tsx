@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, Bell, Lock, LogOut, Moon, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from '@/services/supabase/config';
 
 const SettingsPage = () => {
   const { signOut } = useAuth();
@@ -19,36 +18,6 @@ const SettingsPage = () => {
       await signOut();
     } catch (error) {
       console.error("Error signing out:", error);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    try {
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (error) throw error;
-      
-      if (data.user && data.user.email) {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-          data.user.email,
-          {
-            redirectTo: `${window.location.origin}/dashboard/settings`,
-          }
-        );
-        
-        if (resetError) throw resetError;
-        
-        toast({
-          title: "Password reset email sent",
-          description: "Check your email for a link to reset your password.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Password reset failed",
-        description: error.message || "There was a problem sending the password reset email.",
-      });
     }
   };
 
@@ -173,7 +142,7 @@ const SettingsPage = () => {
             <CardDescription>Manage your account security.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleResetPassword}>
+            <Button variant="outline" className="w-full">
               Change Password
             </Button>
             <Button variant="outline" className="w-full">

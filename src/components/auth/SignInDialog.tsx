@@ -71,10 +71,10 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
     setIsGoogleSubmitting(true);
     try {
       await signInWithGoogle();
-      // Note: For Supabase OAuth, this will redirect the user away from the site
-      // The dialog will be closed automatically when they return
+      setOpen(false);
     } catch (error) {
       console.error("Google sign in error:", error);
+    } finally {
       setIsGoogleSubmitting(false);
     }
   };
