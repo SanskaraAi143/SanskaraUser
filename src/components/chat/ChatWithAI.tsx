@@ -5,28 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChatMessage, sendChatMessage } from '@/services/api/chatApi';
 
-// Initial bot greeting message
-const initialMessages: ChatMessage[] = [
+// Mock data for the chat
+const initialMessages = [
   {
-    id: '1',
-    sender_type: 'assistant',
-    sender_name: 'PlannerAgent',
-    content: {
-      type: 'text',
-      text: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?"
-    },
-    timestamp: new Date(),
-    message: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?"
+    id: 1,
+    role: 'bot',
+    content: "Namaste! I'm Sanskara, your AI Hindu Wedding assistant. How can I help with your wedding planning today?",
+    timestamp: new Date().toISOString(),
   }
 ];
 
 const ChatWithAI = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,56 +46,42 @@ const ChatWithAI = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
     
-    // Add user message to chat
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      sender_type: 'user',
-      sender_name: 'user',
-      content: {
-        type: 'text',
-        text: input.trim()
-      },
-      timestamp: new Date(),
-      message: input.trim()
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date().toISOString(),
     };
     
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     
-    // Show typing indicator
+    // Simulate bot typing
     setIsTyping(true);
     
-    try {
-      // Send to API
-      const response = await sendChatMessage(input.trim(), sessionId);
+    // Simulate response delay
+    setTimeout(() => {
+      const botResponses = [
+        "I'd be happy to help you plan your wedding rituals!",
+        "Here are some popular mandap decoration options for a traditional ceremony.",
+        "For the Sangeet, I recommend these 5 popular songs that guests always enjoy.",
+        "The mehndi ceremony typically occurs 1-2 days before the wedding. Here's a planning checklist.",
+        "I can help you find vendors who specialize in traditional Hindu ceremonies in your area."
+      ];
       
-      // Store session ID for future messages
-      if (response.session_id) {
-        setSessionId(response.session_id);
-      }
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
       
-      // Add AI responses to chat
-      setMessages(prev => [...prev, ...response.messages]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      
-      // Add error message
-      const errorMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        sender_type: 'system',
-        sender_name: 'system',
-        content: {
-          type: 'text',
-          text: "I'm sorry, there was an error processing your request. Please try again later."
-        },
-        timestamp: new Date(),
-        message: "I'm sorry, there was an error processing your request. Please try again later."
+      const botMessage = {
+        id: messages.length + 2,
+        role: 'bot',
+        content: randomResponse,
+        timestamp: new Date().toISOString(),
       };
       
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
+      setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -119,40 +98,32 @@ const ChatWithAI = () => {
               <div
                 key={message.id}
                 className={`flex ${
-                  message.sender_type === 'user' ? 'justify-end' : 'justify-start'
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 <div
                   className={`flex items-start gap-2.5 max-w-[80%] ${
-                    message.sender_type === 'user' ? 'flex-row-reverse' : ''
+                    message.role === 'user' ? 'flex-row-reverse' : ''
                   }`}
                 >
-                  <Avatar className={message.sender_type === 'user' ? 'bg-wedding-orange/20' : 'bg-wedding-red/20'}>
+                  <Avatar className={message.role === 'user' ? 'bg-wedding-orange/20' : 'bg-wedding-red/20'}>
                     <AvatarFallback>
-                      {message.sender_type === 'user' ? <User className="text-wedding-orange" /> : <Bot className="text-wedding-red" />}
+                      {message.role === 'user' ? <User className="text-wedding-orange" /> : <Bot className="text-wedding-red" />}
                     </AvatarFallback>
                   </Avatar>
                   <div
                     className={`p-3 rounded-lg ${
-                      message.sender_type === 'user'
+                      message.role === 'user'
                         ? 'bg-wedding-orange/10 text-gray-800'
                         : 'bg-wedding-red/10 text-gray-800'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">
-                      {message.content.type === 'text' ? message.content.text : message.message}
-                    </p>
+                    <p className="text-sm">{message.content}</p>
                     <p className="text-[10px] text-gray-500 mt-1">
-                      {message.timestamp instanceof Date 
-                        ? message.timestamp.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : new Date(message.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                      }
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </p>
                   </div>
                 </div>
