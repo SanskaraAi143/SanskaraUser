@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { updateProfile } from "firebase/auth";
-import { auth } from "@/services/firebase/config";
+import { supabase } from "@/services/supabase/config";
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
 
 const ProfilePage = () => {
@@ -16,37 +15,58 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [creationDate, setCreationDate] = useState<string>("N/A");
+
+  // Fetch user metadata on component mount
+  useEffect(() => {
+    const fetchUserMetadata = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error("Error fetching user:", error);
+          return;
+        }
+        
+        if (user) {
+          const createdAt = user.created_at;
+          if (createdAt) {
+            setCreationDate(new Date(createdAt).toLocaleDateString());
+          }
+        }
+      } catch (error) {
+        console.error("Error in fetchUserMetadata:", error);
+      }
+    };
+
+    fetchUserMetadata();
+  }, []);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) return;
-
     setIsLoading(true);
+    
     try {
-      await updateProfile(auth.currentUser, {
-        displayName: displayName,
+      const { data, error } = await supabase.auth.updateUser({
+        data: { name: displayName }
       });
+
+      if (error) throw error;
 
       toast({
         title: "Profile Updated",
         description: "Your profile information has been successfully updated.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: "There was a problem updating your profile information.",
+        description: error.message || "There was a problem updating your profile information.",
       });
       console.error("Error updating profile:", error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Calculate when the account was created
-  const formatAccountCreationDate = () => {
-    if (!auth.currentUser?.metadata.creationTime) return "N/A";
-    return new Date(auth.currentUser.metadata.creationTime).toLocaleDateString();
   };
 
   return (
@@ -78,7 +98,7 @@ const ProfilePage = () => {
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-2 text-gray-500" />
               <span>Account created: </span>
-              <span className="ml-auto font-medium">{formatAccountCreationDate()}</span>
+              <span className="ml-auto font-medium">{creationDate}</span>
             </div>
           </CardContent>
           <CardFooter>

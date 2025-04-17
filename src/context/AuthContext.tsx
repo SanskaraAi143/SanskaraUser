@@ -1,15 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  updateProfile,
-  User as FirebaseUser
-} from "firebase/auth";
-import { auth, googleProvider } from "@/services/firebase/config";
+import { supabase } from "@/services/supabase/config";
+import { Session, User as SupabaseUser } from "@supabase/supabase-js";
 import { toast } from "@/hooks/use-toast";
 
 // Types for our authentication context
@@ -46,39 +38,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Transform Supabase user data to our User type
+  const formatUser = (session: Session | null): User | null => {
+    if (!session?.user) return null;
+    
+    const supaUser = session.user;
+    return {
+      id: supaUser.id,
+      email: supaUser.email,
+      name: supaUser.user_metadata?.name || supaUser.user_metadata?.full_name,
+      photoURL: supaUser.user_metadata?.avatar_url,
+    };
+  };
+
   // Effect to initialize auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        // User is signed in
-        setUser({
-          id: firebaseUser.uid,
-          email: firebaseUser.email,
-          name: firebaseUser.displayName || undefined,
-          photoURL: firebaseUser.photoURL || undefined,
-        });
-      } else {
-        // User is signed out
-        setUser(null);
+    // Set initial session data
+    const initializeAuth = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error getting session:", error);
+        setLoading(false);
+        return;
       }
+      
+      setUser(formatUser(data.session));
       setLoading(false);
-    });
+    };
+
+    initializeAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(formatUser(session));
+        setLoading(false);
+      }
+    );
 
     // Cleanup subscription on unmount
-    return () => unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign up function
   const signUp = async (email: string, password: string, name: string) => {
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      
-      // Update the user's profile with their name
-      await updateProfile(firebaseUser, {
-        displayName: name
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
       });
+
+      if (error) throw error;
       
       toast({
         title: "Account created successfully",
@@ -101,7 +119,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
       toast({
         title: "Signed in successfully",
         description: "Welcome back!",
@@ -123,12 +147,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      toast({
-        title: "Signed in successfully",
-        description: `Welcome, ${user.displayName || "User"}!`,
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
       });
+
+      if (error) throw error;
+      
+      // Note: For OAuth with redirect flow, the success toast will be shown
+      // when the user returns to the app after authentication
     } catch (error: any) {
       const errorMessage = error.message || "An unknown error occurred";
       toast({
@@ -136,9 +165,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Google sign in failed",
         description: errorMessage,
       });
-      throw error;
-    } finally {
       setLoading(false);
+      throw error;
     }
   };
 
@@ -146,7 +174,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      await firebaseSignOut(auth);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
       toast({
         title: "Signed out successfully",
         description: "You have been logged out.",
