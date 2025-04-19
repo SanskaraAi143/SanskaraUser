@@ -1,6 +1,6 @@
 
 import { supabase } from '../supabase/config';
-import { auth } from '../firebase/config';
+
 
 export interface Vendor {
   id: string;
@@ -29,16 +29,14 @@ export interface Vendor {
 
 // Get user ID from current auth
 const getCurrentUserId = async () => {
-  const user = auth.currentUser;
-  if (!user) throw new Error('User not authenticated');
-  
-  // Get internal user_id from Supabase based on firebase_uid
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) throw new Error('User not authenticated');
+  // Get internal user_id from Supabase based on supabase user id
   const { data, error } = await supabase
     .from('users')
     .select('user_id')
-    .eq('firebase_uid', user.uid)
+    .eq('supabase_auth_uid', userData.user.id)
     .single();
-    
   if (error) throw error;
   return data.user_id;
 };
@@ -54,14 +52,13 @@ export const getVendorRecommendations = async (
     // If API_BASE_URL is set, try to use the backend API first
     if (API_BASE_URL) {
       try {
-        const user = auth.currentUser;
-        if (!user) throw new Error('User not authenticated');
-        const idToken = await user.getIdToken();
-        
+        // If you need to send a Supabase access token, get it here
+        // const { data: { session } } = await supabase.auth.getSession();
+        // const accessToken = session?.access_token;
         const response = await fetch(`${API_BASE_URL}/vendors/recommend`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${idToken}`,
+            // 'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
           // Add query parameters
@@ -82,8 +79,10 @@ export const getVendorRecommendations = async (
     let query = supabase
       .from('vendors')
       .select('*')
-      .eq('vendor_category', category)
       .eq('is_active', true);
+    if (category) {
+      query = query.eq('vendor_category', category);
+    }
       
     // Add location filter if provided
     if (location) {
@@ -95,7 +94,7 @@ export const getVendorRecommendations = async (
       query = query.lte('pricing_range->min', budget);
     }
     
-    const { data, error } = await query.limit(10);
+    const { data, error } = await query;
     
     if (error) throw error;
     
@@ -125,14 +124,13 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
     // If API_BASE_URL is set, try to use the backend API first
     if (API_BASE_URL) {
       try {
-        const user = auth.currentUser;
-        if (!user) throw new Error('User not authenticated');
-        const idToken = await user.getIdToken();
-        
+        // If you need to send a Supabase access token, get it here
+        // const { data: { session } } = await supabase.auth.getSession();
+        // const accessToken = session?.access_token;
         const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${idToken}`,
+            // 'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
         });
@@ -172,6 +170,37 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
     console.error('Error fetching vendor details:', error);
     throw error;
   }
+};
+
+export const addVendorToUser = async (vendor: any) => {
+  const userId = await getCurrentUserId();
+  // Prefer vendor.vendor_id for global vendors, fallback to vendor.id
+  const linked_vendor_id = vendor.vendor_id || vendor.id;
+  const { data, error } = await supabase
+    .from('user_vendors')
+    .insert([
+      {
+        user_id: userId,
+        vendor_name: vendor.name || vendor.vendor_name || '',
+        vendor_category: vendor.category || vendor.vendor_category || '',
+        contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
+        status: 'recommended',
+        linked_vendor_id,
+      },
+    ])
+    .select();
+  if (error) throw error;
+  return data;
+};
+
+export const removeVendorFromUser = async (userVendorId: string) => {
+  // Always delete by user_vendor_id (UUID primary key)
+  const { error } = await supabase
+    .from('user_vendors')
+    .delete()
+    .eq('user_vendor_id', userVendorId);
+  if (error) throw error;
+  return true;
 };
 
 export const getUserVendors = async (): Promise<any[]> => {

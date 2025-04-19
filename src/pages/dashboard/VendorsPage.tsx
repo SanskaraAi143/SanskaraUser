@@ -1,5 +1,5 @@
 
-import React, { useState, type ChangeEvent } from "react";
+import React, { useState, useEffect, type ChangeEvent } from "react";
 import { 
   Card, 
   CardContent, 
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { getUserVendors } from "@/services/api/vendorApi";
 
 interface Vendor {
   id: string;
@@ -34,75 +35,95 @@ interface Vendor {
   email: string;
   price: string;
   bookingDate?: string;
-  status: 'contacted' | 'booked' | 'pending' | 'confirmed';
+  status: 'recommended' | 'contacted' | 'booked' | 'pending' | 'completed';
   notes?: string;
+  linkedVendor?: any; // Allow linkedVendor for type checks
 }
 
 const VendorsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  
-  // Sample data - in a real application, this would come from Firebase or an API
-  const [vendors, setVendors] = useState<Vendor[]>([
-    {
-      id: "1",
-      name: "Royal Palace",
-      category: "Venue",
-      location: "Mumbai, Maharashtra",
-      rating: 4.8,
-      contact: "+91 9876543210",
-      email: "info@royalpalace.com",
-      price: "₹150,000-₹300,000",
-      bookingDate: "2025-07-15",
-      status: "confirmed",
-      notes: "Deposit paid. Need to confirm menu by May."
-    },
-    {
-      id: "2",
-      name: "Divine Caterers",
-      category: "Catering",
-      location: "Jaipur, Rajasthan",
-      rating: 4.5,
-      contact: "+91 9876543211",
-      email: "bookings@divinecaterers.com",
-      price: "₹1,500 per plate",
-      status: "contacted",
-      notes: "Waiting for quote on vegetarian options."
-    },
-    {
-      id: "3",
-      name: "Lens Story",
-      category: "Photography",
-      location: "Delhi, Delhi",
-      rating: 4.7,
-      contact: "+91 9876543212",
-      email: "capture@lensstory.com",
-      price: "₹65,000",
-      status: "pending",
-      notes: ""
-    },
-    {
-      id: "4",
-      name: "Flower Dreams",
-      category: "Decoration",
-      location: "Bengaluru, Karnataka",
-      rating: 4.6,
-      contact: "+91 9876543213",
-      email: "info@flowerdreams.com",
-      price: "₹85,000",
-      status: "booked",
-      notes: "Confirmed red and gold theme."
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [allVendors, setAllVendors] = useState<Vendor[]>([]); // For global vendors
+  const [showAllVendors, setShowAllVendors] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    getUserVendors()
+      .then((data) => {
+        const mapped = data.map((item: any) => {
+          const vendor = item.linkedVendor || {};
+          // Ensure status is one of allowed values
+          let status: Vendor['status'] = 'pending';
+          if (['recommended', 'contacted', 'booked', 'pending', 'completed'].includes(item.status)) {
+            status = item.status;
+          }
+          return {
+            id: item.id,
+            name: item.name || vendor.vendor_name || '',
+            category: item.category || vendor.vendor_category || '',
+            location: vendor.address?.city && vendor.address?.state ? `${vendor.address.city}, ${vendor.address.state}` : vendor.address?.fullAddress || '',
+            rating: vendor.rating || 0,
+            contact: item.contactInfo || vendor.phone_number || '',
+            email: vendor.contact_email || '',
+            price: vendor.pricing_range ? `${vendor.pricing_range.min ? '₹' + vendor.pricing_range.min.toLocaleString() : ''}${vendor.pricing_range.max ? '-₹' + vendor.pricing_range.max.toLocaleString() : ''} ${vendor.pricing_range.unit || ''}` : '',
+            bookingDate: item.bookedDate || '',
+            status,
+            notes: item.notes || '',
+            linkedVendor: item.linkedVendor,
+          };
+        });
+        setVendors(mapped);
+        setError(null);
+      })
+      .catch((e) => {
+        setError(e.message || 'Failed to load vendors');
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Fetch all vendors for 'View All Vendors' mode
+  useEffect(() => {
+    if (showAllVendors && allVendors.length === 0) {
+      setLoading(true);
+      import('@/services/api/vendorApi').then(({ getVendorRecommendations }) => {
+        getVendorRecommendations('', '', undefined)
+          .then((data: any[]) => {
+            const mapped = data.map((vendor: any) => ({
+              id: vendor.id || vendor.vendor_id || '',
+              name: vendor.name || vendor.vendor_name || '',
+              category: vendor.category || vendor.vendor_category || '',
+              location: vendor.address?.city && vendor.address?.state ? `${vendor.address.city}, ${vendor.address.state}` : vendor.address?.fullAddress || '',
+              rating: vendor.rating || 0,
+              contact: vendor.phoneNumber || vendor.phone_number || '',
+              email: vendor.contactEmail || vendor.contact_email || '',
+              price: vendor.pricingRange ? `${vendor.pricingRange.min ? '₹' + vendor.pricingRange.min.toLocaleString() : ''}${vendor.pricingRange.max ? '-₹' + vendor.pricingRange.max.toLocaleString() : ''} ${vendor.pricingRange.unit || ''}` : '',
+              bookingDate: '',
+              status: '',
+              notes: vendor.description || '',
+            }));
+            setAllVendors(mapped);
+            setError(null);
+          })
+          .catch((e: any) => {
+            setError(e.message || 'Failed to load all vendors');
+          })
+          .finally(() => setLoading(false));
+      });
     }
-  ]);
+  }, [showAllVendors, allVendors.length]);
 
   const filteredVendors = vendors.filter(vendor => {
     if (activeTab !== "all" && vendor.status !== activeTab) {
       return false;
     }
-    
-    return vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           vendor.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           vendor.location.toLowerCase().includes(searchTerm.toLowerCase());
+    return (
+      vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
   
   const handleAddVendor = () => {
@@ -121,10 +142,13 @@ const VendorsPage = () => {
             Manage and track all your wedding vendors in one place.
           </p>
         </div>
-        <Button onClick={handleAddVendor}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Vendor
-        </Button>
+        <button
+          className="px-4 py-2 rounded bg-wedding-red text-white hover:bg-wedding-dark-red transition disabled:opacity-60"
+          onClick={() => setShowAllVendors((v) => !v)}
+        >
+          {showAllVendors ? 'View My Vendors' : 'View All Vendors'}
+        </button>
+
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start">
@@ -134,25 +158,40 @@ const VendorsPage = () => {
             <Input
               placeholder="Search vendors..."
               value={searchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full pl-8"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
             />
           </div>
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 sm:w-fit">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="contacted">Contacted</TabsTrigger>
-            <TabsTrigger value="booked">Booked</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {!showAllVendors && (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full flex gap-2">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="contacted">Contacted</TabsTrigger>
+              <TabsTrigger value="booked">Booked</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVendors.length > 0 ? (
-          filteredVendors.map((vendor) => (
+        {loading ? (
+          <div className="col-span-full flex justify-center items-center h-40 bg-gray-50 rounded-lg">
+            <span>Loading...</span>
+          </div>
+        ) : error ? (
+          <div className="col-span-full flex justify-center items-center h-40 bg-red-50 rounded-lg">
+            <span className="text-red-600">{error}</span>
+          </div>
+        ) : (showAllVendors ? allVendors : filteredVendors).length > 0 ? (
+          (showAllVendors ? allVendors : filteredVendors).filter(vendor => {
+            return (
+              vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }).map((vendor) => (
             <Card key={vendor.id} className="overflow-hidden">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
@@ -166,16 +205,18 @@ const VendorsPage = () => {
                       </div>
                     </CardDescription>
                   </div>
-                  <Badge 
-                    className={`
-                      ${vendor.status === 'confirmed' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''}
-                      ${vendor.status === 'booked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' : ''}
-                      ${vendor.status === 'contacted' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' : ''}
-                      ${vendor.status === 'pending' ? 'bg-gray-100 text-gray-800 hover:bg-gray-100' : ''}
-                    `}
-                  >
-                    {vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
-                  </Badge>
+                  {!showAllVendors && (
+                    <Badge
+                      className={`
+                        ${vendor.status === 'completed' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''}
+                        ${vendor.status === 'booked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' : ''}
+                        ${vendor.status === 'contacted' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' : ''}
+                        ${vendor.status === 'pending' ? 'bg-gray-100 text-gray-800 hover:bg-gray-100' : ''}
+                      `}
+                    >
+                      {vendor.status === 'completed' ? 'Completed' : vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="pb-2">
@@ -209,14 +250,58 @@ const VendorsPage = () => {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between pt-2">
-                <Button variant="outline" size="sm">
-                  Contact
-                </Button>
-                <Button variant="outline" size="sm">
-                  Update
-                </Button>
-              </CardFooter>
+              {showAllVendors ? (
+                <CardFooter className="flex justify-end pt-2">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    disabled={vendors.some((v) => v.linkedVendor?.vendor_id === vendor.id || v.id === vendor.id)}
+                    onClick={async () => {
+                      try {
+                        // Dynamically import addVendorToUser and fallback if not found
+                        const api = await import('@/services/api/vendorApi');
+                        if (typeof api.addVendorToUser === 'function') {
+                          await api.addVendorToUser(vendor);
+                          window.location.reload();
+                        } else {
+                          throw new Error('addVendorToUser not found');
+                        }
+                      } catch (err) {
+                        if (typeof toast === 'function') toast({ title: 'Error', description: 'Could not add vendor' });
+                      }
+                    }}
+                  >
+                    {vendors.some((v) => v.linkedVendor?.vendor_id === vendor.id || v.id === vendor.id)
+                      ? 'Added'
+                      : 'Add to My Vendors'}
+                  </Button>
+                </CardFooter>
+              ) : (
+                <CardFooter className="flex justify-between pt-2">
+                  <Button variant="outline" size="sm">
+                    Contact
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const api = await import('@/services/api/vendorApi');
+                        await api.removeVendorFromUser(vendor.id); // vendor.id is user_vendor_id for user vendors
+                        if (typeof toast === 'function') toast({ title: 'Removed', description: 'Vendor removed from your list.' });
+                        // Instantly remove from UI
+                        setVendors((prev) => prev.filter((v) => v.id !== vendor.id));
+                      } catch (err) {
+                        if (typeof toast === 'function') toast({ title: 'Error', description: 'Could not remove vendor' });
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </CardFooter>
+              )}
             </Card>
           ))
         ) : (

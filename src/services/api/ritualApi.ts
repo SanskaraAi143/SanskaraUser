@@ -1,6 +1,6 @@
 
 import { supabase } from '../supabase/config';
-import { auth } from '../firebase/config';
+
 
 export interface RitualInfo {
   id: string;
