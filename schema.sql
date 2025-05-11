@@ -15,11 +15,11 @@ CREATE TABLE users (
     wedding_date DATE,
     wedding_location TEXT,
     wedding_tradition TEXT,
-    preferences JSONB -- { "budget_min": 5000, "budget_max": 10000, ... }
+    preferences JSONB, -- { "budget_min": 5000, "budget_max": 10000, ... },
 );
+
 CREATE INDEX idx_users_supabase_auth_uid ON users (supabase_auth_uid);
 
--- Vendors Table (Global Vendor Directory)
 CREATE TABLE vendors (
     vendor_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     vendor_name VARCHAR(255) NOT NULL,
@@ -33,6 +33,9 @@ CREATE TABLE vendors (
     description TEXT,
     portfolio_image_urls TEXT[], -- URLs to Supabase Storage
     is_active BOOLEAN DEFAULT true,
+    supabase_auth_uid UUID UNIQUE NULL REFERENCES auth.users(id), -- Supabase Auth ID of primary vendor owner/admin
+    is_verified BOOLEAN DEFAULT false, -- For platform admins to verify vendors
+    commission_rate DECIMAL(5,2) DEFAULT 0.05, -- Platform's commission rate for this vendor
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,21 +43,25 @@ CREATE INDEX idx_vendor_category ON vendors (vendor_category);
 CREATE INDEX idx_vendor_city ON vendors USING gin ((address ->> 'city'));
 CREATE INDEX idx_gin_vendor_name_trgm ON vendors USING gin (vendor_name gin_trgm_ops);
 
--- User Vendors Table (User's selected/tracked vendors)
-CREATE TABLE user_vendors (
+-- -- User Vendors shortlisted Table (User's selected/tracked vendors)
+CREATE TABLE user_shortlisted_vendors (
     user_vendor_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     vendor_name TEXT NOT NULL,
-    vendor_category VARCHAR(100) NOT NULL,
+    vendor_category TEXT NOT NULL,
     contact_info TEXT,
-    status VARCHAR(50) NOT NULL DEFAULT 'contacted', -- 'contacted', 'booked', 'confirmed', 'pending'
+    status VARCHAR(50) NOT NULL DEFAULT 'contacted', -- 'contacted', 'booked', 'confirmed', 'pending', 'liked' , 'disliked'
     booked_date DATE,
     notes TEXT,
     linked_vendor_id UUID REFERENCES vendors(vendor_id) NULL,
+    estimated_cost DECIMAL(12,2) NULL, -- If the user gets a quote.
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX idx_user_vendors_user_id ON user_vendors (user_id);
+    updated_at TIMESTAMPTZ
+); -- Closing parenthesis added here
+
+CREATE INDEX idx_user_vendors_user_id ON user_shortlisted_vendors (user_id);
+CREATE INDEX idx_user_vendors_vendor_name ON user_shortlisted_vendors USING gin (vendor_name gin_trgm_ops);
+CREATE INDEX idx_user_vendors_vendor_category ON user_shortlisted_vendors (vendor_category);
 
 -- Chat Sessions Table
 CREATE TABLE chat_sessions (
@@ -156,3 +163,19 @@ CREATE TABLE timeline_events (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_timeline_events_user_id_datetime ON timeline_events (user_id, event_date_time);
+
+
+-- For creating trigger when a new user is logged add user to users table
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.users (supabase_auth_uid, email)
+    VALUES (new.id, new.email);
+    RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE PROCEDURE public.handle_new_auth_user();
+

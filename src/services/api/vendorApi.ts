@@ -177,14 +177,14 @@ export const addVendorToUser = async (vendor: any) => {
   // Prefer vendor.vendor_id for global vendors, fallback to vendor.id
   const linked_vendor_id = vendor.vendor_id || vendor.id;
   const { data, error } = await supabase
-    .from('user_vendors')
+    .from('user_shortlisted_vendors')
     .insert([
       {
         user_id: userId,
         vendor_name: vendor.name || vendor.vendor_name || '',
         vendor_category: vendor.category || vendor.vendor_category || '',
         contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
-        status: 'recommended',
+        status: 'user_added',
         linked_vendor_id,
       },
     ])
@@ -196,7 +196,7 @@ export const addVendorToUser = async (vendor: any) => {
 export const removeVendorFromUser = async (userVendorId: string) => {
   // Always delete by user_vendor_id (UUID primary key)
   const { error } = await supabase
-    .from('user_vendors')
+    .from('user_shortlisted_vendors')
     .delete()
     .eq('user_vendor_id', userVendorId);
   if (error) throw error;
@@ -208,7 +208,7 @@ export const getUserVendors = async (): Promise<any[]> => {
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
-      .from('user_vendors')
+      .from('user_shortlisted_vendors')
       .select(`
         user_vendor_id,
         vendor_name,
@@ -218,6 +218,7 @@ export const getUserVendors = async (): Promise<any[]> => {
         booked_date,
         notes,
         linked_vendor_id,
+        estimated_cost,
         vendors(*)
       `)
       .eq('user_id', userId);
@@ -233,6 +234,7 @@ export const getUserVendors = async (): Promise<any[]> => {
       bookedDate: item.booked_date,
       notes: item.notes,
       linkedVendor: item.vendors,
+      estimatedCost: item.estimated_cost,
     }));
   } catch (error) {
     console.error('Error fetching user vendors:', error);
