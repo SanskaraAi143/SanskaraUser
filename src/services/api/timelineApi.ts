@@ -15,22 +15,12 @@ export interface TimelineEvent {
 /**
  * Fetches timeline events for the current user
  */
-export const getUserTimelineEvents = async (): Promise<TimelineEvent[]> => {
+export const getUserTimelineEvents = async (user_id: string): Promise<TimelineEvent[]> => {
   try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) throw new Error('User not authenticated');
-    // Fetch internal user_id from Supabase users table
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('supabase_auth_uid', user.data.user.id)
-      .single();
-    if (userError) throw userError;
-    const userId = userData.user_id;
     const { data, error } = await supabase
       .from('timeline_events')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user_id)
       .order('event_date_time', { ascending: true });
     if (error) throw error;
     return data;
@@ -40,20 +30,11 @@ export const getUserTimelineEvents = async (): Promise<TimelineEvent[]> => {
   }
 };
 
-export const addTimelineEvent = async (event: Omit<TimelineEvent, 'event_id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+export const addTimelineEvent = async (user_id: string, event: Omit<TimelineEvent, 'event_id' | 'created_at' | 'updated_at' | 'user_id'>) => {
   try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) throw new Error('User not authenticated');
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('supabase_auth_uid', user.data.user.id)
-      .single();
-    if (userError) throw userError;
-    const userId = userData.user_id;
     const { data, error } = await supabase
       .from('timeline_events')
-      .insert([{ ...event, user_id: userId }]);
+      .insert([{ ...event, user_id }]);
     if (error) throw error;
     return data;
   } catch (error) {

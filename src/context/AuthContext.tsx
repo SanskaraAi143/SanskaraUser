@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/services/supabase/config";
 import { toast } from "@/hooks/use-toast";
@@ -33,6 +32,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
 
   // Helper to map Supabase user to our User type
   const mapSupabaseUser = (sbUser: any): User => ({
@@ -47,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const { data, error } = await supabase.auth.getUser();
       if (data?.user) {
-        setUser(mapSupabaseUser(data.user));
+        setSupabaseUser(data.user);
       } else {
-        setUser(null);
+        setSupabaseUser(null);
       }
       setLoading(false);
     };
@@ -57,15 +57,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen to auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser(mapSupabaseUser(session.user));
+        setSupabaseUser(session.user);
       } else {
-        setUser(null);
+        setSupabaseUser(null);
       }
     });
     return () => {
       listener?.subscription.unsubscribe();
     };
   }, []);
+
+  // Remove polling: fetch internal user_id only once at login/signup
+  const fetchInternalUserId = async (sbUser: any) => {
+    const { data } = await supabase
+      .from('users')
+      .select('user_id')
+      .eq('supabase_auth_uid', sbUser.id)
+      .single();
+    return data?.user_id || sbUser.id;
+  };
 
   // Sign up function
   const signUp = async (email: string, password: string, name: string) => {
@@ -78,7 +88,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (error) throw error;
       if (data.user) {
-        setUser(mapSupabaseUser(data.user));
+        const internalId = await fetchInternalUserId(data.user);
+        setUser({
+          id: internalId,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || data.user.email,
+        });
+        setSupabaseUser(data.user);
       }
       toast({
         title: "Account created successfully",
@@ -104,7 +120,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       if (data.user) {
-        setUser(mapSupabaseUser(data.user));
+        const internalId = await fetchInternalUserId(data.user);
+        setUser({
+          id: internalId,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || data.user.email,
+        });
+        setSupabaseUser(data.user);
       }
       toast({
         title: "Signed in successfully",
@@ -129,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      setUser(null);
+      setSupabaseUser(null);
       toast({
         title: "Signed out successfully",
         description: "You have been logged out.",
@@ -146,6 +168,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
+
+  // Remove polling useEffect for supabaseUser/internal user_id
+  useEffect(() => {
+    if (!supabaseUser) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    // Do not fetch user_id here anymore
+  }, [supabaseUser]);
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>

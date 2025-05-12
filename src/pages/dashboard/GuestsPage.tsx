@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { fetchGuestList, addGuest, updateGuest, removeGuest, Guest } from '../../services/api/guestListApi';
-import { getCurrentUserProfile } from '../../services/api/userApi';
+import { useAuth } from '@/context/AuthContext';
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'bg-gray-400',
@@ -11,7 +10,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function GuestsPage() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user } = useAuth();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -20,6 +19,8 @@ export default function GuestsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('');
+
+  const userId = user?.id || null;
 
   const loadGuests = async () => {
     setLoading(true);
@@ -34,13 +35,6 @@ export default function GuestsPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Fetch user id on mount
-    getCurrentUserProfile().then(profile => {
-      setUserId(profile?.user_id || null);
-    });
-  }, []);
 
   useEffect(() => {
     if (userId) loadGuests();

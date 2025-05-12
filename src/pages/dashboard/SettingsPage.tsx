@@ -29,7 +29,8 @@ const SettingsPage = () => {
     async function fetchSettings() {
       setSettingsLoading(true);
       try {
-        const data = await getCurrentUserProfile();
+        if (!user?.id) return;
+        const data = await getCurrentUserProfile(user.id);
         if (data && data.preferences) {
           setSettings({ ...defaultPreferences, ...data.preferences });
         }
@@ -44,12 +45,13 @@ const SettingsPage = () => {
     }
     fetchSettings();
     // eslint-disable-next-line
-  }, [user.id]);
+  }, [user?.id]);
 
   const handleSaveChanges = async () => {
     setSettingsLoading(true);
     try {
-      await updateCurrentUserProfile({ preferences: settings });
+      if (!user?.id) return;
+      await updateCurrentUserProfile(user.id, { preferences: settings });
       toast({
         title: "Settings saved",
         description: "Your preferences have been updated successfully.",

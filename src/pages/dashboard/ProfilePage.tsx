@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,8 @@ const ProfilePage = () => {
     async function fetchProfile() {
       setProfileLoading(true);
       try {
-        const data = await import('@/services/api/userApi').then(m => m.getCurrentUserProfile());
+        if (!user) return;
+        const data = await import('@/services/api/userApi').then(m => m.getCurrentUserProfile(user.id));
         if (data) {
           setDisplayName(data.display_name || "");
           setWeddingDate(data.wedding_date || "");
@@ -38,12 +38,13 @@ const ProfilePage = () => {
       setProfileLoading(false);
     }
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const handleSaveWeddingDetails = async () => {
     setProfileLoading(true);
     try {
-      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile({
+      if (!user) return;
+      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile(user.id, {
         display_name: displayName || null,
         wedding_date: weddingDate || null,
         wedding_location: location || null,
@@ -63,16 +64,12 @@ const ProfilePage = () => {
     setProfileLoading(false);
   };
 
-
-
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-
     setIsLoading(true);
     try {
-      // Update display name in users table using the shared API
-      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile({ display_name: displayName }));
+      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile(user.id, { display_name: displayName }));
       toast({
         title: "Profile Updated",
         description: "Your profile information has been successfully updated.",

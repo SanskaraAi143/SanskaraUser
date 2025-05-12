@@ -13,26 +13,22 @@ export interface UserProfile {
   preferences: any;
 }
 
-// Fetch current user's profile (by supabase_auth_uid)
-export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError || !authData.user) throw new Error('User not authenticated');
+// Fetch current user's profile (by internal user_id from AuthContext)
+export const getCurrentUserProfile = async (user_id: string): Promise<UserProfile | null> => {
   const { data, error } = await supabase
     .from('users')
     .select('*')
-    .eq('supabase_auth_uid', authData.user.id)
+    .eq('user_id', user_id)
     .single();
   if (error) throw error;
   return data || null;
 };
 
-// Update current user's profile (by supabase_auth_uid)
-export const updateCurrentUserProfile = async (updates: Partial<UserProfile>) => {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError || !authData.user) throw new Error('User not authenticated');
+// Update current user's profile (by internal user_id from AuthContext)
+export const updateCurrentUserProfile = async (user_id: string, updates: Partial<UserProfile>) => {
   const { error } = await supabase
     .from('users')
     .update(updates)
-    .eq('supabase_auth_uid', authData.user.id);
+    .eq('user_id', user_id);
   if (error) throw error;
 };

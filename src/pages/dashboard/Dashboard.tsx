@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,9 +40,11 @@ const Dashboard = () => {
     async function fetchData() {
       setLoading(true);
       try {
-        const profileData = await getCurrentUserProfile();
+        // Use user from AuthContext for user_id
+        if (!user?.id) return;
+        const profileData = await getCurrentUserProfile(user.id);
         setProfile(profileData);
-        const userId = profileData?.user_id;
+        const userId = user.id;
         let suggestedRituals = [];
         try {
           suggestedRituals = await getSuggestedRituals(profileData?.wedding_tradition || "Hindu");
@@ -52,12 +53,12 @@ const Dashboard = () => {
           suggestedRituals = [];
         }
         const [events, guestList, userTasks, maxBudget, userExpenses, userVendors, userMoodBoards] = await Promise.all([
-          getUserTimelineEvents(),
+          getUserTimelineEvents(userId),
           fetchGuestList(userId),
           getUserTasks(userId),
           getUserBudgetMax(userId),
           getExpenses(userId),
-          getUserVendors(),
+          getUserVendors(userId),
           getUserMoodBoards(userId)
         ]);
         setTimelineEvents(events || []);
@@ -82,7 +83,7 @@ const Dashboard = () => {
       }
     }
     fetchData();
-  }, []);
+  }, [user]);
 
   // Derived stats
   const confirmedGuests = guests.filter(g => g.status === "Confirmed").length;

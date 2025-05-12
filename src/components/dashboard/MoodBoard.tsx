@@ -84,12 +84,7 @@ const MoodBoard = () => {
         getUserMoodBoards(user.id)
           .then(boards => {
             // Add default boards (Collections, Bride, Groom) if not present
-            const defaultBoards = [
-              { mood_board_id: 'default-collections', name: 'Collections' },
-              { mood_board_id: 'default-bride', name: 'Bride' },
-              { mood_board_id: 'default-groom', name: 'Groom' }
-            ];
-            const allBoards = [...defaultBoards, ...boards];
+            const allBoards = [...boards];
             setMoodBoards(allBoards);
             if (allBoards.length > 0) setSelectedBoardId(allBoards[0].mood_board_id);
           })

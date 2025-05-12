@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Edit2, Trash2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import { useAuth } from '@/context/AuthContext';
 
 // UI TimelineEvent type
 interface UITimelineEvent {
@@ -22,10 +23,23 @@ interface UITimelineEvent {
 // Supabase TimelineEvent type (imported from API)
 import type { TimelineEvent as SupabaseTimelineEvent } from '@/services/api/timelineApi';
 
+// Add visually hidden style for accessibility
+const visuallyHidden = {
+  border: 0,
+  clip: 'rect(0 0 0 0)',
+  height: '1px',
+  margin: '-1px',
+  overflow: 'hidden',
+  padding: 0,
+  position: 'absolute' as const,
+  width: '1px',
+};
+
 const TimelineCreator = () => {
   const [events, setEvents] = useState<UITimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Utility: combine Date and time string into ISO string
   function combineDateAndTime(date: Date, time: string): string {
@@ -76,7 +90,8 @@ const TimelineCreator = () => {
         location: formData.location,
         description: formData.description,
       };
-      await addTimelineEvent(eventToAdd);
+      if (!user?.id) throw new Error('User not authenticated');
+      await addTimelineEvent(user.id, eventToAdd);
       await fetchAndSetEvents();
       resetForm();
       setShowAddDialog(false);
@@ -147,6 +162,7 @@ const TimelineCreator = () => {
       description: event.description
     });
     setEditingEvent(event);
+    setShowAddDialog(true); // Open dialog on edit
   };
   
   const resetForm = () => {
@@ -171,7 +187,8 @@ const TimelineCreator = () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await getUserTimelineEvents();
+      if (!user?.id) throw new Error('User not authenticated');
+      const data = await getUserTimelineEvents(user.id);
       setEvents(data.map(mapSupabaseEventToUI));
     } catch (e: any) {
       setFetchError('Failed to load timeline events.');
@@ -258,6 +275,10 @@ const TimelineCreator = () => {
       </Card>
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
+          {/* Accessible DialogTitle (visually hidden) */}
+          <span style={visuallyHidden} id="timeline-dialog-title">
+            {editingEvent ? 'Edit Timeline Event' : 'Add Timeline Event'}
+          </span>
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Event Title</label>

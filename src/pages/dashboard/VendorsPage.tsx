@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, type ChangeEvent } from "react";
 import { 
   Card, 
@@ -24,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { getUserVendors } from "@/services/api/vendorApi";
+import { useAuth } from '@/context/AuthContext';
 
 interface Vendor {
   id: string;
@@ -48,16 +48,19 @@ const VendorsPage = () => {
   const [showAllVendors, setShowAllVendors] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user?.id) return;
     setLoading(true);
-    getUserVendors()
+    getUserVendors(user.id)
       .then((data) => {
+        const allowedStatuses = ["booked", "recommended", "contacted", "pending", "completed"] as const;
+        type VendorStatus = typeof allowedStatuses[number];
         const mapped = data.map((item: any) => {
           const vendor = item.linkedVendor || {};
-          // Ensure status is one of allowed values
-          let status: Vendor['status'] = 'pending';
-          if (['recommended', 'contacted', 'booked', 'pending', 'completed'].includes(item.status)) {
+          let status: VendorStatus = "pending";
+          if (allowedStatuses.includes(item.status)) {
             status = item.status;
           }
           return {
@@ -82,7 +85,7 @@ const VendorsPage = () => {
         setError(e.message || 'Failed to load vendors');
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   // Fetch all vendors for 'View All Vendors' mode
   useEffect(() => {
@@ -91,19 +94,27 @@ const VendorsPage = () => {
       import('@/services/api/vendorApi').then(({ getVendorRecommendations }) => {
         getVendorRecommendations('', '', undefined)
           .then((data: any[]) => {
-            const mapped = data.map((vendor: any) => ({
-              id: vendor.id || vendor.vendor_id || '',
-              name: vendor.name || vendor.vendor_name || '',
-              category: vendor.category || vendor.vendor_category || '',
-              location: vendor.address?.city && vendor.address?.state ? `${vendor.address.city}, ${vendor.address.state}` : vendor.address?.fullAddress || '',
-              rating: vendor.rating || 0,
-              contact: vendor.phoneNumber || vendor.phone_number || '',
-              email: vendor.contactEmail || vendor.contact_email || '',
-              price: vendor.pricingRange ? `${vendor.pricingRange.min ? '₹' + vendor.pricingRange.min.toLocaleString() : ''}${vendor.pricingRange.max ? '-₹' + vendor.pricingRange.max.toLocaleString() : ''} ${vendor.pricingRange.unit || ''}` : '',
-              bookingDate: '',
-              status: '',
-              notes: vendor.description || '',
-            }));
+            const allowedStatuses = ["booked", "recommended", "contacted", "pending", "completed"] as const;
+            type VendorStatus = typeof allowedStatuses[number];
+            const mapped = data.map((vendor: any) => {
+              let status: VendorStatus = "pending";
+              if (allowedStatuses.includes(vendor.status)) {
+                status = vendor.status;
+              }
+              return {
+                id: vendor.id || vendor.vendor_id || '',
+                name: vendor.name || vendor.vendor_name || '',
+                category: vendor.category || vendor.vendor_category || '',
+                location: vendor.address?.city && vendor.address?.state ? `${vendor.address.city}, ${vendor.address.state}` : vendor.address?.fullAddress || '',
+                rating: vendor.rating || 0,
+                contact: vendor.phoneNumber || vendor.phone_number || '',
+                email: vendor.contactEmail || vendor.contact_email || '',
+                price: vendor.pricingRange ? `${vendor.pricingRange.min ? '₹' + vendor.pricingRange.min.toLocaleString() : ''}${vendor.pricingRange.max ? '-₹' + vendor.pricingRange.max.toLocaleString() : ''} ${vendor.pricingRange.unit || ''}` : '',
+                bookingDate: '',
+                status,
+                notes: vendor.description || '',
+              };
+            });
             setAllVendors(mapped);
             setError(null);
           })
@@ -261,7 +272,7 @@ const VendorsPage = () => {
                         // Dynamically import addVendorToUser and fallback if not found
                         const api = await import('@/services/api/vendorApi');
                         if (typeof api.addVendorToUser === 'function') {
-                          await api.addVendorToUser(vendor);
+                          await api.addVendorToUser(user.id, vendor);
                           window.location.reload();
                         } else {
                           throw new Error('addVendorToUser not found');

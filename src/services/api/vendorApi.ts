@@ -1,4 +1,3 @@
-
 import { supabase } from '../supabase/config';
 
 
@@ -27,19 +26,9 @@ export interface Vendor {
   portfolioImageUrls: string[];
 }
 
-// Get user ID from current auth
-const getCurrentUserId = async () => {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData.user) throw new Error('User not authenticated');
-  // Get internal user_id from Supabase based on supabase user id
-  const { data, error } = await supabase
-    .from('users')
-    .select('user_id')
-    .eq('supabase_auth_uid', userData.user.id)
-    .single();
-  if (error) throw error;
-  return data.user_id;
-};
+// NOTE: Always pass the internal user_id (from AuthContext/global state),
+// never the supabase_auth_uid. Do not fetch user_id in every API call.
+// Use the resolved user_id from context after login.
 
 export const getVendorRecommendations = async (
   category: string,
@@ -172,15 +161,14 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
   }
 };
 
-export const addVendorToUser = async (vendor: any) => {
-  const userId = await getCurrentUserId();
+export const addVendorToUser = async (user_id: string, vendor: any) => {
   // Prefer vendor.vendor_id for global vendors, fallback to vendor.id
   const linked_vendor_id = vendor.vendor_id || vendor.id;
   const { data, error } = await supabase
     .from('user_shortlisted_vendors')
     .insert([
       {
-        user_id: userId,
+        user_id,
         vendor_name: vendor.name || vendor.vendor_name || '',
         vendor_category: vendor.category || vendor.vendor_category || '',
         contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
@@ -203,41 +191,32 @@ export const removeVendorFromUser = async (userVendorId: string) => {
   return true;
 };
 
-export const getUserVendors = async (): Promise<any[]> => {
-  try {
-    const userId = await getCurrentUserId();
-    
-    const { data, error } = await supabase
-      .from('user_shortlisted_vendors')
-      .select(`
-        user_vendor_id,
-        vendor_name,
-        vendor_category,
-        contact_info,
-        status,
-        booked_date,
-        notes,
-        linked_vendor_id,
-        estimated_cost,
-        vendors(*)
-      `)
-      .eq('user_id', userId);
-      
-    if (error) throw error;
-    
-    return data.map(item => ({
-      id: item.user_vendor_id,
-      name: item.vendor_name,
-      category: item.vendor_category,
-      contactInfo: item.contact_info,
-      status: item.status,
-      bookedDate: item.booked_date,
-      notes: item.notes,
-      linkedVendor: item.vendors,
-      estimatedCost: item.estimated_cost,
-    }));
-  } catch (error) {
-    console.error('Error fetching user vendors:', error);
-    throw error;
-  }
+export const getUserVendors = async (user_id: string): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('user_shortlisted_vendors')
+    .select(`
+      user_vendor_id,
+      vendor_name,
+      vendor_category,
+      contact_info,
+      status,
+      booked_date,
+      notes,
+      linked_vendor_id,
+      estimated_cost,
+      vendors(*)
+    `)
+    .eq('user_id', user_id);
+  if (error) throw error;
+  return data.map(item => ({
+    id: item.user_vendor_id,
+    name: item.vendor_name,
+    category: item.vendor_category,
+    contactInfo: item.contact_info,
+    status: item.status,
+    bookedDate: item.booked_date,
+    notes: item.notes,
+    linkedVendor: item.vendors,
+    estimatedCost: item.estimated_cost,
+  }));
 };
