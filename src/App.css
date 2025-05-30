@@ -8,7 +8,7 @@
 .logo {
   height: 6em;
   padding: 1.5em;
-  will-change: filter;
+  /* will-change: filter; removed */
   transition: filter 300ms;
 }
 .logo:hover {
@@ -28,7 +28,8 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
+  /* Changed selector to be more robust. Assumes the target logo will have this class. */
+  .logo-animated {
     animation: logo-spin infinite 20s linear;
   }
 }

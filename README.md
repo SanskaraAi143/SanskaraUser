@@ -61,20 +61,31 @@ graph TD;
 
 ## Installation & Setup
 
-1. **Clone the repository:**
+**Prerequisites:**
+- Node.js (v18.x or later recommended)
+- npm (v9.x or later recommended) or yarn
+
+1. **Set up Supabase Project:**
+   - If you don't have one, create a new project on [Supabase](https://supabase.com/).
+   - Obtain your project's URL and Anon Key from the Supabase project settings (API section).
+
+2. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-org/Sanskara_AI.git
+   git clone https://github.com/your-org/SanskaraUser-development.git
+   # Or the correct repository URL
+   cd SanskaraUser-development
+   # Or the directory name matching the cloned repository
    ```
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```sh
-   cd sanskara-ai-weddings-planner
    npm install
    ```
-3. **Configure environment variables:**
-   - Copy `.env.example` to `.env` and fill in:
-     - `VITE_SUPABASE_URL`
-     - `VITE_SUPABASE_ANON_KEY`
-4. **Run the app:**
+4. **Configure environment variables:**
+   - Copy `.env.example` to `.env`.
+   - Fill in the following (obtained from your Supabase project):
+     - `VITE_SUPABASE_URL`: Your Supabase project URL. This is needed for the client library to connect to your Supabase backend.
+     - `VITE_SUPABASE_ANON_KEY`: Your Supabase project Anon key. This key allows client-side access to your Supabase services, respecting your Row Level Security policies.
+5. **Run the app:**
    ```sh
    npm run dev
    ```
@@ -95,7 +106,7 @@ graph TD;
 
 - Use unique keys for list rendering to avoid UI bugs.
 - Always handle API errors gracefully and log them for debugging.
-- Use environment variables for sensitive data.
+- Use environment variables for sensitive data; never commit `.env` files.
 - Keep UI components modular and reusable.
 - Validate user input on both frontend and backend.
 
@@ -116,9 +127,12 @@ graph TD;
 ## Security & Privacy
 
 - User authentication via Supabase Auth.
-- Data access is scoped to authenticated users.
+- **Data access is scoped to authenticated users using Supabase Row Level Security (RLS).**
 - No sensitive information is exposed in logs or UI.
-- Follow best practices for environment variable management.
+- **Environment Variable Management:**
+    - Store all API keys, secrets, and sensitive configuration in `.env` files.
+    - **Never commit your `.env` file to version control.** Use `.env.example` as a template.
+    - In production environments, use your hosting provider's secrets management solution.
 
 ---
 
@@ -138,7 +152,7 @@ graph TD;
 ## FAQ
 
 **Q:** Is my data secure?
-**A:** Yes, all data is managed by Supabase with strict access controls.
+**A:** Yes, all data is managed by Supabase with strict access controls, including Row Level Security.
 
 **Q:** Can I invite others to collaborate?
 **A:** Yes, real-time collaboration is supported.
@@ -153,6 +167,7 @@ graph TD;
 1. Fork the repo and create a new branch.
 2. Follow code style guidelines and write clear commit messages.
 3. Open a pull request with a detailed description.
+(See `CONTRIBUTING.md` for more detailed guidelines, if available.)
 
 ---
 
