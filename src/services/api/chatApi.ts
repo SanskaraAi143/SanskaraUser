@@ -1,6 +1,6 @@
 
 import { supabase } from '../supabase/config';
-import { auth } from '../firebase/config';
+
 
 // Define types
 export interface ChatMessage {
@@ -28,11 +28,11 @@ const getCurrentUserId = async () => {
   const user = auth.currentUser;
   if (!user) throw new Error('User not authenticated');
   
-  // Get internal user_id from Supabase based on firebase_uid
+  // Get internal user_id from Supabase based on supabase user id
   const { data, error } = await supabase
     .from('users')
     .select('user_id')
-    .eq('firebase_uid', user.uid)
+    .eq('supabase_auth_uid', user.id)
     .single();
     
   if (error) throw error;
@@ -51,7 +51,7 @@ export const sendChatMessage = async (
       throw new Error('API_BASE_URL environment variable is not set');
     }
     
-    // Get the Firebase ID token
+    // Get the Supabase access token if needed
     const user = auth.currentUser;
     if (!user) throw new Error('User not authenticated');
     const idToken = await user.getIdToken();

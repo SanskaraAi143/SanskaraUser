@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { updateProfile } from "firebase/auth";
-import { auth } from "@/services/firebase/config";
+
+
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
 
 const ProfilePage = () => {
@@ -17,16 +16,60 @@ const ProfilePage = () => {
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Profile & wedding details state
+  const [weddingDate, setWeddingDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [tradition, setTradition] = useState("");
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  React.useEffect(() => {
+    async function fetchProfile() {
+      setProfileLoading(true);
+      try {
+        if (!user) return;
+        const data = await import('@/services/api/userApi').then(m => m.getCurrentUserProfile(user.id));
+        if (data) {
+          setDisplayName(data.display_name || "");
+          setWeddingDate(data.wedding_date || "");
+          setLocation(data.wedding_location || "");
+          setTradition(data.wedding_tradition || "");
+        }
+      } catch (e) { /* ignore */ }
+      setProfileLoading(false);
+    }
+    fetchProfile();
+  }, [user]);
+
+  const handleSaveWeddingDetails = async () => {
+    setProfileLoading(true);
+    try {
+      if (!user) return;
+      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile(user.id, {
+        display_name: displayName || null,
+        wedding_date: weddingDate || null,
+        wedding_location: location || null,
+        wedding_tradition: tradition || null,
+      }));
+      toast({
+        title: "Wedding Details Saved",
+        description: "Your wedding details have been updated.",
+      });
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save wedding details.",
+      });
+    }
+    setProfileLoading(false);
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) return;
-
+    if (!user) return;
     setIsLoading(true);
     try {
-      await updateProfile(auth.currentUser, {
-        displayName: displayName,
-      });
-
+      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile(user.id, { display_name: displayName }));
       toast({
         title: "Profile Updated",
         description: "Your profile information has been successfully updated.",
@@ -43,11 +86,15 @@ const ProfilePage = () => {
     }
   };
 
+
   // Calculate when the account was created
-  const formatAccountCreationDate = () => {
-    if (!auth.currentUser?.metadata.creationTime) return "N/A";
-    return new Date(auth.currentUser.metadata.creationTime).toLocaleDateString();
-  };
+  // const formatAccountCreationDate = () => {
+//   // Supabase user object may have created_at
+//   if (!user || !user.created_at) return "N/A";
+//   return new Date(user.created_at).toLocaleDateString();
+// };
+// Account creation date display removed due to missing property on User type.
+
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -58,13 +105,9 @@ const ProfilePage = () => {
         <Card className="md:col-span-1">
           <CardHeader className="text-center">
             <Avatar className="w-24 h-24 mx-auto mb-2">
-              {user?.photoURL ? (
-                <AvatarImage src={user.photoURL} alt={user.name || "User"} />
-              ) : (
-                <AvatarFallback className="bg-wedding-red/10 text-wedding-red text-xl">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="h-8 w-8" />}
-                </AvatarFallback>
-              )}
+              <AvatarFallback className="bg-wedding-red/10 text-wedding-red text-xl">
+  {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="h-8 w-8" />}
+</AvatarFallback>
             </Avatar>
             <CardTitle className="text-xl">{user?.name || "User"}</CardTitle>
             <CardDescription className="text-sm">{user?.email}</CardDescription>
@@ -78,7 +121,7 @@ const ProfilePage = () => {
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-2 text-gray-500" />
               <span>Account created: </span>
-              <span className="ml-auto font-medium">{formatAccountCreationDate()}</span>
+              <span className="ml-auto font-medium">{'created_at' in (user ?? {}) && typeof (user as any).created_at === 'string' ? new Date((user as any).created_at).toLocaleDateString() : "N/A"}</span>
             </div>
           </CardContent>
           <CardFooter>
@@ -156,6 +199,8 @@ const ProfilePage = () => {
                 <Input 
                   id="weddingDate" 
                   type="date"
+                  value={weddingDate}
+                  onChange={e => setWeddingDate(e.target.value)}
                   placeholder="Select date" 
                 />
               </div>
@@ -164,6 +209,8 @@ const ProfilePage = () => {
                 <Label htmlFor="location">Location</Label>
                 <Input 
                   id="location" 
+                  value={location}
+                  onChange={e => setLocation(e.target.value)}
                   placeholder="Wedding venue"
                 />
               </div>
@@ -172,6 +219,8 @@ const ProfilePage = () => {
                 <Label htmlFor="tradition">Wedding Tradition</Label>
                 <Input 
                   id="tradition" 
+                  value={tradition}
+                  onChange={e => setTradition(e.target.value)}
                   placeholder="e.g., Hindu, Sikh, Bengali"
                 />
               </div>
@@ -179,11 +228,16 @@ const ProfilePage = () => {
           </CardContent>
           <CardFooter>
             <Button 
-              type="submit" 
+              type="button" 
               className="bg-wedding-red hover:bg-wedding-deepred ml-auto"
+              onClick={handleSaveWeddingDetails}
+              disabled={profileLoading}
             >
-              <Save className="mr-2 h-4 w-4" />
-              Save Details
+              {profileLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
+              ) : (
+                <><Save className="mr-2 h-4 w-4" />Save Details</>
+              )}
             </Button>
           </CardFooter>
         </Card>

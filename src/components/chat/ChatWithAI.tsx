@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { Send, User, Bot, ArrowDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,20 @@ const initialMessages = [
 ];
 
 const ChatWithAI = () => {
+  const { user } = useAuth();
+  // You may want to add a way to get the JWT from supabase directly if not in context
+  const [jwt, setJwt] = useState<string | null>(null);
+
+
+
+  useEffect(() => {
+    // Try to get JWT from Supabase client if available
+    const getJwt = async () => {
+      const { data } = await import('@/services/supabase/config').then(mod => mod.supabase.auth.getSession());
+      setJwt(data?.session?.access_token || null);
+    };
+    getJwt();
+  }, [user]);
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -44,8 +59,7 @@ const ChatWithAI = () => {
   };
 
   const handleSendMessage = async () => {
-    if (input.trim() === '') return;
-    
+    if (input.trim() === '' || !jwt) return;
     // Add user message
     const userMessage = {
       id: messages.length + 1,
@@ -53,35 +67,56 @@ const ChatWithAI = () => {
       content: input.trim(),
       timestamp: new Date().toISOString(),
     };
-    
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    
-    // Simulate bot typing
     setIsTyping(true);
-    
-    // Simulate response delay
-    setTimeout(() => {
-      const botResponses = [
-        "I'd be happy to help you plan your wedding rituals!",
-        "Here are some popular mandap decoration options for a traditional ceremony.",
-        "For the Sangeet, I recommend these 5 popular songs that guests always enjoy.",
-        "The mehndi ceremony typically occurs 1-2 days before the wedding. Here's a planning checklist.",
-        "I can help you find vendors who specialize in traditional Hindu ceremonies in your area."
-      ];
-      
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      
-      const botMessage = {
-        id: messages.length + 2,
-        role: 'bot',
-        content: randomResponse,
-        timestamp: new Date().toISOString(),
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
+    try {
+
+      const response = await fetch('http://localhost:8000/api/chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+          session_id: 'user-session-id',
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const botMessage = {
+          id: messages.length + 2,
+          role: 'bot',
+          content: data.reply,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        // Print backend error detail if available
+        setMessages(prev => [
+          ...prev,
+          {
+            id: messages.length + 2,
+            role: 'bot',
+            content: data.detail || 'Sorry, there was a problem reaching the AI backend.',
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      }
+    } catch (error) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: messages.length + 2,
+          role: 'bot',
+          content: 'Sorry, there was a problem reaching the AI backend.',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   return (

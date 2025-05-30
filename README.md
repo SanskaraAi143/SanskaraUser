@@ -1,112 +1,165 @@
+# Sanskara AI Design Document
 
-# Sanskara AI - Hindu Wedding Planning Assistant
+---
 
-A comprehensive wedding planning platform with AI assistance tailored for Hindu weddings.
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Goals & Intended Audience](#goals--intended-audience)
+3. [System Architecture](#system-architecture)
+4. [Installation & Setup](#installation--setup)
+5. [Usage Guide](#usage-guide)
+6. [Best Practices](#best-practices)
+7. [AI-Centric Features](#ai-centric-features)
+8. [Security & Privacy](#security--privacy)
+9. [Future Implementations](#future-implementations)
+10. [FAQ](#faq)
+11. [Contributing](#contributing)
+12. [License](#license)
 
-## Architecture Overview
+---
 
-This project follows a three-tier architecture:
+## Project Overview
 
-1. **Frontend**: React application with Vite, shadcn/ui, and TailwindCSS
-2. **Backend**: Python FastAPI application with AutoGen for AI orchestration
-3. **Database**: Supabase (PostgreSQL) for data storage
+**Sanskara AI** is a next-generation, AI-powered wedding planning platform. It integrates with Supabase for real-time data, provides a user-friendly dashboard, and leverages AI to optimize tasks, vendor management, and personalized suggestions.
 
-## AI Architecture
+---
 
-The AI system uses AutoGen 0.4+ to orchestrate multiple specialized agents:
+## Goals & Intended Audience
 
-- **Planner Agent**: Coordinates other agents
-- **Vendor Agent**: Handles vendor search and recommendations
-- **Ritual Agent**: Provides information about Hindu wedding rituals
-- **Booking Agent**: Manages vendor booking process
-- **Task Manager Agent**: Handles wedding planning tasks
+| Goal                                  | Description                                                                 |
+|---------------------------------------|-----------------------------------------------------------------------------|
+| Seamless Wedding Planning             | Centralize all planning aspects in one dashboard.                           |
+| Personalization via AI                | Use AI to suggest rituals, tasks, and vendors tailored to user preferences. |
+| Real-Time Collaboration               | Enable couples, families, and planners to collaborate live.                 |
+| Data Security                         | Ensure user data is private and secure.                                     |
 
-## Project Setup
+**Intended Audience:**
+- Couples planning weddings
+- Professional wedding planners
+- Vendors
+- Developers interested in AI-driven event management
 
-### Frontend (React)
+---
 
-1. Install dependencies:
+## System Architecture
+
+```mermaid
+graph TD;
+  A[User Interface (React)] --> B[API Layer]
+  B --> C[Supabase Backend]
+  B --> D[AI Services]
+  D --> E[Recommendation Engine]
+  D --> F[Analytics & Insights]
+  C --> G[Database]
+```
+
+- **Frontend:** React + TypeScript, Framer Motion, React Router
+- **Backend:** Supabase (Postgres, Auth, Storage)
+- **AI Layer:** Custom APIs for recommendations, NLP, and automation
+
+---
+
+## Installation & Setup
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-org/Sanskara_AI.git
    ```
+2. **Install dependencies:**
+   ```sh
+   cd sanskara-ai-weddings-planner
    npm install
    ```
-
-2. Create a `.env` file in the root directory with the following variables:
-   ```
-   VITE_API_BASE_URL=your_api_url
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_firebase_app_id
-   ```
-
-3. Run the development server:
-   ```
+3. **Configure environment variables:**
+   - Copy `.env.example` to `.env` and fill in:
+     - `VITE_SUPABASE_URL`
+     - `VITE_SUPABASE_ANON_KEY`
+4. **Run the app:**
+   ```sh
    npm run dev
    ```
 
-### Backend (Python FastAPI)
+---
 
-1. Clone the backend repository (separate from this frontend)
-2. Set up a Python environment (Python 3.9+ recommended)
-3. Install dependencies:
-   ```
-   pip install fastapi uvicorn sqlalchemy asyncpg pydantic pyautogen openai firebase-admin python-dotenv
-   ```
+## Usage Guide
 
-4. Create a `.env` file with:
-   ```
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_SERVICE_KEY=your_supabase_service_key
-   OPENAI_API_KEY=your_openai_api_key
-   FIREBASE_CREDENTIALS=path/to/firebase-credentials.json
-   ```
+- **Dashboard:** View wedding stats, confirmed guests, budget, tasks, and timeline.
+- **Tasks:** Add, edit, and track tasks. Statuses: To Do, Doing, Done.
+- **Vendors:** Manage and remove vendors. Real-time updates after actions.
+- **AI Suggestions:** Get ritual and vendor recommendations based on preferences.
+- **Error Handling:** UI remains responsive even if a data fetch fails.
 
-5. Run the FastAPI server:
-   ```
-   uvicorn main:app --reload
-   ```
+---
 
-### Database (Supabase)
+## Best Practices
 
-1. Create a Supabase project
-2. Run the SQL scripts in `schema.sql` to set up the database schema
-3. Set up Row Level Security (RLS) policies
+- Use unique keys for list rendering to avoid UI bugs.
+- Always handle API errors gracefully and log them for debugging.
+- Use environment variables for sensitive data.
+- Keep UI components modular and reusable.
+- Validate user input on both frontend and backend.
 
-## Backend Implementation
+---
 
-### Core Components
+## AI-Centric Features
 
-1. **Authentication Middleware**: Verifies Firebase ID tokens, gets/creates internal user_id from users table
-2. **AutoGen Agents**: Set up specialized agents with specific tools and capabilities
-3. **API Endpoints**: Connect frontend to backend via RESTful APIs
-4. **Database Operations**: Handle CRUD operations for various resources (users, vendors, rituals, etc.)
+| Feature                  | Description                                                     |
+|-------------------------|-----------------------------------------------------------------|
+| Ritual Suggestions      | AI recommends rituals based on tradition and preferences.         |
+| Vendor Matching         | Smart matching of vendors to user needs.                         |
+| Task Prioritization     | AI suggests which tasks to focus on next.                        |
+| Timeline Optimization   | Automated scheduling based on dependencies and deadlines.         |
+| Budget Insights         | AI highlights overspending and suggests optimizations.            |
 
-### API Endpoints
+---
 
-The following API endpoints should be implemented in the Python FastAPI backend:
+## Security & Privacy
 
-```
-/api/chat - Handle AI conversations via AutoGen
-/api/rituals - Get information about Hindu wedding rituals
-/api/rituals/suggested - Get suggested rituals based on tradition
-/api/rituals/search - Search for rituals
-/api/vendors/recommend - Get vendor recommendations
-/api/vendors/{vendor_id} - Get details for a specific vendor
-/api/tasks - Manage wedding planning tasks
-/api/user/vendors - Manage user-tracked vendors
-```
+- User authentication via Supabase Auth.
+- Data access is scoped to authenticated users.
+- No sensitive information is exposed in logs or UI.
+- Follow best practices for environment variable management.
 
-## Features
+---
 
-- Chat with AI for wedding planning assistance
-- Explore and learn about Hindu wedding rituals
-- Find and manage vendors
-- Create and track wedding tasks
-- Build mood boards
-- Manage guest list
-- Track budget
-- Create wedding timeline
+## Future Implementations
+
+| Feature                    | Description                                 |
+|---------------------------|---------------------------------------------|
+| Mobile App                | Native iOS/Android app for planning on-the-go|
+| Advanced Analytics        | Deeper insights into budget, guests, and tasks|
+| Multi-language Support    | UI and AI suggestions in multiple languages  |
+| AI Chatbot                | 24/7 planning assistant                     |
+| Third-Party Integrations  | Payments, calendars, and more               |
+| Offline Mode              | Plan without internet, sync when online      |
+
+---
+
+## FAQ
+
+**Q:** Is my data secure?
+**A:** Yes, all data is managed by Supabase with strict access controls.
+
+**Q:** Can I invite others to collaborate?
+**A:** Yes, real-time collaboration is supported.
+
+**Q:** What if an API fails?
+**A:** The dashboard is resilient—other data will still load, and errors are logged.
+
+---
+
+## Contributing
+
+1. Fork the repo and create a new branch.
+2. Follow code style guidelines and write clear commit messages.
+3. Open a pull request with a detailed description.
+
+---
+
+## License
+
+MIT License. See [LICENSE](../LICENSE) for details.
+
+---
+
+> **Designed with ❤️ by the Sanskara AI Team**
