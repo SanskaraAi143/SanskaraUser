@@ -98,44 +98,42 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <h1 className="text-3xl font-playfair font-semibold text-[#8d6e63] mb-6">My Profile</h1>
-
+      <h1 className="text-3xl font-playfair font-semibold text-wedding-gold mb-6">My Profile</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Card */}
-        <Card className="md:col-span-1 border-[#ffd700]/30 shadow-lg">
+        <Card className="md:col-span-1 border-wedding-gold/30 shadow-lg">
           <CardHeader className="text-center">
             <Avatar className="w-24 h-24 mx-auto mb-2">
-              <AvatarFallback className="bg-[#ffd700]/10 text-[#8d6e63] text-xl">
+              <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-xl">
                 {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="h-8 w-8" />}
               </AvatarFallback>
             </Avatar>
-            <CardTitle className="text-xl text-[#8d6e63]">{user?.name || "User"}</CardTitle>
+            <CardTitle className="text-xl text-wedding-gold">{user?.name || "User"}</CardTitle>
             <CardDescription className="text-sm text-gray-600">{user?.email}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="flex items-center">
               <Mail className="w-4 h-4 mr-2 text-gray-500" />
               <span>Email: </span>
-              <span className="ml-auto font-medium text-[#8d6e63]">{user?.email}</span>
+              <span className="ml-auto font-medium text-wedding-gold">{user?.email}</span>
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-2 text-gray-500" />
               <span>Account created: </span>
-              <span className="ml-auto font-medium text-[#8d6e63]">N/A</span>
+              <span className="ml-auto font-medium text-wedding-gold">N/A</span>
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full border-[#ffd700] text-[#8d6e63] hover:bg-[#ffd700]/10">
+            <Button variant="outline" className="w-full border-wedding-gold text-wedding-gold hover:bg-wedding-gold/10">
               <Lock className="w-4 h-4 mr-2" />
               Change Password
             </Button>
           </CardFooter>
         </Card>
-
         {/* Edit Profile Form */}
-        <Card className="md:col-span-2 border-[#ffd700]/30 shadow-lg">
+        <Card className="md:col-span-2 border-wedding-gold/30 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-[#8d6e63]">Edit Profile</CardTitle>
+            <CardTitle className="text-wedding-gold">Edit Profile</CardTitle>
             <CardDescription className="text-gray-600">Update your personal information</CardDescription>
           </CardHeader>
           <CardContent>
@@ -147,7 +145,7 @@ const ProfilePage = () => {
                   value={displayName} 
                   onChange={(e) => setDisplayName(e.target.value)} 
                   placeholder="Enter your name"
-                  className="border-[#ffd700] focus:ring-[#ffd700]"
+                  className="border-wedding-gold focus:ring-wedding-gold"
                 />
               </div>
               <div className="space-y-2">
@@ -156,7 +154,7 @@ const ProfilePage = () => {
                   id="email" 
                   value={user?.email || ""} 
                   disabled 
-                  className="bg-gray-50 border-[#ffd700] text-gray-600"
+                  className="bg-gray-50 border-wedding-gold text-gray-600"
                 />
                 <p className="text-xs text-gray-500">Email address cannot be changed</p>
               </div>
@@ -175,11 +173,10 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
       </div>
-
       {/* Wedding Details Card */}
-      <Card className="border-[#ffd700]/30 shadow-lg">
+      <Card className="border-wedding-gold/30 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-[#8d6e63]">Wedding Details</CardTitle>
+          <CardTitle className="text-wedding-gold">Wedding Details</CardTitle>
           <CardDescription className="text-gray-600">Information about your upcoming ceremony</CardDescription>
         </CardHeader>
         <CardContent>
@@ -192,7 +189,7 @@ const ProfilePage = () => {
                 value={weddingDate}
                 onChange={e => setWeddingDate(e.target.value)}
                 placeholder="Select date" 
-                className="border-[#ffd700] focus:ring-[#ffd700]"
+                className="border-wedding-gold focus:ring-wedding-gold"
               />
             </div>
             <div className="space-y-2">
@@ -202,7 +199,7 @@ const ProfilePage = () => {
                 value={location}
                 onChange={e => setLocation(e.target.value)}
                 placeholder="Wedding venue"
-                className="border-[#ffd700] focus:ring-[#ffd700]"
+                className="border-wedding-gold focus:ring-wedding-gold"
               />
             </div>
             <div className="space-y-2">
@@ -212,7 +209,7 @@ const ProfilePage = () => {
                 value={tradition}
                 onChange={e => setTradition(e.target.value)}
                 placeholder="e.g., Hindu, Sikh, Bengali"
-                className="border-[#ffd700] focus:ring-[#ffd700]"
+                className="border-wedding-gold focus:ring-wedding-gold"
               />
             </div>
           </div>

@@ -60,7 +60,7 @@ const Index = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="py-12 md:py-20 bg-gradient-to-r from-wedding-red to-wedding-deepred text-white">
+        <section className="py-12 md:py-20 bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white">
           <div className="container mx-auto px-4 text-center animate-fade-in">
             <h2 className="text-2xl md:text-4xl font-playfair font-bold mb-4 md:mb-6">
               Begin Your Wedding Journey Today
@@ -71,7 +71,7 @@ const Index = () => {
             </p>
             {user ? (
               <Button 
-                className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium"
+                className="bg-white text-wedding-gold hover:bg-wedding-cream transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium"
                 onClick={handleGetStarted}
               >
                 Go to Dashboard

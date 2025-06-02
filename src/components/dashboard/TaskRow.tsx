@@ -67,16 +67,16 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, isSelected, onSelect, onToggle,
   return (
     <div
       className={`relative flex flex-col gap-3 p-5 rounded-2xl shadow-lg bg-white border-l-8 transition-all duration-300 ${fade ? 'opacity-0 pointer-events-none' : 'opacity-100'} hover:shadow-2xl hover:scale-[1.03] hover:z-10 group`}
-      style={{ borderLeftColor: getPriorityColor(task.priority) === 'text-red-600' ? '#ef4444' : getPriorityColor(task.priority) === 'text-yellow-600' ? '#f59e42' : '#22c55e', minHeight: 120 }}
+      style={{ borderLeftColor: getPriorityColor(task.priority) === 'text-red-600' ? '#FFD700' : getPriorityColor(task.priority) === 'text-yellow-600' ? '#FF8F00' : '#FFF8E1', minHeight: 120 }}
     >
       {/* Title & Status Chip */}
       <div className="flex items-center justify-between mb-1">
-        <span className="font-bold text-lg truncate max-w-[140px]" title={task.title}>{task.title.length > 18 ? task.title.slice(0, 18) + '…' : task.title}</span>
+        <span className="font-bold text-lg truncate max-w-[140px] text-wedding-gold" title={task.title}>{task.title.length > 18 ? task.title.slice(0, 18) + '…' : task.title}</span>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm border ${
           task.status === 'Done' ? 'bg-green-100 text-green-700 border-green-200' :
           task.status === 'Doing' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
           task.status === 'To Do' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-          'bg-gray-100 text-gray-600 border-gray-200'
+          'bg-wedding-cream text-wedding-gold border-wedding-gold/30'
         }`} title={task.status}>{task.status}</span>
       </div>
       {/* Description */}

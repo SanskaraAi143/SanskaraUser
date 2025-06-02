@@ -24,11 +24,11 @@ const TasksPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-wedding-maroon/5 rounded-xl p-6 border border-wedding-maroon/20">
-        <h1 className="text-2xl font-playfair text-wedding-maroon mb-2">
+      <div className="bg-gradient-to-br from-wedding-gold/80 via-wedding-cream/90 to-white rounded-xl p-6 border border-wedding-gold/30 shadow-xl">
+        <h1 className="text-3xl font-playfair font-bold bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent mb-2 drop-shadow">
           Wedding Tasks
         </h1>
-        <p className="text-gray-600">
+        <p className="text-wedding-gold/80 font-medium">
           Manage and track all your wedding preparation tasks in one place.
         </p>
       </div>
