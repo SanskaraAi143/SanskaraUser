@@ -1,0 +1,29 @@
+/* ...existing code... */
+
+.tasks-header {
+  /* Use a bold, dark gold or dark gray for visibility */
+  color: #b8860b; /* or #333333 for dark gray */
+  font-weight: 700;
+  font-size: 2rem;
+  /* Remove or soften text-shadow if present */
+  text-shadow: none;
+  /* ...other existing styles... */
+}
+
+.tasks-subheader {
+  color: #7c6f57; /* Slightly darker gold or gray for subtext */
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-shadow: none;
+  /* ...other existing styles... */
+}
+
+.task-status-title {
+  color: #b8860b; /* Match heading color */
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-shadow: none;
+  /* ...other existing styles... */
+}
+
+/* ...existing code... */

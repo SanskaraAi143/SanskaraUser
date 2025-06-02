@@ -46,7 +46,7 @@ const Index = () => {
             </div>
             <div className="crew-description flex-1">
               <h2 className="text-2xl md:text-3xl font-bold mb-4 title-gradient" style={{ color: '#ffd700' }}>Meet Your Divine Planning Crew</h2>
-              <p className="mb-4 text-wedding-brown/90">Your dedicated team of AI assistants, each specializing in different aspects of your wedding journey:</p>
+              <p className="mb-4 text-gray-700/90">Your dedicated team of AI assistants, each specializing in different aspects of your wedding journey:</p>
               <ul className="crew-members space-y-3 text-base md:text-lg">
                 <li className="flex items-center gap-2 font-semibold"><span className="text-2xl">👨‍🍳</span> Chef Arjun - <span className="font-normal">Your culinary excellence guide</span></li>
                 <li className="flex items-center gap-2 font-semibold"><span className="text-2xl">💃</span> Priya - <span className="font-normal">Your tradition & decoration specialist</span></li>

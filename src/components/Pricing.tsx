@@ -65,7 +65,7 @@ const Pricing = () => {
 						Choose Your Perfect<br/>
 						<span className="title-gradient">Wedding Plan</span>
 					</h2>
-					<p className="text-lg md:text-xl text-wedding-brown/80">
+					<p className="text-lg md:text-xl text-gray-700">
 						Select the plan that best suits your needs and start planning your dream Hindu wedding today.
 					</p>
 				</div>

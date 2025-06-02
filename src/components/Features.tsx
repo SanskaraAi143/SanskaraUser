@@ -64,7 +64,7 @@ const Features = () => {
 						<br />
 						<span className="title-gradient">Dream Wedding</span>
 					</h2>
-					<p className="text-lg md:text-xl text-wedding-brown/80">
+					<p className="text-lg md:text-xl text-wedding-gold/90">
 						From planning to execution, our AI-powered platform helps you create the perfect Hindu wedding
 						celebration.
 					</p>
@@ -82,7 +82,7 @@ const Features = () => {
 							<h3 className="text-xl font-playfair font-semibold title-gradient mb-3">
 								{feature.title}
 							</h3>
-							<p className="text-wedding-brown/80">{feature.description}</p>
+							<p className="text-wedding-gold/80">{feature.description}</p>
 						</div>
 					))}
 				</div>

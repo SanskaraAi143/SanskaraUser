@@ -28,7 +28,7 @@ const TasksPage = () => {
         <h1 className="text-3xl font-playfair font-bold bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent mb-2 drop-shadow">
           Wedding Tasks
         </h1>
-        <p className="text-wedding-gold/80 font-medium">
+        <p className="text-wedding-gold/90 font-medium">
           Manage and track all your wedding preparation tasks in one place.
         </p>
       </div>

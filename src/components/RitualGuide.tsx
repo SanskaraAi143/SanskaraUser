@@ -66,7 +66,7 @@ const RitualGuide = () => {
             Discover Sacred<br/>
             <span className="title-gradient">Wedding Rituals</span>
           </h2>
-          <p className="text-lg md:text-xl text-wedding-brown/80">
+          <p className="text-lg md:text-xl text-gray-700">
             Explore the meanings and significance behind traditional Hindu wedding ceremonies
             and learn how to incorporate them into your special day.
           </p>

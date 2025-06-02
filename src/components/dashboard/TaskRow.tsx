@@ -73,9 +73,9 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, isSelected, onSelect, onToggle,
       <div className="flex items-center justify-between mb-1">
         <span className="font-bold text-lg truncate max-w-[140px] text-wedding-gold" title={task.title}>{task.title.length > 18 ? task.title.slice(0, 18) + '…' : task.title}</span>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm border ${
-          task.status === 'Done' ? 'bg-green-100 text-green-700 border-green-200' :
-          task.status === 'Doing' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-          task.status === 'To Do' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+          task.status === 'Done' ? 'bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white border-wedding-gold/40' :
+          task.status === 'Doing' ? 'bg-gradient-to-r from-wedding-gold/60 to-wedding-secondaryGold/60 text-wedding-gold border-wedding-gold/30' :
+          task.status === 'To Do' ? 'bg-gradient-to-r from-wedding-cream to-wedding-gold/30 text-wedding-gold border-wedding-gold/20' :
           'bg-wedding-cream text-wedding-gold border-wedding-gold/30'
         }`} title={task.status}>{task.status}</span>
       </div>

@@ -179,7 +179,7 @@ const TaskTracker = () => {
             <h2 className="text-3xl font-playfair font-bold bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent mb-2 drop-shadow">
               Wedding Planning Tasks
             </h2>
-            <p className="text-wedding-gold/80 font-medium">
+            <p className="text-wedding-gold/90 font-medium">
               Track and manage all your wedding preparation tasks in one place
             </p>
           </div>
@@ -250,11 +250,11 @@ const TaskTracker = () => {
                                     className="mt-1 border-[#d4af37] focus:ring-[#d4af37]"
                                   />
                                   <div className="min-w-0">
-                                    <h4 className="font-semibold text-wedding-brown truncate">
+                                    <h4 className="font-semibold text-wedding-gold truncate">
                                       {task.title}
                                     </h4>
                                     {task.description && (
-                                      <p className="text-sm text-wedding-brown/70 truncate mt-1">
+                                      <p className="text-sm text-wedding-gold/70 truncate mt-1">
                                         {task.description}
                                       </p>
                                     )}
@@ -268,7 +268,7 @@ const TaskTracker = () => {
                                 </div>
                               </div>
                               {task.due_date && (
-                                <div className="mt-3 flex items-center gap-2 text-sm text-wedding-brown/60">
+                                <div className="mt-3 flex items-center gap-2 text-sm text-wedding-gold/60">
                                   <CalendarDays className="h-4 w-4 text-[#d4af37]" />
                                   <span>{new Date(task.due_date).toLocaleDateString()}</span>
                                 </div>

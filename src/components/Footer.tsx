@@ -21,7 +21,7 @@ const Footer = () => {
                   Sanskara<span className="font-bold">AI</span>
                 </span>
               </div>
-              <p className="text-wedding-brown/80 max-w-md text-lg">
+              <p className="text-gray-700 max-w-md text-lg">
                 Your AI-powered guide to planning a beautiful, authentic Hindu wedding that honors
                 traditions while reflecting your unique love story.
               </p>

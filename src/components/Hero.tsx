@@ -46,7 +46,7 @@ const Hero = () => {
                 <span className="title-gradient">Hindu Wedding</span><br/>
                 With AI
               </h1>
-              <p className="mt-6 text-lg md:text-xl text-wedding-brown/80 max-w-2xl">
+              <p className="mt-6 text-lg md:text-xl text-gray-700 max-w-2xl">
                 Sanskara AI is your virtual wedding planner that helps you navigate Hindu wedding
                 rituals, vendors, and traditions to create your perfect ceremony.
               </p>

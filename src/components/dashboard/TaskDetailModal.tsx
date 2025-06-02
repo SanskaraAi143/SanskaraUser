@@ -46,7 +46,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="glass-card max-w-lg w-full p-8 relative animate-fade-in">
         <button
-          className="absolute top-4 right-4 text-wedding-brown/60 hover:text-wedding-gold text-xl font-bold"
+          className="absolute top-4 right-4 text-gray-700/60 hover:text-wedding-gold text-xl font-bold"
           onClick={onClose}
           aria-label="Close"
         >
@@ -63,7 +63,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
           className="space-y-5"
         >
           <div>
-            <label className="block mb-1 font-medium text-wedding-brown">Title</label>
+            <label className="block mb-1 font-medium text-wedding-gold">Title</label>
             <Input
               value={title}
               onChange={e => setTitle(e.target.value)}
@@ -72,7 +72,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium text-wedding-brown">Description</label>
+            <label className="block mb-1 font-medium text-wedding-gold">Description</label>
             <Input
               value={desc}
               onChange={e => setDesc(e.target.value)}
@@ -81,7 +81,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block mb-1 font-medium text-wedding-brown">Due Date</label>
+              <label className="block mb-1 font-medium text-wedding-gold">Due Date</label>
               <Input
                 type="date"
                 value={dueDate}
@@ -90,7 +90,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
               />
             </div>
             <div className="flex-1">
-              <label className="block mb-1 font-medium text-wedding-brown">Priority</label>
+              <label className="block mb-1 font-medium text-wedding-gold">Priority</label>
               <select
                 value={priority}
                 onChange={e => setPriority(e.target.value as any)}
@@ -103,7 +103,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
             </div>
           </div>
           <div>
-            <label className="block mb-1 font-medium text-wedding-brown">Category</label>
+            <label className="block mb-1 font-medium text-wedding-gold">Category</label>
             <Input
               value={category}
               onChange={e => setCategory(e.target.value)}

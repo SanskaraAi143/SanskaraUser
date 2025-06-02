@@ -28,7 +28,7 @@ const ChatDemo = () => {
             Your Personal<br/>
             <span className="title-gradient">Wedding Guide</span>
           </h2>
-          <p className="text-lg md:text-xl text-wedding-brown/80">
+          <p className="text-lg md:text-xl text-gray-700">
             Sanskara AI understands Hindu wedding traditions, answering your questions and
             guiding you through every step of the planning process.
           </p>
