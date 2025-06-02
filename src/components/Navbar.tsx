@@ -33,7 +33,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3">
             <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
-              <img src="/WhatsApp%20Image%202025-05-26%20at%206.40.58%20PM.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
+              <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
             </div>
             <h1 className="text-2xl font-playfair font-semibold title-gradient">
               Sanskara<span className="font-bold">AI</span>
@@ -96,7 +96,7 @@ const Navbar = () => {
                 <div className="mb-8">
                   <Link to="/" className="flex items-center gap-3 mb-6">
                     <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
-                      <img src="/WhatsApp%20Image%202025-05-26%20at%206.40.58%20PM.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
+                      <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
                     </div>
                     <h2 className="text-2xl font-playfair font-semibold title-gradient">
                       Sanskara<span className="font-bold">AI</span>

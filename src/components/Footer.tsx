@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
                   <img
-                    src="/WhatsApp%20Image%202025-05-26%20at%206.40.58%20PM.jpeg"
+                    src="/logo.jpeg"
                     alt="Site Logo"
                     className="h-10 w-10 object-contain rounded-full"
                   />

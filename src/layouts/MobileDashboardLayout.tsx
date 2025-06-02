@@ -156,7 +156,7 @@ const MobileDashboardLayout = () => {
         <div className="flex h-16 items-center justify-between border-b px-4 bg-gradient-to-br from-[#ffd700] to-[#ffecb3]">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="/WhatsApp%20Image%202025-05-26%20at%206.40.58%20PM.jpeg" 
+              src="/logo.jpeg" 
               alt="SanskaraAI Logo" 
               className="h-10 w-10 object-contain"
             />
