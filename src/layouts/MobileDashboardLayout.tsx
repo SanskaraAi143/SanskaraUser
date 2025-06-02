@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -153,16 +152,16 @@ const MobileDashboardLayout = () => {
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-white">
-        <div className="flex h-16 items-center justify-between border-b px-4">
+      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-[#fffbe7] border-[#ffd700]/30 min-h-screen shadow-lg">
+        <div className="flex h-16 items-center justify-between border-b px-4 bg-gradient-to-br from-[#ffd700] to-[#ffecb3]">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
-              alt="Sanskara Logo" 
+              src="/WhatsApp%20Image%202025-05-26%20at%206.40.58%20PM.jpeg" 
+              alt="SanskaraAI Logo" 
               className="h-10 w-10 object-contain"
             />
-            <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
-              Sanskara<span className="text-wedding-red">AI</span>
+            <h1 className="text-lg font-playfair font-semibold" style={{color:'#ff8f00'}}>
+              Sanskara<span style={{color:'#8d6e63'}}>AI</span>
             </h1>
           </Link>
         </div>
@@ -173,24 +172,18 @@ const MobileDashboardLayout = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium ${
-                  isActive
-                    ? "bg-wedding-red/10 text-wedding-red"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-lg ${isActive ? 'bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] shadow-lg' : 'text-[#8d6e63] hover:bg-[#fffde7]'}`}
               >
-                <link.icon className={`mr-3 h-5 w-5 ${isActive ? "text-wedding-red" : "text-gray-500"}`} />
-                {link.name}
+                <link.icon size={20} />
+                <span>{link.name}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="border-t p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <UserProfileDropdown />
-            </div>
-          </div>
+        <div className="px-4 py-4">
+          <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200">
+            Ask AI
+          </Button>
         </div>
       </aside>
 

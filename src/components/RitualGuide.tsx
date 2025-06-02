@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bookmark, ChevronRight, Info } from 'lucide-react';
@@ -53,159 +52,90 @@ const rituals = [
 ];
 
 const RitualGuide = () => {
-  const [selectedRitual, setSelectedRitual] = useState(rituals[0]);
   const navigate = useNavigate();
   const { user } = useAuth();
-  
-  const handleViewDetails = (ritual) => {
-    if (user) {
-      navigate('/dashboard/chat', { state: { initialTab: 'ritual', ritualName: ritual.name } });
-    }
-  };
-  
-  const handleLearnMore = () => {
-    if (user) {
-      navigate('/dashboard/chat', { state: { initialTab: 'ritual', ritualName: selectedRitual.name } });
-    }
-  };
+  const [activeRitual, setActiveRitual] = useState(rituals[0]);
 
   return (
-    <section id="ritual-guide" className="py-16 md:py-24 bg-wedding-cream pattern-bg">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-12 animate-fade-in">
-          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-wedding-maroon mb-4">
-            Sacred Rituals Guide
+    <section className="relative py-20 md:py-32 overflow-hidden">
+      <div className="gradient-bg opacity-50"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="glass-card p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-6">
+            Discover Sacred<br/>
+            <span className="title-gradient">Wedding Rituals</span>
           </h2>
-          <p className="text-gray-700 text-lg">
-            Explore and understand the significance of traditional Hindu wedding rituals
-            to create a meaningful ceremony that honors your heritage.
+          <p className="text-lg md:text-xl text-wedding-brown/80">
+            Explore the meanings and significance behind traditional Hindu wedding ceremonies
+            and learn how to incorporate them into your special day.
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
-            <div className="bg-white p-6 rounded-xl shadow-md animate-scale-in">
-              <h3 className="text-2xl font-playfair font-semibold text-wedding-maroon mb-2">
-                {selectedRitual.name}
+            <div className="glass-card p-8 md:p-10">
+              <h3 className="text-2xl md:text-3xl font-playfair font-bold title-gradient mb-4">
+                {activeRitual.name}
               </h3>
-              <p className="text-gray-700 mb-6">
-                {selectedRitual.description}
+              <p className="text-lg text-wedding-brown/80 mb-8">
+                {activeRitual.description}
               </p>
               
-              <div className="flex flex-wrap gap-4 mb-6">
-                {rituals.map((ritual) => (
-                  <button
-                    key={ritual.id}
-                    onClick={() => setSelectedRitual(ritual)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedRitual.id === ritual.id
-                        ? "bg-wedding-red text-white"
-                        : "bg-wedding-red/10 text-wedding-red hover:bg-wedding-red/20"
-                    }`}
-                  >
-                    {ritual.name}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="flex gap-4">
-                <Button variant="outline" className="border-wedding-red text-wedding-red hover:bg-wedding-red/10">
-                  <Bookmark size={18} className="mr-2" />
-                  Save to Planner
+              {user ? (
+                <Button 
+                  className="cta-button"
+                  onClick={() => navigate('/dashboard/rituals')}
+                >
+                  <Info size={20} className="mr-2" />
+                  Learn More
                 </Button>
-                {user ? (
-                  <Button 
-                    className="bg-wedding-red hover:bg-wedding-deepred text-white"
-                    onClick={handleLearnMore}
-                  >
+              ) : (
+                <SignInDialog>
+                  <Button className="cta-button">
+                    <Info size={20} className="mr-2" />
                     Learn More
-                    <ChevronRight size={18} className="ml-1" />
                   </Button>
-                ) : (
-                  <SignInDialog>
-                    <Button className="bg-wedding-red hover:bg-wedding-deepred text-white">
-                      Learn More
-                      <ChevronRight size={18} className="ml-1" />
-                    </Button>
-                  </SignInDialog>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <div className="order-1 lg:order-2">
-            <div className="relative rounded-xl overflow-hidden shadow-lg">
-              <img 
-                src={selectedRitual.image} 
-                alt={selectedRitual.name} 
-                className="w-full h-80 md:h-96 object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                <div className="flex items-center gap-2 text-white">
-                  <Info size={18} />
-                  <p className="text-sm">Click ritual names to learn more</p>
+                </SignInDialog>
+              )}
+              
+              <div className="mt-8 pt-8 border-t border-wedding-gold/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bookmark className="h-5 w-5 text-wedding-gold" />
+                    <span className="text-wedding-brown/80">Save for later</span>
+                  </div>
+                  <Button variant="ghost" className="nav-link">
+                    All Rituals
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="mt-16 max-w-4xl mx-auto">
-          <h3 className="text-2xl font-playfair font-semibold text-wedding-maroon text-center mb-8">
-            More Wedding Traditions
-          </h3>
-          
-          <Carousel className="w-full">
-            <CarouselContent>
-              {rituals.map((ritual) => (
-                <CarouselItem key={ritual.id} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-2 h-full">
-                    <div className="bg-white rounded-xl shadow-md overflow-hidden h-full flex flex-col">
-                      <div className="h-48 relative">
-                        <img 
-                          src={ritual.image} 
-                          alt={ritual.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-4 flex-grow">
-                        <h4 className="font-playfair font-semibold text-wedding-maroon text-lg mb-1">
-                          {ritual.name}
-                        </h4>
-                        <p className="text-gray-600 text-sm line-clamp-3">
-                          {ritual.description}
-                        </p>
-                      </div>
-                      <div className="p-4 pt-0">
-                        {user ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full border-wedding-red text-wedding-red hover:bg-wedding-red/10"
-                            onClick={() => handleViewDetails(ritual)}
-                          >
-                            View Details
-                          </Button>
-                        ) : (
-                          <SignInDialog>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full border-wedding-red text-wedding-red hover:bg-wedding-red/10"
-                            >
-                              View Details
-                            </Button>
-                          </SignInDialog>
-                        )}
-                      </div>
+
+          <div className="order-1 lg:order-2">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {rituals.map((ritual) => (
+                  <CarouselItem key={ritual.id}>
+                    <div 
+                      className="glass-card p-2 aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-300 hover:scale-[1.02]"
+                      onClick={() => setActiveRitual(ritual)}
+                    >
+                      <img
+                        src={ritual.image}
+                        alt={ritual.name}
+                        className="w-full h-full object-cover rounded-xl"
+                      />
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2 lg:-left-6" />
-            <CarouselNext className="right-2 lg:-right-6" />
-          </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="bg-gradient-primary text-white border-0 hover:bg-gradient-primary hover:opacity-90" />
+              <CarouselNext className="bg-gradient-primary text-white border-0 hover:bg-gradient-primary hover:opacity-90" />
+            </Carousel>
+          </div>
         </div>
       </div>
     </section>

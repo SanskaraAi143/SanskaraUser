@@ -1,30 +1,73 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import ChatWithAI from '@/components/chat/ChatWithAI';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ChatWithAI from '@/components/chat/ChatWithAI';
 import RitualChat from '@/components/chat/RitualChat';
-import { useLocation } from 'react-router-dom';
 import VendorChat from '@/components/chat/VendorChat';
+import { useLocation } from 'react-router-dom';
 
-const ChatPage = () => {
+interface SuggestedTopic {
+  id: number;
+  text: string;
+  category: 'general' | 'ritual' | 'vendor';
+}
+
+const SUGGESTED_TOPICS: SuggestedTopic[] = [
+  {
+    id: 1,
+    text: "Explain the Saptapadi ritual",
+    category: "ritual"
+  },
+  {
+    id: 2,
+    text: "How to choose a wedding date?",
+    category: "general"
+  },
+  {
+    id: 3,
+    text: "Create a Mehndi ceremony plan",
+    category: "general"
+  },
+  {
+    id: 4,
+    text: "Find Hindu priests in my area",
+    category: "vendor"
+  },
+  {
+    id: 5,
+    text: "Sangeet night planning ideas",
+    category: "general"
+  }
+];
+
+const ChatPage: React.FC = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("ai");
+  const [activeTab, setActiveTab] = useState<'general' | 'ritual' | 'vendor'>('general');
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   
   useEffect(() => {
-    // Check if there's state passed from navigation
     if (location.state) {
       const { initialTab, ritualName } = location.state as { initialTab?: string; ritualName?: string };
       if (initialTab) {
-        setActiveTab(initialTab);
+        setActiveTab(initialTab as 'general' | 'ritual' | 'vendor');
       }
     }
   }, [location]);
-  
+
+  useEffect(() => {
+    console.log("Active Tab:", activeTab);
+  }, [activeTab]);
+
+  const handleTopicClick = (topic: SuggestedTopic) => {
+    console.log("Topic Clicked:", topic);
+    setActiveTab(topic.category);
+    setSelectedTopic(topic.text);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="bg-wedding-maroon/5 rounded-xl p-6 border border-wedding-maroon/20">
-        <h1 className="text-2xl font-playfair text-wedding-maroon mb-2">
+      <div className="bg-[#fffbe7] rounded-xl p-6 border border-[#ffd700]/30">
+        <h1 className="text-2xl font-playfair text-[#8d6e63] mb-2">
           Chat with Sanskara
         </h1>
         <p className="text-gray-600">
@@ -33,63 +76,73 @@ const ChatPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 h-[600px]">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
-              <TabsTrigger value="ai">General Assistant</TabsTrigger>
-              <TabsTrigger value="ritual">Ritual Expert</TabsTrigger>
-              <TabsTrigger value="vendor">Vendor Chat</TabsTrigger>
-            </TabsList>
-            <TabsContent value="ai" className="h-[560px]">
-              <ChatWithAI />
-            </TabsContent>
-            <TabsContent value="ritual" className="h-[560px]">
-              <RitualChat initialRitual={location.state?.ritualName} />
-            </TabsContent>
-            <TabsContent value="vendor" className="h-[560px]">
-              <VendorChat />
-            </TabsContent>
+        <div className="lg:col-span-3">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'general' | 'ritual' | 'vendor')} className="w-full">
+            <div className="bg-white rounded-lg p-1 mb-4 border border-[#ffd700]/30">
+              <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger 
+                  value="general"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ffd700] data-[state=active]:to-[#ffecb3] data-[state=active]:text-[#8d6e63] py-3"
+                >
+                  General Assistant
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="ritual"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ffd700] data-[state=active]:to-[#ffecb3] data-[state=active]:text-[#8d6e63] py-3"
+                >
+                  Ritual Expert
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="vendor"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ffd700] data-[state=active]:to-[#ffecb3] data-[state=active]:text-[#8d6e63] py-3"
+                >
+                  Vendor Chat
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className="h-[560px]">
+              <TabsContent value="general" className="h-full mt-0">
+                <ChatWithAI selectedTopic={selectedTopic} />
+              </TabsContent>
+              <TabsContent value="ritual" className="h-full mt-0">
+                <RitualChat initialRitual={location.state?.ritualName} selectedTopic={selectedTopic} />
+              </TabsContent>
+              <TabsContent value="vendor" className="h-full mt-0">
+                <VendorChat selectedTopic={selectedTopic} />
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
-        
+
         <div className="lg:col-span-1 space-y-6">
-          <Card>
+          {/* Suggested Topics */}
+          <Card className="border-[#ffd700]/30 shadow-lg">
             <CardHeader>
-              <CardTitle>Suggested Topics</CardTitle>
+              <CardTitle className="text-[#8d6e63]">Suggested Topics</CardTitle>
               <CardDescription>Popular questions to ask</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors"
-                onClick={() => {
-                  setActiveTab("ritual");
-                }}>
-                Explain the Saptapadi ritual
-              </div>
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
-                How to choose a wedding date?
-              </div>
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors"
-                onClick={() => {
-                  setActiveTab("ai");
-                }}>
-                Create a Mehndi ceremony plan
-              </div>
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
-                Find Hindu priests in my area
-              </div>
-              <div className="p-2 rounded-md bg-wedding-red/10 text-wedding-red cursor-pointer hover:bg-wedding-red/20 transition-colors">
-                Sangeet night planning ideas
-              </div>
+              {SUGGESTED_TOPICS.map((topic) => (
+                <div
+                  key={topic.id}
+                  className="p-2 rounded-md bg-[#ffd700]/10 text-[#8d6e63] cursor-pointer hover:bg-[#ffd700]/20 transition-colors"
+                  onClick={() => handleTopicClick(topic)}
+                >
+                  {topic.text}
+                </div>
+              ))}
             </CardContent>
           </Card>
-          
-          <Card>
+
+          {/* Recent Conversations */}
+          <Card className="border-[#ffd700]/30 shadow-lg">
             <CardHeader>
-              <CardTitle>Recent Conversations</CardTitle>
+              <CardTitle className="text-[#8d6e63]">Recent Conversations</CardTitle>
               <CardDescription>Your conversation history</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-gray-500 text-center text-sm italic">
+              <p className="text-[#8d6e63]/60 text-center text-sm italic">
                 Your recent conversations will appear here
               </p>
             </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,9 +15,10 @@ type Message = {
 
 interface RitualChatProps {
   initialRitual?: string;
+  selectedTopic?: string | null;
 }
 
-const RitualChat = ({ initialRitual }: RitualChatProps) => {
+const RitualChat = ({ initialRitual, selectedTopic }: RitualChatProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -54,6 +54,13 @@ const RitualChat = ({ initialRitual }: RitualChatProps) => {
       }, 1000);
     }
   }, [initialRitual]);
+
+  // Update input message when selected topic changes
+  useEffect(() => {
+    if (selectedTopic) {
+      setInputMessage(selectedTopic);
+    }
+  }, [selectedTopic]);
 
   // Generate ritual-specific response
   const generateRitualResponse = (ritualName: string) => {
