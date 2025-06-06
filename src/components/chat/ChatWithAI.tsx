@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { runAgent, listSessions, createSession, listArtifacts, listArtifactVersions, getArtifact } from '@/services/api';
 
 interface Message {
   id: number;
@@ -32,8 +33,16 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [artifacts, setArtifacts] = useState<any[]>([]);
+  const [artifactVersions, setArtifactVersions] = useState<any[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [selectedArtifact, setSelectedArtifact] = useState<string | null>(null);
+  const [sessionEvents, setSessionEvents] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const appName = 'sanskara';
 
   useEffect(() => {
     const getJwt = async () => {
@@ -41,6 +50,27 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
       setJwt(data?.session?.access_token || null);
     };
     getJwt();
+  }, [user]);
+
+  useEffect(() => {
+    // Session management: get or create session
+    const setupSession = async () => {
+      if (!user) return;
+      try {
+        const userId = user.id;
+        const sessions = await listSessions(appName, userId);
+        if (sessions && sessions.length > 0) {
+          setSessionId(sessions[0].session_id || sessions[0].id || sessions[0]);
+        } else {
+          const session = await createSession(appName, userId);
+          setSessionId(session.session_id || session.id || session);
+        }
+      } catch (err) {
+        // Optionally show error toast
+        setSessionId(null);
+      }
+    };
+    setupSession();
   }, [user]);
 
   useEffect(() => {
@@ -53,6 +83,67 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
     }
   }, [selectedTopic]);
 
+  // Fetch all sessions for user
+  useEffect(() => {
+    const fetchSessions = async () => {
+      if (!user) return;
+      try {
+        const userId = user.id;
+        const sessions = await listSessions(appName, userId);
+        setSessions(sessions);
+      } catch (err) {
+        setSessions([]);
+      }
+    };
+    fetchSessions();
+  }, [user]);
+
+  // Fetch artifacts for selected session
+  useEffect(() => {
+    const fetchArtifacts = async () => {
+      if (!user || !selectedSession) return;
+      try {
+        const userId = user.id;
+        const artifacts = await listArtifacts(appName, userId, selectedSession);
+        setArtifacts(artifacts);
+      } catch (err) {
+        setArtifacts([]);
+      }
+    };
+    fetchArtifacts();
+  }, [user, selectedSession]);
+
+  // Fetch artifact versions for selected artifact
+  useEffect(() => {
+    const fetchArtifactVersions = async () => {
+      if (!user || !selectedSession || !selectedArtifact) return;
+      try {
+        const userId = user.id;
+        const versions = await listArtifactVersions(appName, userId, selectedSession, selectedArtifact);
+        setArtifactVersions(versions);
+      } catch (err) {
+        setArtifactVersions([]);
+      }
+    };
+    fetchArtifactVersions();
+  }, [user, selectedSession, selectedArtifact]);
+
+  // Helper: Load session events (history)
+  useEffect(() => {
+    const fetchSessionEvents = async () => {
+      if (!user || !selectedSession) return;
+      try {
+        const userId = user.id;
+        // Get session details (includes events)
+        const session = await (await import('@/services/api')).getSession(appName, userId, selectedSession);
+        setSessionEvents(session.events || []);
+      } catch (err) {
+        setSessionEvents([]);
+      }
+    };
+    fetchSessionEvents();
+  }, [user, selectedSession]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
@@ -64,42 +155,57 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
     }
   };
 
+  // Ensure a session is created before sending any messages
   const handleSendMessage = async () => {
-    if (input.trim() === '' || !jwt) return;
-    
+    if (input.trim() === '' || !user) return;
+    const userId = user.id;
+    let activeSessionId = sessionId;
+    // If no session exists, create one first
+    if (!activeSessionId) {
+      try {
+        const session = await createSession(appName, userId);
+        activeSessionId = session.session_id || session.id || session;
+        setSessionId(activeSessionId);
+        setSelectedSession(activeSessionId);
+      } catch (err) {
+        setIsTyping(false);
+        return;
+      }
+    }
     const userMessage: Message = {
       id: messages.length + 1,
       role: 'user',
       content: input.trim(),
       timestamp: new Date().toISOString(),
     };
-    
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
-
     try {
-      const response = await fetch('http://localhost:8000/api/chat/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-          session_id: 'user-session-id',
-        }),
-      });
-
-      const data = await response.json();
-      
+      // The runAgent endpoint expects newMessage to have both 'role' and 'parts' (OpenAPI spec)
+      const newMessage = {
+        role: 'user',
+        parts: [{ text: userMessage.content }],
+      };
+      const data = await runAgent(appName, userId, activeSessionId, newMessage);
+      // The API returns an array of events, not a single reply/message
+      // Find the latest model/agent response event with text
+      let aiText = '';
+      if (Array.isArray(data)) {
+        // Find the last event with content.parts[0].text and author not 'user'
+        const aiEvent = [...data].reverse().find(ev => ev.content && ev.content.parts && ev.content.parts[0]?.text && ev.author && ev.author !== 'user');
+        aiText = aiEvent?.content?.parts?.map?.(p => p.text).filter(Boolean).join(' ') || '';
+      } else if (data && data.reply) {
+        aiText = data.reply;
+      } else if (data && data.message) {
+        aiText = data.message;
+      }
       const botMessage: Message = {
         id: messages.length + 2,
         role: 'bot',
-        content: response.ok ? data.reply : (data.detail || 'Sorry, there was a problem reaching the AI backend.'),
+        content: aiText || 'Sorry, no response from AI.',
         timestamp: new Date().toISOString(),
       };
-      
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       const errorMessage: Message = {
@@ -121,6 +227,76 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
         <h2 className="text-xl font-playfair font-medium">Chat with Sanskara AI</h2>
         <p className="text-white/90 text-sm">Your Hindu Wedding Planning Assistant</p>
       </div>
+
+      {/* Session History */}
+      <div className="p-2 bg-white/80 border-b border-[#ffd700]/20">
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs text-[#8d6e63] font-semibold">Sessions:</span>
+          {sessions.map((s) => (
+            <button
+              key={s.session_id || s.id || s}
+              className={`px-2 py-1 rounded text-xs border ${selectedSession === (s.session_id || s.id || s) ? 'bg-[#ffd700]/80 text-white' : 'bg-white text-[#8d6e63] border-[#ffd700]/30'}`}
+              onClick={() => setSelectedSession(s.session_id || s.id || s)}
+            >
+              {s.session_id?.slice?.(-6) || s.id?.slice?.(-6) || String(s).slice(-6)}
+            </button>
+          ))}
+        </div>
+        {/* Session Event History */}
+        {sessionEvents.length > 0 && (
+          <div className="mt-2 text-xs text-[#8d6e63] max-h-32 overflow-y-auto">
+            <div className="font-semibold mb-1">Session History:</div>
+            <ul className="space-y-1">
+              {sessionEvents.map((ev, idx) => (
+                <li key={ev.id || idx} className="border-b border-[#ffd700]/10 pb-1">
+                  <span className="font-bold">{ev.author}:</span> {ev.content?.parts?.map?.(p => p.text).filter(Boolean).join(' ')}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Artifact List */}
+      {selectedSession && (
+        <div className="p-2 bg-white/70 border-b border-[#ffd700]/20">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-[#8d6e63] font-semibold">Artifacts:</span>
+            {artifacts.map((a) => (
+              <button
+                key={a.name || a}
+                className={`px-2 py-1 rounded text-xs border ${selectedArtifact === (a.name || a) ? 'bg-[#ff8f00]/80 text-white' : 'bg-white text-[#8d6e63] border-[#ffd700]/30'}`}
+                onClick={() => setSelectedArtifact(a.name || a)}
+              >
+                {a.name || a}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Artifact Versions */}
+      {selectedArtifact && artifactVersions.length > 0 && (
+        <div className="p-2 bg-white/60 border-b border-[#ffd700]/20">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-[#8d6e63] font-semibold">Versions:</span>
+            {artifactVersions.map((v) => (
+              <button
+                key={v.version_id || v}
+                className="px-2 py-1 rounded text-xs border bg-white text-[#8d6e63] border-[#ffd700]/30"
+                onClick={async () => {
+                  if (!user) return;
+                  const userId = user.id;
+                  const artifact = await getArtifact(appName, userId, selectedSession, selectedArtifact, v.version_id || v);
+                  alert(JSON.stringify(artifact, null, 2));
+                }}
+              >
+                {v.version_id || v}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Chat Messages Area */}
       <div className="flex-grow flex flex-col overflow-hidden">
