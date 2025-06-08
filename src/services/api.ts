@@ -1,12 +1,12 @@
-
+// MCP/Google ADK API integration for agent chat, session, and artifact management
 import axios from 'axios';
 
-// Set the API base URL to your Python backend
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.sanskara-ai.com/api'  // Replace with your actual production API URL
-  : 'http://localhost:5000/api';       // Replace with your actual development API URL
-
-// Create an axios instance
+// Set the MCP API base URL
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.sanskaraai.com' // Replace with your production MCP backend URL
+  : 'http://localhost:8000'; // Local MCP backend
+console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+console.log('API_BASE_URL', API_BASE_URL);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -14,150 +14,103 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests if available
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Chat API
-export const getSanskaraAIResponse = async (message: string, category: string = 'general') => {
-  try {
-    const response = await api.post('/chat', { message, category });
+// Run agent (chat) - POST /run and /run_sse
+export const runAgent = async (appName, userId, sessionId, newMessage, streaming = false) => {
+  // Always ensure newMessage has role and parts (OpenAPI spec)
+  const messagePayload = {
+    role: newMessage.role || 'user',
+    parts: newMessage.parts || [],
+  };
+  const payload = {
+    appName,
+    userId,
+    sessionId,
+    newMessage: messagePayload,
+    streaming,
+  };
+  console.log('appname, userId, sessionId, newMessage, streaming', appName, userId, sessionId, messagePayload, streaming);
+  if (streaming) {
+    // Use /run_sse for streaming responses
+    const response = await api.post('/run_sse', payload);
     return response.data;
-  } catch (error) {
-    console.error('Error fetching AI response:', error);
-    throw error;
+  } else {
+    // Use /run for normal responses
+    const response = await api.post('/run', payload);
+    return response.data;
   }
 };
 
-// Ritual information API
-export const getRitualInformation = async (ritualName: string) => {
-  try {
-    const response = await api.get(`/rituals/${ritualName}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching ritual information:', error);
-    throw error;
-  }
+// List all apps - GET /list-apps
+export const listApps = async () => {
+  const response = await api.get('/list-apps');
+  return response.data;
 };
 
-// Calendar and date recommendation API
-export const getAuspiciousDates = async (startDate: string, endDate: string) => {
-  try {
-    const response = await api.get('/dates/auspicious', {
-      params: { start_date: startDate, end_date: endDate }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching auspicious dates:', error);
-    throw error;
-  }
+// List sessions for a user - GET /apps/{app_name}/users/{user_id}/sessions
+export const listSessions = async (appName, userId) => {
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions`);
+  return response.data;
 };
 
-// Vendor recommendation API
-export const getVendorRecommendations = async (
-  category: string,
-  location: string,
-  budget?: number
-) => {
-  try {
-    const response = await api.get('/vendors/recommend', {
-      params: { category, location, budget }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching vendor recommendations:', error);
-    throw error;
-  }
+// Get a session - GET /apps/{app_name}/users/{user_id}/sessions/{session_id}
+export const getSession = async (appName, userId, sessionId) => {
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions/${sessionId}`);
+  return response.data;
 };
 
-// Guest list analysis
-export const analyzeGuestList = async (guests: any[]) => {
-  try {
-    const response = await api.post('/guests/analyze', { guests });
-    return response.data;
-  } catch (error) {
-    console.error('Error analyzing guest list:', error);
-    throw error;
-  }
+// Create a session - POST /apps/{app_name}/users/{user_id}/sessions
+export const createSession = async (appName, userId, state = {}) => {
+  const response = await api.post(`/apps/${appName}/users/${userId}/sessions`, state);
+  return response.data;
 };
 
-// Budget optimization
-export const optimizeBudget = async (
-  totalBudget: number,
-  expenses: any[],
-  priorities: string[]
-) => {
-  try {
-    const response = await api.post('/budget/optimize', {
-      total_budget: totalBudget,
-      expenses,
-      priorities
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error optimizing budget:', error);
-    throw error;
-  }
+// Delete a session - DELETE /apps/{app_name}/users/{user_id}/sessions/{session_id}
+export const deleteSession = async (appName, userId, sessionId) => {
+  const response = await api.delete(`/apps/${appName}/users/${userId}/sessions/${sessionId}`);
+  return response.data;
 };
 
-// General text processing/generation (for invitations, vows, etc.)
-export const generateText = async (
-  type: 'invitation' | 'vow' | 'speech',
-  parameters: Record<string, any>
-) => {
-  try {
-    const response = await api.post('/generate/text', {
-      type,
-      parameters
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error generating text:', error);
-    throw error;
-  }
+// List artifacts for a session - GET /apps/{app_name}/users/{user_id}/sessions/{session_id}/artifacts
+export const listArtifacts = async (appName, userId, sessionId) => {
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions/${sessionId}/artifacts`);
+  return response.data;
 };
 
-// Sentiment analysis for guest comments
-export const analyzeSentiment = async (text: string) => {
-  try {
-    const response = await api.post('/analyze/sentiment', { text });
-    return response.data;
-  } catch (error) {
-    console.error('Error analyzing sentiment:', error);
-    throw error;
-  }
+// Get artifact - GET /apps/{app_name}/users/{user_id}/sessions/{session_id}/artifacts/{artifact_name}
+export const getArtifact = async (appName, userId, sessionId, artifactName, version) => {
+  const params = version ? { version } : undefined;
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions/${sessionId}/artifacts/${artifactName}`, { params });
+  return response.data;
 };
 
-// Image analysis for mood board suggestions
-export const analyzeImage = async (imageUrl: string) => {
-  try {
-    const response = await api.post('/analyze/image', { image_url: imageUrl });
-    return response.data;
-  } catch (error) {
-    console.error('Error analyzing image:', error);
-    throw error;
-  }
+// Delete artifact - DELETE /apps/{app_name}/users/{user_id}/sessions/{session_id}/artifacts/{artifact_name}
+export const deleteArtifact = async (appName, userId, sessionId, artifactName) => {
+  const response = await api.delete(`/apps/${appName}/users/${userId}/sessions/${sessionId}/artifacts/${artifactName}`);
+  return response.data;
 };
 
-// Generate color palette from image
-export const generateColorPalette = async (imageUrl: string) => {
-  try {
-    const response = await api.post('/generate/color-palette', { image_url: imageUrl });
-    return response.data;
-  } catch (error) {
-    console.error('Error generating color palette:', error);
-    throw error;
-  }
+// List artifact versions - GET /apps/{app_name}/users/{user_id}/sessions/{session_id}/artifacts/{artifact_name}/versions
+export const listArtifactVersions = async (appName, userId, sessionId, artifactName) => {
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions/${sessionId}/artifacts/${artifactName}/versions`);
+  return response.data;
+};
+
+// Get artifact version - GET /apps/{app_name}/users/{user_id}/sessions/{session_id}/artifacts/{artifact_name}/versions/{version_id}
+export const getArtifactVersion = async (appName, userId, sessionId, artifactName, versionId) => {
+  const response = await api.get(`/apps/${appName}/users/${userId}/sessions/${sessionId}/artifacts/${artifactName}/versions/${versionId}`);
+  return response.data;
+};
+
+// Debug: Get trace - GET /debug/trace/{event_id}
+export const getTrace = async (eventId) => {
+  const response = await api.get(`/debug/trace/${eventId}`);
+  return response.data;
+};
+
+// Debug: Get session trace - GET /debug/trace/session/{session_id}
+export const getSessionTrace = async (sessionId) => {
+  const response = await api.get(`/debug/trace/session/${sessionId}`);
+  return response.data;
 };
 
 export default api;

@@ -14,7 +14,10 @@ import {
   MessageCircle,
   PieChart,
   Paintbrush,
-  CheckSquare
+  CheckSquare,
+  Linkedin,
+  Instagram,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -27,8 +30,10 @@ const DashboardLayout = () => {
   // While loading auth state, show a loading spinner
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-wedding-red border-t-transparent"></div>
+      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80">
+        <div className="glass-card p-8 rounded-full">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-wedding-gold border-t-transparent"></div>
+        </div>
       </div>
     );
   }
@@ -52,113 +57,82 @@ const DashboardLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-white">
-        <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
-              alt="Sanskara Logo" 
-              className="h-10 w-10 object-contain"
+    <div className="min-h-screen bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80">
+      {/* Floating particles background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="floating-particles">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={i}
+              className="particle opacity-20"
+              style={{
+                left: `${Math.random() * 100}%`,
+                width: `${Math.random() * 6 + 3}px`,
+                height: `${Math.random() * 6 + 3}px`,
+                animationDelay: `${Math.random() * 15}s`,
+                animationDuration: `${Math.random() * 15 + 15}s`
+              }}
             />
-            <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
-              Sanskara<span className="text-wedding-red">AI</span>
-            </h1>
-          </Link>
+          ))}
         </div>
-        <nav className="flex-1 space-y-1 px-2 py-4">
-          {sidebarLinks.map((link) => {
-            const isActive = location.pathname === link.href;
-            return (
-              <Link
-                key={link.name}
-                to={link.href}
-                className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium ${
-                  isActive
-                    ? "bg-wedding-red/10 text-wedding-red"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <link.icon className={`mr-3 h-5 w-5 ${isActive ? "text-wedding-red" : "text-gray-500"}`} />
-                {link.name}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="border-t p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <UserProfileDropdown />
-            </div>
-          </div>
-        </div>
-      </aside>
+      </div>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile Topbar */}
-        <header className="bg-white shadow-sm z-10">
-          <div className="flex h-16 items-center justify-between px-4">
-            <div className="flex items-center md:hidden">
-              <Link to="/" className="flex items-center">
-                <img 
-                  src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
-                  alt="Sanskara Logo" 
-                  className="h-8 w-8 object-contain"
+      {/* Dashboard Layout */}
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="fixed inset-y-0 left-0 w-64 bg-[#fffbe7] border-r border-[#ffd700]/30 shadow-lg flex flex-col justify-between z-30">
+          <div className="p-6">
+            <Link to="/" className="flex items-center gap-3 mb-8">
+              <div className="h-10 w-10 flex items-center justify-center bg-gradient-to-br from-[#ffd700] to-[#ffecb3] rounded-full shadow-lg">
+                <img
+                  src="/logo.jpeg"
+                  alt="Site Logo"
+                  className="h-8 w-8 object-contain rounded-full"
                 />
-                <h1 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
-                  Sanskara<span className="text-wedding-red">AI</span>
-                </h1>
-              </Link>
-            </div>
-            <div className="hidden md:block">
-              <h2 className="text-lg font-semibold text-gray-700">
-                {sidebarLinks.find((link) => link.href === location.pathname)?.name || "Dashboard"}
-              </h2>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-wedding-red border-wedding-red hover:bg-wedding-red/10"
-                asChild
-              >
-                <Link to="/dashboard/chat">
-                  <MessageCircle className="mr-1 h-4 w-4" />
-                  Ask AI
-                </Link>
-              </Button>
-              <div className="md:hidden">
-                <UserProfileDropdown />
               </div>
-            </div>
-          </div>
-          <div className="flex overflow-x-auto border-t md:hidden">
-            <nav className="flex space-x-4 px-4 py-2">
+              <span className="text-xl font-playfair font-semibold" style={{color:'#ff8f00'}}>
+                Sanskara<span style={{color:'#8d6e63'}}>AI</span>
+              </span>
+            </Link>
+            <nav className="space-y-1">
               {sidebarLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
                   <Link
                     key={link.name}
                     to={link.href}
-                    className={`flex flex-col items-center py-1 px-3 rounded-md ${
-                      isActive
-                        ? "bg-wedding-red/10 text-wedding-red"
-                        : "text-gray-600"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-lg ${isActive ? 'bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] shadow-lg' : 'text-[#8d6e63] hover:bg-[#fffde7]'}`}
                   >
-                    <link.icon className="h-5 w-5" />
-                    <span className="text-xs mt-1">{link.name}</span>
+                    <link.icon size={20} />
+                    <span>{link.name}</span>
                   </Link>
                 );
               })}
             </nav>
           </div>
-        </header>
+          <div className="px-6 py-4">
+            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200">
+              Ask AI
+            </Button>
+          </div>
+        </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-gray-50 p-4">
-          <Outlet />
+        <main className="flex-1 ml-64">
+          {/* Header */}
+          <header className="glass-card border-b border-wedding-gold/20 sticky top-0 z-50">
+            <div className="px-8 py-4 flex items-center justify-between">
+              <h1 className="text-2xl font-playfair font-semibold title-gradient">
+                {sidebarLinks.find(link => link.href === location.pathname)?.name || 'Dashboard'}
+              </h1>
+              <UserProfileDropdown />
+            </div>
+          </header>
+
+          {/* Page Content */}
+          <div className="p-8">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

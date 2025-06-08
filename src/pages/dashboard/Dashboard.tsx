@@ -118,8 +118,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <motion.div initial="hidden" animate="visible" variants={cardVariants} className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-wedding-maroon/20 shadow-lg">
-        <h1 className="text-3xl font-playfair text-wedding-maroon mb-2 animate-fadeIn">
+      <motion.div initial="hidden" animate="visible" variants={cardVariants} className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-wedding-gold/20 shadow-lg">
+        <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
           Welcome back, {profile?.display_name || user?.name || "Friend"}!
         </h1>
         <p className="text-gray-600 animate-fadeIn delay-75">

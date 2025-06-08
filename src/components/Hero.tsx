@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, Calendar, Heart } from 'lucide-react';
@@ -19,34 +18,56 @@ const Hero = () => {
   };
   
   return (
-    <div className="pattern-bg pt-24 pb-16 md:pt-32 md:pb-24">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-          <div className="lg:w-1/2 animate-fade-in">
-            <h1 className="text-3xl md:text-4xl lg:text-6xl font-playfair font-bold text-wedding-maroon leading-tight">
-              Plan Your Dream <span className="text-wedding-red">Hindu Wedding</span> With AI
-            </h1>
-            <p className="mt-4 md:mt-6 text-base md:text-lg text-gray-700 max-w-2xl">
-              Sanskara AI is your virtual wedding planner that helps you navigate Hindu wedding
-              rituals, vendors, and traditions to create your perfect ceremony.
-            </p>
-            <div className="mt-6 md:mt-8 flex flex-col sm:flex-row gap-4">
-              {user ? (
-                <Button 
-                  className="bg-wedding-red hover:bg-wedding-deepred text-white h-10 md:h-12 px-4 md:px-6 text-base md:text-lg w-full sm:w-auto" 
-                  onClick={handleStartPlanning}
-                >
-                  <Sparkles size={isMobile ? 16 : 20} className="mr-2" />
-                  Chat with Sanskara
-                </Button>
-              ) : (
-                <SignInDialog>
-                  <Button className="bg-wedding-red hover:bg-wedding-deepred text-white h-10 md:h-12 px-4 md:px-6 text-base md:text-lg w-full sm:w-auto">
-                    <Sparkles size={isMobile ? 16 : 20} className="mr-2" />
+    <div className="relative min-h-[90vh] flex items-center">
+      <div className="gradient-bg"></div>
+      {/* Floating particles */}
+      <div className="floating-particles">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${Math.random() * 15 + 15}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="container mx-auto px-4 pt-20">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="lg:w-1/2">
+            <div className="glass-card p-8 md:p-12">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold leading-tight">
+                Plan Your Dream <br/>
+                <span className="title-gradient">Hindu Wedding</span><br/>
+                With AI
+              </h1>
+              <p className="mt-6 text-lg md:text-xl text-gray-700 max-w-2xl">
+                Sanskara AI is your virtual wedding planner that helps you navigate Hindu wedding
+                rituals, vendors, and traditions to create your perfect ceremony.
+              </p>
+              <div className="mt-8 md:mt-10 flex flex-col sm:flex-row gap-4">
+                {user ? (
+                  <Button 
+                    className="cta-button text-lg"
+                    onClick={handleStartPlanning}
+                  >
+                    <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
                     Chat with Sanskara
                   </Button>
-                </SignInDialog>
-              )}
+                ) : (
+                  <SignInDialog>
+                    <Button className="cta-button text-lg">
+                      <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
+                      Chat with Sanskara
+                    </Button>
+                  </SignInDialog>
+                )}
+              </div>
               <Button 
                 variant="outline" 
                 className="h-10 md:h-12 px-4 md:px-6 text-base md:text-lg border-wedding-red text-wedding-red hover:bg-wedding-red/10 w-full sm:w-auto"

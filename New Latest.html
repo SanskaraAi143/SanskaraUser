@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskara AI - Your Divine Wedding Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #fff8e1 0%, #fffde7 50%, #fff3c4 100%);
+            color: #8d6e63;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.15) 0%, 
+                rgba(255, 193, 7, 0.12) 25%,
+                rgba(255, 235, 59, 0.1) 50%,
+                rgba(255, 152, 0, 0.08) 75%,
+                rgba(255, 215, 0, 0.1) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            animation: gradientShift 20s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .floating-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            background: linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 253, 231, 0.9));
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff8f00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #8d6e63;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #ff8f00;
+            transform: translateY(-2px);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center horizontally */
+            gap: 60px; /* More space between content and avatar */
+            padding: 0 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            flex: 1 1 480px;
+            max-width: 540px;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+            background: rgba(255,255,255,0.55);
+            border-radius: 24px;
+            box-shadow: 0 8px 40px rgba(255, 215, 0, 0.12);
+            padding: 48px 40px 48px 48px;
+            margin-right: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff8f00, #ffd700, #ffb300);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 143, 0, 0.3)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 143, 0, 0.6)); }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: #8d6e63;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            color: #fff;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ff8f00;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 2px solid #ffd700;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #ff8f00;
+            transform: translateY(-3px);
+        }
+
+        .saraswati-avatar {
+            flex: 0 0 370px;
+            height: 480px;
+            background: linear-gradient(135deg, #fffbe7 60%, #fff3c4 100%);
+            border-radius: 32px;
+            backdrop-filter: blur(24px);
+            border: 2.5px solid rgba(255, 215, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: avatarFloat 6s ease-in-out infinite;
+            box-shadow: 0 16px 64px rgba(255, 215, 0, 0.18), 0 2px 12px #fffbe7;
+            margin-left: 0;
+            position: relative;
+        }
+
+        .saraswati-avatar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            pointer-events: none;
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.08);
+        }
+
+        .avatar-icon {
+            width: 120px;
+            height: 120px;
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+            animation: avatarPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .avatar-text {
+            text-align: center;
+            padding: 0 30px;
+        }
+
+        .avatar-text h3 {
+            color: #ff8f00;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .avatar-text p {
+            color: #8d6e63;
+            font-size: 1.08rem;
+            line-height: 1.5;
+        }
+
+        .features {
+            padding: 100px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #ff8f00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .planning-crew {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 3rem auto;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(255, 215, 0, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .crew-image-container {
+            flex: 1;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .crew-image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), transparent);
+            z-index: 1;
+        }
+
+        .crew-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            transform: scale(1.02);
+            transition: 
+                transform 0.5s cubic-bezier(.25,.8,.25,1),
+                box-shadow 0.5s cubic-bezier(.25,.8,.25,1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+            will-change: transform, box-shadow;
+        }
+
+        .crew-image-container:hover .crew-image {
+            transform: scale(1.08) perspective(600px) rotateY(-8deg) rotateX(4deg);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.25), 0 1.5px 8px rgba(255,215,0,0.15);
+            z-index: 2;
+        }
+
+        .crew-description {
+            flex: 1;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .crew-description h3 {
+            color: #ff8f00;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .crew-members {
+            list-style: none;
+            padding: 0;
+            margin-top: 1.5rem;
+        }
+
+        .crew-members li {
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .crew-members li:hover {
+            transform: translateX(10px);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.6);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .feature-card h3 {
+            color: #ff8f00;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .feature-card p {
+            color: #8d6e63;
+            line-height: 1.6;
+        }
+
+        .rituals-section {
+            padding: 100px 50px;
+            background: linear-gradient(135deg, rgba(255, 248, 225, 0.8), rgba(255, 253, 231, 0.6));
+        }
+
+        .rituals-section h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #ff8f00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .rituals-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rituals-slider {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .ritual-card {
+            min-width: 350px;
+            margin-right: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .ritual-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.3);
+        }
+
+        .ritual-image {
+            height: 200px;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+        }
+
+        .ritual-content {
+            padding: 30px;
+        }
+
+        .ritual-content h3 {
+            color: #ff8f00;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .ritual-content p {
+            color: #8d6e63;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .ritual-steps {
+            background: rgba(255, 248, 225, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #8d6e63;
+        }
+
+        .slider-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .testimonials {
+            padding: 100px 50px;
+            text-align: center;
+            background: rgba(255, 248, 225, 0.3);
+        }
+
+        .testimonials h2 {
+            font-size: 3rem;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #ff8f00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .testimonial-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            color: #8d6e63;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            color: #ff8f00;
+            font-weight: 600;
+        }
+
+        .about-section {
+            padding: 100px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-section h2 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #ff8f00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-content {
+            font-size: 1.2rem;
+            color: #8d6e63;
+            line-height: 1.8;
+            margin-bottom: 50px;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .about-feature {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .about-feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .about-feature h4 {
+            color: #ff8f00;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .about-feature p {
+            color: #8d6e63;
+            line-height: 1.5;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, rgba(255, 248, 225, 0.9), rgba(255, 253, 231, 0.8));
+            padding: 60px 50px 30px;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            color: #ff8f00;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .footer-section p, .footer-section li {
+            color: #8d6e63;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: #8d6e63;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #ff8f00;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            color: #8d6e63;
+        }
+
+        .chat-interface {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700, #ff8f00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            animation: chatPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes chatPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .chat-interface:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.6);
+        }
+
+        /* Chat popup styles */
+        .chat-popup {
+            display: none;
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 340px;
+            max-width: 90vw;
+            background: #fffbe7;
+            border-radius: 18px;
+            box-shadow: 0 8px 40px rgba(255, 215, 0, 0.22);
+            border: 2px solid #ffd700;
+            z-index: 2000;
+            padding: 0;
+            overflow: hidden;
+            animation: fadeInUp 0.4s;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .chat-popup-header {
+            background: linear-gradient(135deg, #ffd700, #ffecb3);
+            color: #8d6e63;
+            font-weight: 700;
+            padding: 18px 20px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-popup-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: #ff8f00;
+            cursor: pointer;
+        }
+        .chat-popup-body {
+            padding: 22px 20px 18px 20px;
+            color: #8d6e63;
+            font-size: 1.05rem;
+            min-height: 80px;
+        }
+
+        @media (max-width: 1100px) {
+            .hero {
+                flex-direction: column;
+                gap: 32px;
+                padding: 100px 20px 50px;
+                height: auto;
+            }
+            .hero-content {
+                margin-bottom: 0;
+                padding: 32px 18px 32px 18px;
+            }
+            .saraswati-avatar {
+                margin-top: 24px;
+                width: 100%;
+                max-width: 370px;
+                height: auto;
+                min-height: 350px;
+            }
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 100px 20px 50px;
+            }
+            
+            .hero-content {
+                padding: 24px 8px 24px 8px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .saraswati-avatar {
+                margin-top: 24px;
+                min-height: 320px;
+            }
+            
+            .features, .rituals-section, .testimonials, .about-section {
+                padding: 50px 20px;
+            }
+            
+            .features-grid, .about-features {
+                grid-template-columns: 1fr;
+            }
+
+            .ritual-card {
+                min-width: 300px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .planning-crew {
+                flex-direction: column;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    
+    <div class="floating-particles" id="particles"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">🕉</div>
+            <span>Sanskara AI</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#rituals">Sacred Rituals</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#" class="cta-button">Start Your Journey</a>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Your Divine Wedding Companion</h1>
+            <p>Experience the sacred union of tradition and technology. Let Saraswati guide you through every ritual, every moment, every blessing of your perfect wedding celebration.</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="startJourney()">Begin Sacred Journey</button>
+                <a href="#features" class="btn-secondary">Explore Features</a>
+            </div>
+        </div>
+        <div class="saraswati-avatar">
+            <div class="avatar-icon">🪷</div>
+            <div class="avatar-text">
+                <h3>Meet Saraswati</h3>
+                <p>Your personal ritual guide, blessing every step of your wedding journey with ancient wisdom and modern convenience.</p>
+            </div>
+        </div>
+    </section>    <section class="features" id="features">
+        <h2>Sacred Wedding Planning</h2>
+        
+        <style>
+            .planning-crew {
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(12px);
+                border-radius: 24px;
+                padding: 3rem;
+                margin: 3rem auto;
+                max-width: 1200px;
+                display: flex;
+                align-items: center;
+                gap: 3rem;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 
+                    0 8px 32px rgba(255, 215, 0, 0.1),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            }
+
+            .crew-image-container {
+                flex: 1;
+                position: relative;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            }
+
+            .crew-image-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), transparent);
+                z-index: 1;
+            }
+
+            .crew-image {
+                width: 100%;
+                height: auto;
+                display: block;
+                transform: scale(1.02);
+                transition: 
+                    transform 0.5s cubic-bezier(.25,.8,.25,1),
+                    box-shadow 0.5s cubic-bezier(.25,.8,.25,1);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+                will-change: transform, box-shadow;
+            }
+
+            .crew-image-container:hover .crew-image {
+                transform: scale(1.08) perspective(600px) rotateY(-8deg) rotateX(4deg);
+                box-shadow: 0 24px 48px rgba(0,0,0,0.25), 0 1.5px 8px rgba(255,215,0,0.15);
+                z-index: 2;
+            }
+
+            .crew-description {
+                flex: 1;
+                padding: 1.5rem;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 16px;
+                backdrop-filter: blur(8px);
+            }
+
+            .crew-description h3 {
+                color: #ff8f00;
+                font-size: 2rem;
+                margin-bottom: 1rem;
+                font-weight: 600;
+            }
+
+            .crew-members {
+                list-style: none;
+                padding: 0;
+                margin-top: 1.5rem;
+            }
+
+            .crew-members li {
+                margin: 1rem 0;
+                font-size: 1.1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                padding: 0.5rem 1rem;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                transition: transform 0.3s ease;
+            }
+
+            .crew-members li:hover {
+                transform: translateX(10px);
+                background: rgba(255, 215, 0, 0.1);
+            }
+        </style>
+
+        <div class="planning-crew">
+            <div class="crew-image-container">
+                <img src="crew-bitemoji.jpeg" alt="Sanskara AI Wedding Planning Crew" class="crew-image">
+            </div>
+            <div class="crew-description">
+                <h3>Meet Your Divine Planning Crew</h3>
+                <p>Your dedicated team of AI assistants, each specializing in different aspects of your wedding journey:</p>
+                <ul class="crew-members">
+                    <li>👨‍🍳 Chef Arjun - Your culinary excellence guide</li>
+                    <li>👰 Priya - Your tradition & decoration specialist</li>
+                    <li>🕉️ Pandit Ji - Your sacred ritual advisor</li>
+                    <li>🎧 Tech Guide - Your digital planning assistant</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📿</div>
+                <h3>Ritual Guidance</h3>
+                <p>Complete step-by-step guidance for all wedding ceremonies, blessed by Saraswati's wisdom for authentic traditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💐</div>
+                <h3>Vendor Network</h3>
+                <p>Curated luxury vendors for flowers, catering, photography, and decorations - all vetted for excellence.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Sacred Timeline</h3>
+                <p>Personalized wedding timeline considering auspicious dates, planetary positions, and family traditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💎</div>
+                <h3>Luxury Planning</h3>
+                <p>Premium wedding experiences with attention to every detail, from grand venues to intimate moments.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h3>Cultural Ceremonies</h3>
+                <p>Expert guidance on regional traditions, customs, and ceremonies to honor your heritage perfectly.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💝</div>
+                <h3>Guest Experience</h3>
+                <p>Seamless guest management with invitations, accommodation, and memorable experiences for all.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="rituals-section" id="rituals">
+        <h2>Sacred Rituals</h2>
+        <div class="rituals-container">
+            <div class="rituals-slider" id="ritualsSlider">
+                <div class="ritual-card">
+                    <div class="ritual-image">🔥</div>
+                    <div class="ritual-content">
+                        <h3>Agni Sanskar</h3>
+                        <p>The sacred fire ceremony that purifies and sanctifies the union, witnessed by the divine fire as your eternal witness.</p>
+                        <div class="ritual-steps">
+                            <strong>Key Steps:</strong> Fire preparation, sacred mantras, seven circles around Agni, offering prayers for prosperity and happiness.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ritual-card">
+                    <div class="ritual-image">👑</div>
+                    <div class="ritual-content">
+                        <h3>Mangalsutra Dharana</h3>
+                        <p>The sacred thread that binds two souls, representing protection, love, and the eternal bond of marriage.</p>
+                        <div class="ritual-steps">
+                            <strong>Key Steps:</strong> Blessing the mangalsutra, chanting protective mantras, placing around bride's neck with love and devotion.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ritual-card">
+                    <div class="ritual-image">🦶</div>
+                    <div class="ritual-content">
+                        <h3>Saptapadi</h3>
+                        <p>Seven sacred steps representing seven lifelong promises, each step taking you closer to eternal unity.</p>
+                        <div class="ritual-steps">
+                            <strong>Key Steps:</strong> Seven vows for food, strength, prosperity, family, progeny, seasons, and friendship - binding for seven lifetimes.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ritual-card">
+                    <div class="ritual-image">🌾</div>
+                    <div class="ritual-content">
+                        <h3>Kanyadaan</h3>
+                        <p>The sacred giving away of the bride, representing the transfer of responsibility and blessing of new beginnings.</p>
+                        <div class="ritual-steps">
+                            <strong>Key Steps:</strong> Father's blessing, sacred water ceremony, joining of hands, prayers for the couple's prosperous future.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ritual-card">
+                    <div class="ritual-image">💍</div>
+                    <div class="ritual-content">
+                        <h3>Sindoor Daan</h3>
+                        <p>The sacred vermillion ceremony marking the bride as a married woman, blessed with protection and prosperity.</p>
+                        <div class="ritual-steps">
+                            <strong>Key Steps:</strong> Blessing the sindoor, applying with ring finger, chanting protective mantras, family blessings.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-nav">
+                <button class="nav-btn" onclick="slideRituals(-1)">← Previous</button>
+                <button class="nav-btn" onclick="slideRituals(1)">Next →</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <h2>Sacred Testimonials</h2>
+        <div class="testimonial-card">
+            <p class="testimonial-text">"Sanskara AI made our wedding planning effortless and deeply meaningful. Every ritual was beautifully explained and seamlessly integrated into our celebration."</p>
+            <p class="testimonial-author">- Aditi & Rohit</p>
+        </div>
+    </section>
+
+    <section class="about-section" id="about">
+        <h2>About Sanskara AI</h2>
+        <div class="about-content">
+            <p>Sanskara AI is your divine companion for wedding planning, blending ancient wisdom with modern technology. Our mission is to make your wedding a sacred and joyous celebration, honoring your unique journey and traditions.</p>
+        </div>
+        
+        <div class="about-features">
+            <div class="about-feature">
+                <div class="about-feature-icon">🌟</div>
+                <h4>Personalized Experience</h4>
+                <p>Every couple is unique, and so is our approach. We tailor every detail to reflect your personal story and preferences.</p>
+            </div>
+            
+            <div class="about-feature">
+                <div class="about-feature-icon">🤝</div>
+                <h4>Expert Guidance</h4>
+                <p>Our team of experienced planners and cultural experts are with you every step of the way, ensuring authenticity and ease.</p>
+            </div>
+            
+            <div class="about-feature">
+                <div class="about-feature-icon">💬</div>
+                <h4>24/7 Support</h4>
+                <p>We are always here for you. Any question, any concern, day or night - just reach out and we are here to help.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>We are a team of passionate individuals committed to making your wedding a memorable and sacred experience.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: support@sanskaraai.com</p>
+                <p>Phone: +1 234 567 890</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#" class="social-link">📘</a>
+                    <a href="#" class="social-link">📸</a>
+                    <a href="#" class="social-link">🐦</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 Sanskara AI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div class="chat-interface" id="chatInterface">
+        <div class="chat-icon">💬</div>
+    </div>
+    <!-- Chat Popup -->
+    <div class="chat-popup" id="chatPopup">
+        <div class="chat-popup-header">
+            Saraswati Chat
+            <button class="chat-popup-close" onclick="closeChatPopup()" title="Close">&times;</button>
+        </div>
+        <div class="chat-popup-body">
+            <p>Namaste! How can I help you with your wedding journey today?</p>
+            <!-- You can add a chat input box and messages here -->
+        </div>
+    </div>
+
+    <script>
+        // Rituals slider functionality
+        const slider = document.getElementById('ritualsSlider');
+        const cards = slider ? slider.getElementsByClassName('ritual-card') : [];
+        let currentIndex = 0;
+
+        function updateSlider() {
+            if (!slider || !cards.length) return;
+            const cardWidth = cards[0].offsetWidth + 30; // card width + margin
+            slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        }
+
+        function slideRituals(direction) {
+            if (!cards.length) return;
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex > cards.length - 1) currentIndex = cards.length - 1;
+            updateSlider();
+        }
+
+        // Optional: Responsive reset
+        window.addEventListener('resize', updateSlider);
+
+        // "Begin Sacred Journey" button functionality
+        function startJourney() {
+            window.location.hash = '#features';
+        }
+
+        // Floating particles (optional, for visual effect)
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            for (let i = 0; i < 18; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = `${20 + Math.random() * 30}px`;
+                p.style.height = p.style.width;
+                p.style.left = `${Math.random() * 100}%`;
+                p.style.animationDuration = `${10 + Math.random() * 10}s`;
+                p.style.animationDelay = `${Math.random() * 10}s`;
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        // Chat popup functionality
+        const chatBtn = document.getElementById('chatInterface');
+        const chatPopup = document.getElementById('chatPopup');
+        if (chatBtn && chatPopup) {
+            chatBtn.onclick = function() {
+                chatPopup.style.display = 'block';
+            };
+        }
+        function closeChatPopup() {
+            chatPopup.style.display = 'none';
+        }
+        // Optional: Close chat popup on outside click
+        window.addEventListener('click', function(e) {
+            if (chatPopup && chatPopup.style.display === 'block') {
+                if (!chatPopup.contains(e.target) && !chatBtn.contains(e.target)) {
+                    chatPopup.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

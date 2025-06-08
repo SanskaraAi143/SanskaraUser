@@ -15,6 +15,21 @@ import SettingsPage from './pages/dashboard/SettingsPage';
 import NotFound from './pages/NotFound';
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 import { Toaster } from './components/ui/toaster';
+import { MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const FloatingChatButton = () => {
+  const navigate = useNavigate();
+  return (
+    <button
+      className="fixed bottom-6 right-6 z-50 bg-gradient-primary text-white shadow-xl rounded-full p-4 flex items-center justify-center hover:scale-105 transition-all duration-300"
+      onClick={() => navigate('/dashboard/chat')}
+      aria-label="Chat with Sanskara AI"
+    >
+      <MessageCircle size={28} />
+    </button>
+  );
+};
 
 function App() {
   return (
@@ -37,6 +52,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
+        <FloatingChatButton />
       </AuthProvider>
     </BrowserRouter>
   );

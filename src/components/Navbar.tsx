@@ -28,15 +28,15 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-sm fixed w-full top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-10 w-10 flex items-center justify-center">
-              <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-full w-full object-contain" />
+    <nav className="glass-nav">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+              <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
             </div>
-            <h1 className="text-2xl font-playfair font-semibold text-wedding-maroon">
-              Sanskara<span className="text-wedding-red">AI</span>
+            <h1 className="text-2xl font-playfair font-semibold title-gradient">
+              Sanskara<span className="font-bold">AI</span>
             </h1>
           </Link>
         </div>
@@ -46,32 +46,43 @@ const Navbar = () => {
             <a 
               key={link.href}
               href={link.href} 
-              className="font-medium text-gray-700 hover:text-wedding-red transition-colors"
+              className="nav-link"
             >
               {link.label}
             </a>
           ))}
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {user ? (
-            <UserProfileDropdown />
-          ) : (
-            <SignInDialog>
-              <Button variant="outline" className="hidden sm:flex">
-                <User size={18} className="mr-2" />
-                Sign In
+            <>
+              <Button
+                variant="ghost"
+                className="nav-link hidden md:flex items-center gap-2"
+                onClick={handleStartPlanning}
+              >
+                <MessageCircle className="h-5 w-5" />
+                Chat
               </Button>
-            </SignInDialog>
+              <UserProfileDropdown />
+            </>
+          ) : (
+            <>
+              <SignInDialog>
+                <Button variant="ghost" className="nav-link hidden md:flex items-center gap-2">
+                  <User size={18} />
+                  Sign In
+                </Button>
+              </SignInDialog>
+              <Button 
+                className="cta-button hidden md:flex"
+                onClick={handleStartPlanning}
+              >
+                <MessageCircle size={18} className="mr-2" />
+                Start Chatting
+              </Button>
+            </>
           )}
-          
-          <Button 
-            className="bg-wedding-red hover:bg-wedding-deepred"
-            onClick={handleStartPlanning}
-          >
-            <MessageCircle size={18} className="mr-2" />
-            Chat Now
-          </Button>
           
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
@@ -80,15 +91,15 @@ const Navbar = () => {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[75vw] sm:w-[350px]">
+            <SheetContent side="right" className="w-[75vw] sm:w-[350px] glass-card border-0">
               <div className="flex flex-col h-full py-6">
                 <div className="mb-8">
-                  <Link to="/" className="flex items-center gap-2 mb-6">
-                    <div className="h-10 w-10 flex items-center justify-center">
-                      <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-full w-full object-contain" />
+                  <Link to="/" className="flex items-center gap-3 mb-6">
+                    <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
+                      <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
                     </div>
-                    <h2 className="text-xl font-playfair font-semibold text-wedding-maroon">
-                      Sanskara<span className="text-wedding-red">AI</span>
+                    <h2 className="text-2xl font-playfair font-semibold title-gradient">
+                      Sanskara<span className="font-bold">AI</span>
                     </h2>
                   </Link>
                   <nav className="flex flex-col space-y-4">
@@ -96,7 +107,7 @@ const Navbar = () => {
                       <a
                         key={link.href}
                         href={link.href}
-                        className="font-medium text-gray-700 hover:text-wedding-red transition-colors py-2"
+                        className="nav-link py-2"
                       >
                         {link.label}
                       </a>
@@ -106,8 +117,8 @@ const Navbar = () => {
                 <div className="mt-auto space-y-4">
                   {user ? (
                     <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
+                      variant="ghost" 
+                      className="nav-link w-full justify-start"
                       onClick={() => signOut()}
                     >
                       <User size={18} className="mr-2" />
@@ -115,18 +126,18 @@ const Navbar = () => {
                     </Button>
                   ) : (
                     <SignInDialog>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="ghost" className="nav-link w-full justify-start">
                         <User size={18} className="mr-2" />
                         Sign In
                       </Button>
                     </SignInDialog>
                   )}
                   <Button 
-                    className="w-full justify-start bg-wedding-red hover:bg-wedding-deepred"
+                    className="cta-button w-full justify-start"
                     onClick={handleStartPlanning}
                   >
                     <MessageCircle size={18} className="mr-2" />
-                    Chat Now
+                    Start Chatting
                   </Button>
                 </div>
               </div>

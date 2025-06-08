@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -162,20 +161,20 @@ const MoodBoard = () => {
 
 
   return (
-    <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-0">
-          <CardTitle>Wedding Mood Board</CardTitle>
-          <CardDescription>Visualize your wedding aesthetic</CardDescription>
+    <div className="space-y-8">
+      <Card className="glass-card shadow-2xl border-0 bg-gradient-to-br from-wedding-cream/90 via-white/80 to-wedding-gold/30 p-0">
+        <CardHeader className="pb-0 bg-gradient-to-r from-wedding-cream/80 to-wedding-gold/20 rounded-t-2xl border-b border-wedding-gold/20">
+          <CardTitle className="font-playfair text-3xl md:text-4xl text-wedding-gold drop-shadow-lg tracking-tight">Wedding Mood Board</CardTitle>
+          <CardDescription className="text-lg text-yellow-900/80">Visualize your wedding aesthetic</CardDescription>
         </CardHeader>
-        <div className="px-6 pt-6 flex flex-col md:flex-row md:items-center gap-4">
-          <div className="flex flex-col gap-2 w-full md:w-72">
+        <div className="px-8 pt-8 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex flex-col gap-2 w-full md:w-80">
             <div className="flex gap-2 items-center">
               <Select value={selectedBoardId || ''} onValueChange={setSelectedBoardId}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white/80 border-wedding-gold/30 shadow-sm focus:ring-wedding-gold">
                   <SelectValue placeholder="Select Mood Board" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/90 border-wedding-gold/30">
                   {moodBoards.map(board => (
                     <div key={board.mood_board_id} className="flex items-center justify-between pr-2">
                       <SelectItem value={board.mood_board_id} className="flex-1">
@@ -198,70 +197,69 @@ const MoodBoard = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button size="sm" onClick={() => setCreatingBoard(true)}>+ New</Button>
+              <Button size="sm" className="bg-wedding-gold text-white font-semibold shadow-md hover:bg-wedding-secondaryGold transition" onClick={() => setCreatingBoard(true)}>+ New</Button>
             </div>
             {creatingBoard && (
               <div className="flex gap-2 mt-2">
                 <input
                   type="text"
-                  className="border rounded px-2 py-1 flex-1"
+                  className="border border-wedding-gold/40 rounded px-2 py-1 flex-1 bg-white/80 focus:ring-wedding-gold"
                   value={newBoardName}
                   onChange={e => setNewBoardName(e.target.value)}
                   placeholder="Mood board name"
                   autoFocus
                 />
-                <Button size="sm" onClick={handleCreateMoodBoard} disabled={!newBoardName.trim()}>Create</Button>
+                <Button size="sm" className="bg-wedding-gold text-white font-semibold" onClick={handleCreateMoodBoard} disabled={!newBoardName.trim()}>Create</Button>
                 <Button size="sm" variant="outline" onClick={() => { setCreatingBoard(false); setNewBoardName(''); }}>Cancel</Button>
               </div>
             )}
-
           </div>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
-              <div className="col-span-full text-center p-8 text-gray-500">Loading...</div>
+              <div className="col-span-full text-center p-8 text-yellow-900/60">Loading...</div>
             ) : filteredItems.length > 0 ? (
               filteredItems.map(image => (
-                <div key={image.item_id} className="relative group rounded-lg overflow-hidden cursor-pointer" onClick={() => handleOpenImageModal(image)}>
+                <div key={image.item_id} className="relative group rounded-2xl overflow-hidden cursor-pointer glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105" onClick={() => handleOpenImageModal(image)}>
                   <img 
                     src={image.image_url} 
                     alt={image.note} 
-                    className="w-full aspect-square object-contain bg-white rounded shadow-md transition-transform hover:scale-105"
-                    style={{ maxHeight: 240 }}
+                    className="w-full aspect-square object-cover bg-white rounded-2xl shadow-md transition-transform"
+                    style={{ maxHeight: 260 }}
                   />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col justify-between p-3 transition-opacity">
+                  <div className="absolute inset-0 bg-gradient-to-t from-wedding-gold/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 flex flex-col justify-between p-3 transition-opacity">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="absolute top-1 right-1 text-white self-end"
+                      className="absolute top-2 right-2 text-white bg-black/30 hover:bg-black/60"
                       onClick={e => { e.stopPropagation(); handleRemoveImage(image.item_id); }}
                     >
                       <X size={18} />
                     </Button>
                     <div></div>
-                    <p className="text-white text-sm">{image.note}</p>
+                    <p className="text-white text-base font-medium drop-shadow-lg">{image.note}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center p-8 text-gray-500">
+              <div className="col-span-full text-center p-8 text-yellow-900/60">
                 No images added to this mood board yet.
               </div>
             )}
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <div className="border-2 border-dashed rounded-lg h-48 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors mt-4">
+              <div className="border-2 border-dashed border-wedding-gold/40 rounded-2xl h-48 flex items-center justify-center cursor-pointer hover:bg-wedding-gold/10 transition-colors mt-6">
                 <div className="text-center">
-                  <Plus size={24} className="mx-auto text-gray-400" />
-                  <p className="text-sm text-gray-500 mt-2">Add image</p>
+                  <Plus size={32} className="mx-auto text-wedding-gold" />
+                  <p className="text-base text-yellow-900/80 mt-2 font-medium">Add image</p>
                 </div>
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white/90 rounded-2xl shadow-2xl border-0">
               <DialogHeader>
-                <DialogTitle>Add to your mood board</DialogTitle>
+                <DialogTitle className="text-wedding-gold font-playfair text-2xl">Add to your mood board</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <ImageUpload onUpload={async (file, previewUrl, tag) => {
@@ -274,7 +272,6 @@ const MoodBoard = () => {
                     setMoodBoardItems(items);
                     toast({ title: 'Image added', description: 'New image added to your mood board.' });
                   } catch (e) {
-                    // Try to fetch items anyway in case upload succeeded but error thrown
                     const items = await getMoodBoardItems(selectedBoardId);
                     setMoodBoardItems(items);
                     toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image, but we refreshed your board.' });
@@ -282,27 +279,26 @@ const MoodBoard = () => {
                     setUploading(false);
                   }
                 }} />
-                {uploading && <div className="text-center text-gray-500">Uploading...</div>}
+                {uploading && <div className="text-center text-yellow-900/60">Uploading...</div>}
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        <CardFooter className="border-t bg-gray-50/80 justify-between p-4">
-          <Button variant="outline" size="sm" onClick={handleExportImages}>
+        <CardFooter className="border-t-2 border-wedding-gold/20 bg-gradient-to-r from-wedding-cream/60 to-wedding-gold/10 justify-between p-6 rounded-b-2xl">
+          <Button variant="outline" size="sm" className="border-wedding-gold/40 text-wedding-gold font-semibold hover:bg-wedding-gold/10" onClick={handleExportImages}>
             <Download size={16} className="mr-1" />
             Export
           </Button>
         </CardFooter>
         {imageModalOpen && modalImage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={handleCloseImageModal}>
-            <div className="bg-white rounded-lg shadow-xl p-4 max-w-full max-h-full flex flex-col items-center relative" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-full max-h-full flex flex-col items-center relative" onClick={e => e.stopPropagation()}>
               <button className="absolute top-2 right-2 text-gray-700 hover:text-black" onClick={handleCloseImageModal}><X size={28} /></button>
-              <img src={modalImage.image_url} alt={modalImage.note} className="max-w-[90vw] max-h-[70vh] object-contain rounded mb-4" />
-              <div className="text-lg font-medium text-center mb-2">{modalImage.note}</div>
+              <img src={modalImage.image_url} alt={modalImage.note} className="max-w-[90vw] max-h-[70vh] object-contain rounded-xl mb-4 shadow-lg" />
+              <div className="text-xl font-playfair text-wedding-gold text-center mb-2">{modalImage.note}</div>
             </div>
           </div>
         )}
-
       </Card>
     </div>
   );
