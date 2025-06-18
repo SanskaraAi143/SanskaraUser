@@ -20,11 +20,7 @@ const Navbar = () => {
   ];
 
   const handleStartPlanning = () => {
-    if (user) {
-      navigate('/dashboard/chat');
-    } else {
-      navigate('/dashboard/chat');
-    }
+    navigate('/dashboard/chat');
   };
 
   return (
@@ -42,15 +38,25 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
-            <a 
-              key={link.href}
-              href={link.href} 
-              className="nav-link"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map(link => 
+            link.isRoute ? (
+              <Link 
+                key={link.href}
+                to={link.href} 
+                className="nav-link"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a 
+                key={link.href}
+                href={link.href} 
+                className="nav-link"
+              >
+                {link.label}
+              </a>
+            )
+          )}
         </div>
         
         <div className="flex items-center gap-4">
@@ -94,7 +100,7 @@ const Navbar = () => {
             <SheetContent side="right" className="w-[75vw] sm:w-[350px] glass-card border-0">
               <div className="flex flex-col h-full py-6">
                 <div className="mb-8">
-                  <Link to="/" className="flex items-center gap-3 mb-6">
+                  <Link to="/" className="flex items-center gap-3 mb-6" onClick={() => setIsOpen(false)}>
                     <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
                       <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
                     </div>
@@ -103,15 +109,26 @@ const Navbar = () => {
                     </h2>
                   </Link>
                   <nav className="flex flex-col space-y-4">
-                    {navLinks.map(link => (
-                      <a
-                        key={link.href}
-                        href={link.href}
-                        className="nav-link py-2"
-                      >
-                        {link.label}
-                      </a>
-                    ))}
+                    {navLinks.map(link => 
+                      link.isRoute ? (
+                        <Link
+                          key={link.href}
+                          to={link.href}
+                          className="nav-link py-2"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          className="nav-link py-2"
+                        >
+                          {link.label}
+                        </a>
+                      )
+                    )}
                   </nav>
                 </div>
                 <div className="mt-auto space-y-4">
