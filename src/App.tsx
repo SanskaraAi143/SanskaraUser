@@ -16,6 +16,10 @@ import NotFound from './pages/NotFound';
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 import { Toaster } from './components/ui/toaster';
 
+// Blog Pages
+import BlogListPage from './pages/blog/index';
+import BlogDetailPage from './pages/blog/[slug]';
+
 function App() {
   return (
     <BrowserRouter>
@@ -34,6 +38,8 @@ function App() {
             <Route path="vendors" element={<VendorsPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

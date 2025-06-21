@@ -17,6 +17,7 @@ const Navbar = () => {
     { href: "#how-it-works", label: "How It Works" },
     { href: "#pricing", label: "Pricing" },
     { href: "#testimonials", label: "Testimonials" },
+    { href: "/blog", label: "Blog", isRouterLink: true },
   ];
 
   const handleStartPlanning = () => {
@@ -43,13 +44,23 @@ const Navbar = () => {
         
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
-            <a 
-              key={link.href}
-              href={link.href} 
-              className="font-medium text-gray-700 hover:text-wedding-red transition-colors"
-            >
-              {link.label}
-            </a>
+            link.isRouterLink ? (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="font-medium text-gray-700 hover:text-wedding-red transition-colors"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                className="font-medium text-gray-700 hover:text-wedding-red transition-colors"
+              >
+                {link.label}
+              </a>
+            )
           ))}
         </div>
         
@@ -93,13 +104,25 @@ const Navbar = () => {
                   </Link>
                   <nav className="flex flex-col space-y-4">
                     {navLinks.map(link => (
-                      <a
-                        key={link.href}
-                        href={link.href}
-                        className="font-medium text-gray-700 hover:text-wedding-red transition-colors py-2"
-                      >
-                        {link.label}
-                      </a>
+                      link.isRouterLink ? (
+                        <Link
+                          key={link.href}
+                          to={link.href}
+                          className="font-medium text-gray-700 hover:text-wedding-red transition-colors py-2"
+                          onClick={() => setIsOpen(false)} // Close sheet on navigation
+                        >
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          className="font-medium text-gray-700 hover:text-wedding-red transition-colors py-2"
+                          onClick={() => setIsOpen(false)} // Close sheet on navigation
+                        >
+                          {link.label}
+                        </a>
+                      )
                     ))}
                   </nav>
                 </div>
