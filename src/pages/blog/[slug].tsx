@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PostData, getPostBySlug } from '@/lib/blog-posts';
-// import Navbar from '@/components/Navbar'; // Using simplified Navbar for article page
-// import Footer from '@/components/Footer'; // Using simplified Footer for article page
+import Navbar from '@/components/Navbar'; // Import the main Navbar
+import Footer from '@/components/Footer';   // Import the main Footer
 import { Button } from '@/components/ui/button'; // Keep for potential future use
 import { Helmet } from 'react-helmet-async';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -176,25 +176,11 @@ const BlogDetailPage: React.FC = () => {
 
       <div className="progress-bar" style={{ width: `${scrollProgress}%` }}></div>
 
-      {/* Simplified Navbar for Article Page */}
-      <nav className="bg-white/90 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-                <Link to="/" className="flex items-center space-x-3 logo-pulse">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                        <FontAwesomeIcon icon={faOm} className="text-white text-lg" />
-                    </div>
-                    <span className="text-2xl font-bold gradient-text">SanskaraAI</span>
-                </Link>
-                <div className="flex items-center space-x-4">
-                    <Link to="/blog" className="text-orange-500 font-semibold hover:text-red-500 transition-colors">Blog Home</Link>
-                </div>
-            </div>
-        </div>
-      </nav>
+      <Navbar /> {/* Using the main site Navbar */}
 
       {/* Main Article Content - applied max-w-3xl and mx-auto for centering */}
-      <main ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 overflow-y-auto" style={{maxHeight: 'calc(100vh - 4rem)'}} /* Temp for testing scroll on content div */>
+      {/* Added pt-20 (or similar) to account for fixed Navbar height */}
+      <main ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28"> {/* Adjust top padding as needed */}
         <div className="mb-6 fade-in-up">
           {post.category && <span className="tag-pill">{post.category}</span>}
         </div>
@@ -251,24 +237,7 @@ const BlogDetailPage: React.FC = () => {
 
       </main>
 
-      {/* Simplified Footer for Article Page */}
-      <footer className="bg-white/60 backdrop-blur-md py-12 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-                <Link to="/" className="flex items-center space-x-3 mb-4 md:mb-0 logo-pulse">
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                        <FontAwesomeIcon icon={faOm} className="text-white text-sm" />
-                    </div>
-                    <span className="text-xl font-bold gradient-text">SanskaraAI</span>
-                </Link>
-                <div className="text-sm text-gray-500 text-center md:text-left">
-                    © {new Date().getFullYear()} SanskaraAI. All rights reserved. •
-                    <a href="#" className="hover:text-orange-500 transition-colors"> Privacy & Terms</a> •
-                    Built with <FontAwesomeIcon icon={faHeart} className="text-red-500" /> by SanskaraAI Team
-                </div>
-            </div>
-        </div>
-      </footer>
+      <Footer /> {/* Using the main site Footer */}
     </div>
   );
 };

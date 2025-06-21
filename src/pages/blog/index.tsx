@@ -72,10 +72,10 @@ const BlogListPage: React.FC = () => {
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
       </Helmet>
 
-      <Navbar /> {/* Using existing Navbar. Adjustments might be needed in a separate step if it clashes significantly. */}
+      <Navbar /> {/* Using existing Navbar. */}
 
-      {/* Hero Section */}
-      <section className="gradient-bg py-20">
+      {/* Hero Section - Add top padding to content below fixed navbar */}
+      <section className="gradient-bg py-20 pt-32 md:pt-36 lg:pt-40"> {/* Increased top padding */}
         <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in"> {/* Using existing animate-fade-in from index.css */}
             <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 font-inter">
                 Hindu Wedding <span className="gradient-text">Insights</span>
