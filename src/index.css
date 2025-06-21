@@ -1,5 +1,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -42,14 +44,230 @@
 @layer base {
   * {
     @apply border-border;
+    /* font-family: 'Inter', sans-serif; /* Default font from new blog style */
   }
   body {
-    @apply bg-background text-foreground font-poppins;
+    @apply bg-background text-foreground font-poppins; /* Existing body font */
+     /* background: #faf7f2; /* From new blog article style */
+     /* color: #3a3a3a; /* From new blog article style */
   }
+  /* Consider if Playfair should be overridden by Inter/Nunito for blog pages specifically or globally */
   h1, h2, h3, h4, h5, h6 {
     @apply font-playfair;
   }
 }
+
+/* Styles from new blog design */
+.gradient-bg {
+  background: linear-gradient(135deg, #FEF3E2 0%, #FDE68A 50%, #F59E0B 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #F59E0B, #DC2626);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; /* Standard property */
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px); /* May need to check browser support or Tailwind equivalent */
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #F59E0B, #DC2626);
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #DC2626, #F59E0B);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+}
+
+.tag-gradient {
+  background: linear-gradient(135deg, #FEF3E2, #FDE68A);
+  border: 1px solid #F59E0B;
+}
+
+.active-tag {
+  background: linear-gradient(135deg, #F59E0B, #DC2626);
+  color: white;
+}
+
+.floating-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* .fade-in animation already exists as .animate-fade-in, will use that or consolidate */
+/* Original .fade-in from new styles:
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+} */
+
+.logo-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { /* This might conflict with another pulse if defined elsewhere */
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Styles from new article design */
+/* body styles from article.html are commented out in @layer base body for now */
+
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F59E0B, #DC2626);
+  z-index: 100; /* Ensure this is higher than other fixed elements like navbar */
+  width: 0;
+  transition: width 0.2s;
+  border-radius: 2px;
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.7s;
+}
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tag-pill {
+  display: inline-block;
+  background: #fbeee0;
+  color: #b97a2b;
+  border-radius: 9999px; /* rounded-full */
+  padding: 0.25rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600; /* font-semibold or font-bold */
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.callout-box {
+  background: linear-gradient(135deg, #fbeee0 60%, #f9d6c1 100%);
+  border: 2px solid #f7c9a7;
+  border-radius: 2rem; /* rounded-3xl or custom */
+  box-shadow: 0 4px 32px 0 rgba(245, 158, 11, 0.07);
+  padding: 2.5rem 2rem 2rem 2rem; /* p-8 or custom */
+  margin: 3rem 0 2rem 0; /* my-8 or custom */
+  text-align: center;
+  max-width: 700px; /* max-w-3xl or similar */
+  margin-left: auto;
+  margin-right: auto;
+}
+.callout-box h4 {
+  font-size: 2rem; /* text-3xl or text-4xl */
+  font-weight: 700; /* font-bold */
+  color: #b97a2b; /* custom text color */
+  margin-bottom: 1rem; /* mb-4 */
+}
+.callout-btn {
+  background: linear-gradient(90deg, #F59E0B, #DC2626);
+  color: #fff; /* text-white */
+  font-weight: 700; /* font-bold */
+  font-size: 1.1rem; /* text-lg */
+  border-radius: 9999px; /* rounded-full */
+  padding: 0.9rem 2.5rem; /* py-3 px-10 or custom */
+  margin-top: 1.5rem; /* mt-6 */
+  box-shadow: 0 2px 12px 0 rgba(245, 158, 11, 0.13);
+  border: none;
+  transition: background 0.2s, transform 0.2s;
+}
+.callout-btn:hover {
+  background: linear-gradient(90deg, #DC2626, #F59E0B);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Article content typography - to be applied via a wrapper class e.g., .prose-sanskara */
+.prose-sanskara h1, .prose-sanskara h2, .prose-sanskara h3, .prose-sanskara h4 {
+  color: #2d2d2d; /* custom text color */
+  font-family: 'Nunito', 'Inter', sans-serif;
+  font-weight: 700; /* font-bold */
+}
+.prose-sanskara h2 {
+  font-size: 2rem; /* text-3xl */
+  margin-top: 2.5rem; /* mt-10 */
+  margin-bottom: 1.2rem; /* mb-5 */
+  border-bottom: 2px solid #e6e2d8; /* custom border */
+  padding-bottom: 0.3rem; /* pb-1 */
+}
+.prose-sanskara h3 {
+  font-size: 1.3rem; /* text-xl */
+  margin-top: 2rem; /* mt-8 */
+  margin-bottom: 0.7rem; /* mb-3 */
+}
+.prose-sanskara p, .prose-sanskara ul, .prose-sanskara ol {
+  font-size: 1.13rem; /* text-lg (approx) */
+  line-height: 2.1; /* leading-loose or custom */
+  margin-bottom: 1.2rem; /* mb-5 */
+}
+.prose-sanskara ul, .prose-sanskara ol {
+  margin-left: 1.5rem; /* ml-6 */
+}
+.prose-sanskara strong {
+  color: #b97a2b; /* custom text color */
+  font-weight: bold; /* Tailwind's default strong is bold */
+}
+.prose-sanskara a {
+  color: #DC2626; /* custom text color */
+  text-decoration: underline;
+}
+.prose-sanskara a:hover {
+  color: #F59E0B; /* custom hover color */
+}
+.prose-sanskara hr {
+  border: none;
+  border-top: 1.5px solid #f7c9a7;
+  margin: 2.5rem 0; /* my-10 */
+}
+
+/* Ensure Inter font is applied to blog specific sections if not globally */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+.font-nunito {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Specific body style for blog pages if needed, can be applied via a wrapper in React */
+.blog-body {
+  background: #faf7f2;
+  color: #3a3a3a;
+  font-family: 'Nunito', 'Inter', sans-serif;
+}
+
+/* Update existing logo-pulse if different from new one, or choose one */
+/* Existing .logo-pulse from Navbar might conflict if styles are different */
+/* New .logo-pulse from article.html:
+.logo-pulse {
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.15); }
+}
+*/
 
 .pattern-bg {
   background-color: #fff9f5;

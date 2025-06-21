@@ -1,49 +1,69 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PostData } from '@/lib/blog-posts'; // Assuming PostData is exported from blog-posts.ts
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { PostData } from '@/lib/blog-posts';
+import { Button } from '@/components/ui/button'; // Keep for potential future use, but new design uses custom button
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarAlt, faClock } from '@fortawesome/free-regular-svg-icons';
 
 interface BlogPostCardProps {
-  post: PostData;
+  post: PostData & { category?: string; tags?: string[]; readTime?: string }; // Extended PostData
 }
 
 const BlogPostCard: React.FC<BlogPostCardProps> = ({ post }) => {
+  // Fallback for tags if not provided in post data
+  const tagsToDisplay = post.tags && post.tags.length > 0 ? post.tags : ["General"];
+  const categoryToDisplay = post.category || "Featured";
+
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader>
-        {post.image && (
-          <div className="aspect-[16/9] mb-4 rounded-md overflow-hidden">
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        <CardTitle className="text-xl font-semibold hover:text-wedding-red transition-colors">
-          <Link to={`/blog/${post.slug}`}>{post.title}</Link>
-        </CardTitle>
-        <p className="text-sm text-gray-500">
+    <article className="card-hover bg-white/70 rounded-2xl p-8 shadow-lg floating-animation font-inter">
+      {/* Image can be added here if desired, similar to old card */}
+      {/* Example:
+      {post.image && (
+        <div className="aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md">
+          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+        </div>
+      )}
+      */}
+      <div className="mb-4">
+        <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-semibold">
+          {categoryToDisplay}
+        </span>
+      </div>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 leading-tight hover:text-orange-600 transition-colors">
+        <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+      </h2>
+      <p className="text-gray-600 mb-6 leading-relaxed">
+        {post.excerpt || "No excerpt available."}
+      </p>
+      <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4">
+        <span>
+          <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
           {new Date(post.date).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
           })}
-          {post.author && ` by ${post.author}`}
-        </p>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-gray-700">{post.excerpt}</p>
-      </CardContent>
-      <CardFooter>
-        <Button asChild variant="link" className="p-0 text-wedding-red hover:text-wedding-deepred">
-          <Link to={`/blog/${post.slug}`}>
-            Read More &rarr;
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+        </span>
+        {post.readTime && (
+          <span>
+            <FontAwesomeIcon icon={faClock} className="mr-1" />
+            {post.readTime}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {tagsToDisplay.map((tag, index) => (
+          <span key={index} className="bg-orange-50 text-orange-500 px-2 py-1 rounded text-xs">
+            {tag}
+          </span>
+        ))}
+      </div>
+      <Link to={`/blog/${post.slug}`} className="block w-full">
+        <button className="btn-gradient text-white px-6 py-3 rounded-full font-medium w-full">
+          Read Full Article
+        </button>
+      </Link>
+    </article>
   );
 };
 
