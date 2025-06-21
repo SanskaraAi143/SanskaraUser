@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,7 +13,11 @@ type Message = {
   timestamp: Date;
 };
 
-const VendorChat = () => {
+interface VendorChatProps {
+  selectedTopic?: string | null;
+}
+
+const VendorChat: React.FC<VendorChatProps> = ({ selectedTopic }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -74,6 +77,12 @@ const VendorChat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (selectedTopic) {
+      setInputMessage(selectedTopic);
+    }
+  }, [selectedTopic]);
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-md border border-gray-200">

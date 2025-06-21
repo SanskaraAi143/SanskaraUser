@@ -41,15 +41,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     name: sbUser.user_metadata?.name || sbUser.email,
   });
 
-  // Effect to initialize auth state
+  // Effect to initialize auth state and restore user on reload
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
       const { data, error } = await supabase.auth.getUser();
       if (data?.user) {
         setSupabaseUser(data.user);
+        // Restore internal user_id mapping
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('user_id')
+          .eq('supabase_auth_uid', data.user.id)
+          .single();
+        setUser({
+          id: userRow?.user_id || data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || data.user.email,
+        });
       } else {
         setSupabaseUser(null);
+        setUser(null);
       }
       setLoading(false);
     };
@@ -58,8 +70,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setSupabaseUser(session.user);
+        // Restore internal user_id mapping
+        supabase
+          .from('users')
+          .select('user_id')
+          .eq('supabase_auth_uid', session.user.id)
+          .single()
+          .then(({ data: userRow }) => {
+            setUser({
+              id: userRow?.user_id || session.user.id,
+              email: session.user.email,
+              name: session.user.user_metadata?.name || session.user.email,
+            });
+          });
       } else {
         setSupabaseUser(null);
+        setUser(null);
       }
     });
     return () => {
@@ -168,16 +194,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
-
-  // Remove polling useEffect for supabaseUser/internal user_id
-  useEffect(() => {
-    if (!supabaseUser) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-    // Do not fetch user_id here anymore
-  }, [supabaseUser]);
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>

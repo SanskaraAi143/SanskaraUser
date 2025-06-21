@@ -1,16 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import TaskDetailModal from './TaskDetailModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from '@/context/AuthContext';
 import { getUserTasks, addUserTask, updateUserTask, removeUserTask } from '@/services/api/tasksApi';
 import TaskRow from './TaskRow';
 import Pagination from './Pagination';
 import CategoryManager from './CategoryManager';
+import { CalendarDays } from 'lucide-react';
 
 import type { Task } from '@/services/api/tasksApi';
 import { getPriorityColor } from '@/lib/utils';
@@ -47,15 +45,6 @@ const TaskTracker = () => {
   const [showUndo, setShowUndo] = useState(false);
   const [undoAction, setUndoAction] = useState<null | (() => void)>(null);
   const [userPrefs, setUserPrefs] = useState(() => JSON.parse(localStorage.getItem('userPrefs') || '{}'));
-  // For comments/attachments
-  const [comments, setComments] = useState<Record<string, string[]>>(JSON.parse(localStorage.getItem('comments') || '{}'));
-  const [attachments, setAttachments] = useState<Record<string, File[]>>(JSON.parse(localStorage.getItem('attachments') || '{}'));
-
-
-
-
-
-
 
   // Inline edit handler
   const handleEditTask = async (taskId: string, updates: Partial<Task>) => {
@@ -70,7 +59,6 @@ const TaskTracker = () => {
       setLoading(false);
     }
   };
-
 
   // Filtering, sorting, and search state
   const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'incomplete'>(userPrefs.filterStatus || 'all');
@@ -95,12 +83,6 @@ const TaskTracker = () => {
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
   }, [categories]);
-  useEffect(() => {
-    localStorage.setItem('comments', JSON.stringify(comments));
-  }, [comments]);
-  useEffect(() => {
-    localStorage.setItem('attachments', JSON.stringify(attachments));
-  }, [attachments]);
   useEffect(() => {
     localStorage.setItem('tasksPerPage', String(tasksPerPage));
   }, [tasksPerPage]);
@@ -170,89 +152,157 @@ const TaskTracker = () => {
       });
   }
 
+  const kanbanStatuses = ["No Status", "To Do", "Doing", "Done"];
+  
+  // Show error toast if error occurs
+  useEffect(() => {
+    if (error) {
+      // Optionally use a toast here if you have a toast system
+      // toast({ title: 'Error', description: error, variant: 'destructive' });
+      // For now, just log
+      console.error(error);
+    }
+  }, [error]);
+
+  // Render error message if error exists
   return (
-    <div className="w-full min-h-screen bg-[#f8f9fb] px-6 py-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 text-2xl font-bold">Task Tracker</div>
-        {/* Loading Indicator */}
-        {loading && (
-          <div className="w-full flex justify-center items-center py-6">
-            <span className="text-gray-500 text-sm">Loading tasks...</span>
-          </div>
-        )}
-        {/* Add New Task Button */}
-        <div className="flex justify-start mb-8">
-          <Button onClick={handleAdd}>Add Task</Button>
+    <div className="space-y-8">
+      {error && (
+        <div className="glass-card p-4 bg-red-100 border border-red-300 text-red-700 text-center font-semibold">
+          {error}
         </div>
-        {/* Kanban Board */}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex flex-wrap justify-center gap-8">
-            {['No Status', 'To Do', 'Doing', 'Done'].map((status) => (
-              <Droppable droppableId={status} key={status}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`w-72 min-h-[400px] bg-white rounded-2xl shadow-xl px-4 pt-6 pb-4 flex flex-col transition-all duration-300 relative border-t-8 ${
-                      status === 'No Status' ? 'border-gray-300' :
-                      status === 'To Do' ? 'border-blue-400' :
-                      status === 'Doing' ? 'border-yellow-400' :
-                      'border-green-400'
-                    } ${snapshot.isDraggingOver ? 'ring-2 ring-blue-300 scale-[1.01]' : ''}`}
-                  >
-                    <div className="sticky top-0 z-10 bg-white rounded-t-2xl pb-2 mb-3 flex items-center gap-2 border-b border-gray-100">
-                      <span className={`text-xl font-bold ${
-                        status === 'No Status' ? 'text-gray-500' :
-                        status === 'To Do' ? 'text-blue-600' :
-                        status === 'Doing' ? 'text-yellow-700' :
-                        'text-green-600'
-                      }`}>
-                        {status === 'No Status' && <span className="mr-1">🗂️</span>}
-                        {status === 'To Do' && <span className="mr-1">📝</span>}
-                        {status === 'Doing' && <span className="mr-1">⏳</span>}
-                        {status === 'Done' && <span className="mr-1">✅</span>}
-                        {status}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-5 flex-1">
-                      {tasks.filter(t => t.status === status).map((task, i) => (
-                        <Draggable draggableId={task.task_id} index={i} key={task.task_id}>
+      )}
+      {/* Header with Actions */}
+      <div className="glass-card p-6 bg-gradient-to-br from-wedding-gold/80 via-wedding-cream/90 to-white border border-wedding-gold/30 shadow-xl rounded-2xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-playfair font-bold bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent mb-2 drop-shadow">
+              Wedding Planning Tasks
+            </h2>
+            <p className="text-wedding-gold/90 font-medium">
+              Track and manage all your wedding preparation tasks in one place
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="ghost" className="rounded-full bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white shadow-lg hover:scale-105 transition" onClick={() => setModalTask({} as Task)}>
+              Add New Task
+            </Button>
+            <CategoryManager
+              categories={categories}
+              onAdd={cat => setCategories([...categories, cat])}
+              onDelete={cat => setCategories(categories.filter(c => c !== cat))}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Kanban Board */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {kanbanStatuses.map((status) => (
+            <Droppable key={status} droppableId={status}>
+              {(provided, snapshot) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className={`rounded-2xl p-4 min-h-[340px] transition-all duration-300 border-2 shadow-xl
+                    bg-gradient-to-br from-wedding-cream/80 via-white/60 to-wedding-gold/10
+                    ${snapshot.isDraggingOver ? 'ring-2 ring-wedding-gold scale-105' : 'border-wedding-gold/30'}
+                  `}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-playfair font-bold text-xl bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent drop-shadow">
+                      {status}
+                    </h3>
+                    <span className="bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white text-sm px-3 py-1 rounded-full shadow font-semibold border border-wedding-gold/40">
+                      {tasks.filter((task) => task.status === status).length}
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {tasks
+                      .filter((task) => task.status === status)
+                      .map((task, index) => (
+                        <Draggable
+                          key={task.task_id}
+                          draggableId={task.task_id}
+                          index={index}
+                        >
                           {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`transition-all duration-200 ${snapshot.isDragging ? 'scale-[1.03] shadow-2xl z-20 ring-2 ring-blue-200' : ''}`}
+                              className={`
+                                bg-gradient-to-br from-white/70 via-[#f8e7c7]/60 to-[#d4af37]/10
+                                backdrop-blur-md rounded-xl p-4 border-2 border-[#d4af37]/20 shadow-lg
+                                transition-all duration-300 cursor-pointer
+                                ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-[#d4af37] scale-105' : ''}
+                                hover:shadow-2xl hover:scale-[1.03]
+                              `}
+                              onClick={() => setModalTask(task)}
                             >
-                              <TaskRow 
-                                task={task}
-                                isSelected={false}
-                                onSelect={() => {}}
-                                onToggle={handleToggle}
-                                onDelete={handleDelete}
-                                onEdit={() => setModalTask(task)}
-                              />
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <Checkbox
+                                    checked={task.status === 'Done'}
+                                    onCheckedChange={() => handleToggle(task)}
+                                    className="mt-1 border-[#d4af37] focus:ring-[#d4af37]"
+                                  />
+                                  <div className="min-w-0">
+                                    <h4 className="font-semibold text-wedding-gold truncate">
+                                      {task.title}
+                                    </h4>
+                                    {task.description && (
+                                      <p className="text-sm text-wedding-gold/70 truncate mt-1">
+                                        {task.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className={`px-2.5 py-1 rounded-full text-xs font-semibold border border-[#d4af37]/40
+                                  ${getPriorityColor(task.priority)}
+                                  bg-gradient-to-r from-[#fffbe6]/80 to-[#d4af37]/20
+                                `}>
+                                  {task.priority}
+                                </div>
+                              </div>
+                              {task.due_date && (
+                                <div className="mt-3 flex items-center gap-2 text-sm text-wedding-gold/60">
+                                  <CalendarDays className="h-4 w-4 text-[#d4af37]" />
+                                  <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </Draggable>
                       ))}
-                      {provided.placeholder}
-                    </div>
                   </div>
-                )}
-              </Droppable>
-            ))}
-          </div>
-        </DragDropContext>
-        {/* Task Detail Modal */}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {/* Task Detail Modal */}
+      {modalTask && (
         <TaskDetailModal
           task={modalTask}
           open={!!modalTask}
           onClose={() => setModalTask(null)}
           onSave={handleModalSave}
-          onTaskAdded={async () => {
-            if (user?.id) setTasks(await getUserTasks(user.id));
-          }}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Pagination */}
+      <div className="glass-card p-4 mt-6">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(tasks.length / tasksPerPage)}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>
