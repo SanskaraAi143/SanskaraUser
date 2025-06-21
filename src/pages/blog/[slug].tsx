@@ -1,6 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { PostData, getPostBySlug } from '@/lib/blog-posts';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PostData, getPostBySlug } from '@/lib/blog-posts';

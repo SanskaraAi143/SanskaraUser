@@ -15,12 +15,14 @@ export interface PostData {
 }
 
 // Use Vite's import.meta.glob to import all markdown files from the content/blog directory
-// The ?raw suffix imports the file content as a string
-const markdownModules = import.meta.glob('/content/blog/*.md', { as: 'raw', eager: true });
+// Updated to new syntax: query: '?raw', import: 'default'
+const markdownModules = import.meta.glob('/content/blog/*.md', { query: '?raw', import: 'default', eager: true });
 
 export async function getAllPosts(): Promise<PostData[]> {
   const allPostsData = await Promise.all(
-    Object.entries(markdownModules).map(async ([filePath, rawContent]) => {
+    Object.entries(markdownModules).map(async ([filePath, rawContentModule]) => {
+      // Assuming rawContentModule is the string content due to `import: 'default'` and `?raw`
+      const rawContent = rawContentModule as string;
       const slug = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
       const matterResult = matter(rawContent);
 
@@ -50,7 +52,8 @@ export async function getPostBySlug(slug: string): Promise<PostData | null> {
   const filePath = `/content/blog/${slug}.md`;
 
   if (markdownModules[filePath]) {
-    const rawContent = markdownModules[filePath];
+    // Assuming markdownModules[filePath] is the string content due to `import: 'default'` and `?raw`
+    const rawContent = markdownModules[filePath] as string;
     const matterResult = matter(rawContent);
     const contentHtml = await marked(matterResult.content);
 
