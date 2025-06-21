@@ -19,10 +19,16 @@ export interface PostData {
 const markdownModules = import.meta.glob('/content/blog/*.md', { query: '?raw', import: 'default', eager: true });
 
 export async function getAllPosts(): Promise<PostData[]> {
-  const allPostsData = await Promise.all(
-    Object.entries(markdownModules).map(async ([filePath, rawContentModule]) => {
+  const postPromises = Object.entries(markdownModules).map(async ([filePath, rawContentModule]) => {
+    try {
       // Assuming rawContentModule is the string content due to `import: 'default'` and `?raw`
       const rawContent = rawContentModule as string;
+
+      if (!rawContent || typeof rawContent !== 'string') {
+        console.error(`[getAllPosts] Invalid or empty rawContent for ${filePath}. Skipping.`);
+        return null; // Skip this entry if rawContent is not a string
+      }
+
       const slug = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
       const matterResult = matter(rawContent);
 
@@ -36,8 +42,13 @@ export async function getAllPosts(): Promise<PostData[]> {
           image?: string;
         }),
       };
-    })
-  );
+    } catch (error) {
+      console.error(`[getAllPosts] Error processing file ${filePath}:`, error);
+      return null; // Return null if there's an error processing a file
+    }
+  });
+
+  const allPostsData = (await Promise.all(postPromises)).filter(post => post !== null) as PostData[];
 
   return allPostsData.sort((a, b) => {
     if (new Date(a.date) < new Date(b.date)) {
@@ -52,8 +63,14 @@ export async function getPostBySlug(slug: string): Promise<PostData | null> {
   const filePath = `/content/blog/${slug}.md`;
 
   if (markdownModules[filePath]) {
-    // Assuming markdownModules[filePath] is the string content due to `import: 'default'` and `?raw`
-    const rawContent = markdownModules[filePath] as string;
+    const rawContentModule = markdownModules[filePath];
+    // Assuming rawContentModule is the string content
+    const rawContent = rawContentModule as string;
+
+    if (!rawContent || typeof rawContent !== 'string') {
+        console.error(`[getPostBySlug] Invalid or empty rawContent for ${filePath}.`);
+        return null;
+    }
     const matterResult = matter(rawContent);
     const contentHtml = await marked(matterResult.content);
 

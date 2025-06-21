@@ -19,6 +19,7 @@ const BlogListPage: React.FC = () => {
   useEffect(() => {
     const fetchAndProcessPosts = async () => {
       const fetchedRawPosts = await getAllPosts();
+
       // Add dummy/default category, tags, readTime for styling if not present in actual data
       // These should ideally come from frontmatter
       const processedPosts = fetchedRawPosts.map(p => ({
@@ -44,7 +45,8 @@ const BlogListPage: React.FC = () => {
 
     const indexOfLastPost = currentPage * POSTS_PER_PAGE;
     const indexOfFirstPost = indexOfLastPost - POSTS_PER_PAGE;
-    setDisplayedPosts(postsToDisplay.slice(indexOfFirstPost, indexOfLastPost));
+    const paginatedPosts = postsToDisplay.slice(indexOfFirstPost, indexOfLastPost);
+    setDisplayedPosts(paginatedPosts);
 
   }, [allPosts, currentPage, activeFilter]);
 
