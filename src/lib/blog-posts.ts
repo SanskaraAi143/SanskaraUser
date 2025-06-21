@@ -1,9 +1,7 @@
-import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
-
-const postsDirectory = path.join(process.cwd(), 'content/blog');
+// Node.js 'fs' and 'path' modules cannot be used in client-side Vite code directly.
+// We will use Vite's import.meta.glob for static analysis at build time.
 
 export interface PostData {
   slug: string;
@@ -16,15 +14,15 @@ export interface PostData {
   [key: string]: any; // Allow other front matter fields
 }
 
-export function getAllPosts(): PostData[] {
-  const fileNames = fs.readdirSync(postsDirectory);
-  const allPostsData = fileNames
-    .filter(fileName => fileName.endsWith('.md')) // Ensure we only process markdown files
-    .map(fileName => {
-      const slug = fileName.replace(/\.md$/, '');
-      const fullPath = path.join(postsDirectory, fileName);
-      const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const matterResult = matter(fileContents);
+// Use Vite's import.meta.glob to import all markdown files from the content/blog directory
+// The ?raw suffix imports the file content as a string
+const markdownModules = import.meta.glob('/content/blog/*.md', { as: 'raw', eager: true });
+
+export async function getAllPosts(): Promise<PostData[]> {
+  const allPostsData = await Promise.all(
+    Object.entries(markdownModules).map(async ([filePath, rawContent]) => {
+      const slug = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
+      const matterResult = matter(rawContent);
 
       return {
         slug,
@@ -36,7 +34,8 @@ export function getAllPosts(): PostData[] {
           image?: string;
         }),
       };
-    });
+    })
+  );
 
   return allPostsData.sort((a, b) => {
     if (new Date(a.date) < new Date(b.date)) {
@@ -48,11 +47,11 @@ export function getAllPosts(): PostData[] {
 }
 
 export async function getPostBySlug(slug: string): Promise<PostData | null> {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  const filePath = `/content/blog/${slug}.md`;
 
-  try {
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const matterResult = matter(fileContents);
+  if (markdownModules[filePath]) {
+    const rawContent = markdownModules[filePath];
+    const matterResult = matter(rawContent);
     const contentHtml = await marked(matterResult.content);
 
     return {
@@ -66,22 +65,19 @@ export async function getPostBySlug(slug: string): Promise<PostData | null> {
         image?: string;
       }),
     };
-  } catch (err) {
-    // If the file doesn't exist or there's an error reading it
-    console.error(`Error reading post ${slug}:`, err);
+  } else {
+    console.error(`Post with slug "${slug}" not found. Path: ${filePath}`);
     return null;
   }
 }
 
 export function getAllPostSlugs(): { params: { slug: string } }[] {
-  const fileNames = fs.readdirSync(postsDirectory);
-  return fileNames
-    .filter(fileName => fileName.endsWith('.md'))
-    .map(fileName => {
-      return {
-        params: {
-          slug: fileName.replace(/\.md$/, ''),
-        },
-      };
-    });
+  return Object.keys(markdownModules).map(filePath => {
+    const slug = filePath.split('/').pop()?.replace(/\.md$/, '') || '';
+    return {
+      params: {
+        slug,
+      },
+    };
+  });
 }

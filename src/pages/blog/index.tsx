@@ -13,10 +13,11 @@ const BlogListPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    // In a real Next.js app, this would be `getStaticProps` or `getServerSideProps`
-    // For a CRA/Vite React app, we fetch on mount.
-    const fetchedPosts = getAllPosts();
-    setPosts(fetchedPosts);
+    const fetchPosts = async () => {
+      const fetchedPosts = await getAllPosts();
+      setPosts(fetchedPosts);
+    };
+    fetchPosts();
   }, []);
 
   const indexOfLastPost = currentPage * POSTS_PER_PAGE;
