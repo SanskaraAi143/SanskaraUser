@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8030,
+    allowedHosts: ["sanskaraai.com"],
   },
   plugins: [
     react(),
