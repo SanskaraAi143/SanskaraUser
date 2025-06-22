@@ -1,55 +1,66 @@
-/* FuturisticChatView.css */
+/* FuturisticChatView.css - Adapted from new HTML example */
 
-.futuristic-chat-view {
+/* Equivalent to .chat-container from HTML */
+.futuristic-chat-container {
+  width: 100%; /* Changed from 95% to fill parent, parent page can control max-width */
+  height: 100%; /* Changed from 90vh to fill parent */
   display: flex;
   flex-direction: column;
-  height: 100%; /* Assumes parent container (DynamicBackground's content-on-top) provides height */
-  width: 100%;
-  color: #f0f0f0; /* Default text color for the view */
-  position: relative; /* For absolute positioning of children if needed */
-  overflow: hidden; /* Prevent content from spilling out and causing scrollbars on the view itself */
+  border-radius: 20px; /* Keep consistent with new design */
+  overflow: hidden;
+  background: linear-gradient(145deg, #161b22, #0d1117); /* From new HTML */
+  box-shadow: 0 10px 30px rgba(0, 255, 255, 0.15), 0 5px 15px rgba(0, 255, 255, 0.25); /* From new HTML */
+  position: relative; /* For canvas later */
+  color: #e6edf3; /* Default text color from new HTML body */
 }
 
-.ai-visualizer-section {
-  /* Positioning for the AI Visualizer, e.g., top center, or corner */
+/* Equivalent to .header from HTML */
+.futuristic-header {
+  background-color: #1f2a37;
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 20px 0; /* Add some padding */
-  /* background-color: rgba(0, 0, 0, 0.1); */ /* Optional subtle background */
-  z-index: 10; /* Ensure it's above messages if overlapping */
-  flex-shrink: 0; /* Prevent this section from shrinking */
-  /* Example: Fixed height for the visualizer area */
-  /* height: 180px; */
+  justify-content: center;
+  gap: 10px;
+  /* border-top-left-radius: 20px; */ /* Part of parent's radius */
+  /* border-top-right-radius: 20px; */ /* Part of parent's radius */
+  z-index: 10; /* Ensure header is above canvas */
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
-.messages-section {
-  flex-grow: 1; /* This section takes up the most space */
-  display: flex; /* Use flex to ensure FuturisticMessageDisplay fills it */
-  flex-direction: column;
-  overflow: hidden; /* Important: FuturisticMessageDisplay handles its own scrolling */
-  /* The actual FuturisticMessageDisplay component inside will handle its own padding and scrolling */
+.futuristic-header h1 {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: bold; /* font-bold */
+  color: white; /* text-white */
 }
 
-.input-section {
-  flex-shrink: 0; /* Prevent this section from shrinking */
-  /* MultimodalInput handles its own padding and background */
-  /* border-top: 1px solid rgba(255, 255, 255, 0.1); */ /* Moved to MultimodalInput */
-  z-index: 10; /* Ensure input is above messages if any overlap is possible */
+.header-glow {
+  width: 12px;
+  height: 12px;
+  background-color: #00ffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
+  animation: pulse-glow 1.5s infinite alternate;
 }
 
-/* Example of how one might place the AI visualizer differently, e.g., top-left corner */
+@keyframes pulse-glow {
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
 /*
-.ai-visualizer-section.corner-placement {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 100px; // Smaller size for corner
-  height: 100px;
-  padding: 0;
-}
-.ai-visualizer-section.corner-placement .ai-state-visualizer-container {
-  width: 100px;
-  height: 100px;
-}
+  Styles for .messages-section and .input-section will be largely
+  handled by FuturisticMessageDisplay.css and MultimodalInput.css respectively,
+  but this file defines their flex behavior within futuristic-chat-container.
 */
+
+/* FuturisticMessageDisplay will be the new .conversational-canvas */
+/* It needs to grow and enable scrolling. This is handled by its own CSS. */
+/* MultimodalInput will be the new .input-area */
+/* It should not shrink. This is handled by its own CSS. */
+
+/* Remove old styles that are no longer relevant */
+/* .ai-visualizer-section, .messages-section (old), .input-section (old) */
+/* These are implicitly removed by not being defined or by being replaced. */

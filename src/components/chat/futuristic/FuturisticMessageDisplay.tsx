@@ -4,11 +4,18 @@ import './FuturisticMessageDisplay.css';
 
 interface FuturisticMessageDisplayProps {
   messages: Message[];
+  isUserSpeaking: boolean;
+  isAISpeaking: boolean;
   // Potentially add props for user typing, AI typing indicators if they are to be part of the message flow
 }
 
-const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ messages }) => {
+const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({
+  messages,
+  isUserSpeaking,
+  isAISpeaking
+}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,25 +23,27 @@ const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ mes
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]); // Scroll to bottom whenever messages change
+  }, [messages]);
 
-  const isValidMessage = (msg: any): msg is Message =>
-    msg && typeof msg === 'object' && typeof msg.role === 'string' && typeof msg.content === 'string';
+  // Determine container class based on speaking state for background effects
+  let containerClasses = "futuristic-conversational-canvas"; // Base class from new CSS
+  if (isAISpeaking) {
+    containerClasses += " speaking-ai";
+  } else if (isUserSpeaking) {
+    containerClasses += " speaking-user";
+  }
+
+  // Log messages before rendering to help debug (can be removed later)
+  // console.log('[FuturisticMessageDisplay] Rendering messages:', JSON.parse(JSON.stringify(messages)));
 
   return (
-    <div className="futuristic-message-display-container">
-      <div className="message-list">
-        {messages.filter(isValidMessage).map((msg) => (
-          <MessageItem key={msg.id} message={msg} />
-        ))}
-        {/* AI Typing indicator could be a special type of MessageItem or a separate component here */}
-        {/* Example:
-          isAiTyping && (
-            <MessageItem message={{ id: 'typing', role: 'bot', content: '...' }} />
-          )
-        */}
-        <div ref={messagesEndRef} />
-      </div>
+    <div ref={containerRef} className={containerClasses}>
+      {/* The message-list div might not be needed if styling is applied directly to items */}
+      {messages.filter(Boolean).map((msg) => (
+        <MessageItem key={msg.id} message={msg} />
+      ))}
+      {/* AI Typing indicator could be added here later, styled appropriately */}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

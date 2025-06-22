@@ -1,97 +1,55 @@
-/* MessageItem.css */
+/* MessageItem.css - Adapted from .message-bubble in new HTML */
 
-.message-item-wrapper {
-  display: flex;
-  margin-bottom: 15px;
-  animation: messageAppear 0.5s ease-out forwards;
-  opacity: 0;
-  transform: translateY(10px); /* Start slightly lower */
-}
-
-@keyframes messageAppear {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.user-message-wrapper {
-  justify-content: flex-end;
-  margin-left: auto; /* Pushes user messages to the right */
-  max-width: 75%; /* Max width for user messages */
-}
-
-.bot-message-wrapper {
-  justify-content: flex-start;
-  margin-right: auto; /* Pushes bot messages to the left */
-  max-width: 75%; /* Max width for bot messages */
-}
-
-.message-item {
-  padding: 12px 18px;
-  border-radius: 18px; /* More rounded, futuristic feel */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Softer, more diffused shadow */
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  backdrop-filter: blur(5px); /* Frosted glass effect */
-  -webkit-backdrop-filter: blur(5px); /* For Safari */
-}
-
-.user-message {
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.7), rgba(0, 88, 183, 0.8)); /* User message gradient, slightly transparent */
-  color: #ffffff;
-  border-top-right-radius: 5px; /* Slightly different rounding for user */
-}
-
-.bot-message {
-  background: linear-gradient(135deg, rgba(50, 50, 70, 0.7), rgba(30, 30, 50, 0.8)); /* Bot message gradient, slightly transparent */
-  color: #e0e0e0;
-  border-top-left-radius: 5px; /* Slightly different rounding for bot */
-}
-
-/* Avatar Placeholder Styling (Future) */
-/*
-.message-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px; // For bot
-  margin-left: 10px; // For user (adjust flex order)
-  background-color: #ccc; // Placeholder
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-*/
-
-.message-content {
-  font-size: 1rem;
+.message-bubble {
+  max-width: 70%; /* From new HTML */
+  padding: 0.8rem 1.2rem; /* From new HTML */
+  border-radius: 15px; /* From new HTML */
+  position: relative; /* From new HTML */
+  animation: fadeIn 0.3s ease-out; /* From new HTML */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* From new HTML */
+  z-index: 6; /* Ensure bubbles are above canvas, from new HTML */
+  /* Standard text properties */
+  font-size: 1rem; /* Default, can adjust */
   line-height: 1.5;
-  white-space: pre-wrap; /* Preserve line breaks */
-  word-wrap: break-word; /* Break long words */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
-.message-timestamp {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6); /* Light timestamp for user */
-  text-align: right;
-  margin-top: 8px;
+@keyframes fadeIn { /* From new HTML */
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.bot-message .message-timestamp {
-  color: rgba(224, 224, 224, 0.5); /* Slightly different light timestamp for bot */
+.message-bubble.user {
+  align-self: flex-end; /* From new HTML */
+  background-color: #2b3a4a; /* From new HTML */
+  color: #e6edf3; /* From new HTML */
+  border-bottom-right-radius: 5px; /* From new HTML */
 }
 
-/* Rich Media Placeholder Styling (Future) */
-/*
-.rich-media-container {
-  margin-top: 10px;
-  border-radius: 10px;
-  overflow: hidden;
+.message-bubble.ai { /* HTML uses .ai, not .bot */
+  align-self: flex-start; /* From new HTML */
+  background-color: #004d40; /* From new HTML */
+  color: #a7ffeb; /* From new HTML */
+  border-bottom-left-radius: 5px; /* From new HTML */
 }
-.rich-media-container img {
-  max-width: 100%;
-  display: block;
+
+.message-bubble.system {
+  align-self: center;
+  background-color: #333; /* Example system message style */
+  color: #ccc;
+  font-size: 0.85rem;
+  font-style: italic;
+  max-width: 80%;
+  text-align: center;
+  border-radius: 8px;
 }
-*/
+
+
+/* Old classes to be removed or adapted: */
+/* .message-item-wrapper, .user-message-wrapper, .bot-message-wrapper */
+/* .message-item (old base class) */
+/* .user-message (old user variant) */
+/* .bot-message (old bot variant) */
+/* .message-content (merged into .message-bubble) */
+/* .message-timestamp (can be re-added if needed with new styling) */

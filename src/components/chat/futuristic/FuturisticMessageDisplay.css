@@ -1,43 +1,55 @@
-/* FuturisticMessageDisplay.css */
+/* FuturisticMessageDisplay.css - Adapted from .conversational-canvas in new HTML */
 
-.futuristic-message-display-container {
-  flex-grow: 1; /* Takes up available vertical space */
-  overflow-y: auto; /* Enables scrolling for messages */
-  padding: 20px;
-  display: flex; /* Using flex to potentially allow for future alignment options */
-  flex-direction: column; /* Stack messages vertically */
-  position: relative; /* For positioning elements like a scroll-to-bottom button if needed */
-}
-
-.message-list {
+.futuristic-conversational-canvas { /* Renamed from .futuristic-message-display-container */
+  flex-grow: 1;
+  padding: 2rem; /* From new HTML */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 5px; /* Reduced gap as margins are on items, or manage all spacing here */
-  width: 100%;
+  gap: 1rem; /* From new HTML */
+  background: radial-gradient(circle at top left, rgba(0, 255, 255, 0.05), transparent 50%),
+              radial-gradient(circle at bottom right, rgba(138, 43, 226, 0.05), transparent 50%); /* From new HTML */
+  transition: background 0.5s ease-in-out; /* From new HTML */
+  z-index: 5; /* From new HTML (relative to .futuristic-chat-container) */
+  position: relative; /* For z-index to work, and for messages inside */
+
+  /* Custom scrollbar styling (can keep or adapt from old version) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 255, 0.2) rgba(0, 255, 255, 0.05); /* Cyan-ish scrollbar */
 }
 
-/* Custom scrollbar styling (optional, for a more futuristic feel) */
-.futuristic-message-display-container::-webkit-scrollbar {
+.futuristic-conversational-canvas::-webkit-scrollbar {
   width: 8px;
 }
 
-.futuristic-message-display-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05); /* Very subtle track */
+.futuristic-conversational-canvas::-webkit-scrollbar-track {
+  background: rgba(0, 255, 255, 0.05);
   border-radius: 4px;
 }
 
-.futuristic-message-display-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent thumb */
+.futuristic-conversational-canvas::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.2);
   border-radius: 4px;
   transition: background 0.3s ease;
 }
 
-.futuristic-message-display-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4); /* Darker on hover */
+.futuristic-conversational-canvas::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.4);
 }
 
-/* Fallback for Firefox */
-.futuristic-message-display-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+
+/* Dynamic background states from new HTML */
+.futuristic-conversational-canvas.speaking-ai {
+  background: radial-gradient(circle at top left, rgba(0, 255, 255, 0.1), transparent 50%),
+              radial-gradient(circle at bottom right, rgba(138, 43, 226, 0.1), transparent 50%);
+}
+.futuristic-conversational-canvas.speaking-user {
+  background: radial-gradient(circle at top left, rgba(76, 175, 80, 0.05), transparent 50%),
+              radial-gradient(circle at bottom right, rgba(255, 159, 0, 0.05), transparent 50%);
+}
+
+/* The .message-list class is no longer strictly necessary if gap is applied to the container */
+/* Ensure direct children (MessageItem wrappers) are stacked */
+.futuristic-conversational-canvas > * {
+  /* This will apply to MessageItem wrappers. MessageItem.css will handle individual message styles. */
 }

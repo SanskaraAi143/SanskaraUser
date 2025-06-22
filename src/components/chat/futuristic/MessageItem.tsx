@@ -1,14 +1,11 @@
 import React from 'react';
 import './MessageItem.css';
-// import AIStateVisualizer from './AIStateVisualizer'; // Example: if AI avatar is the visualizer
 
 export interface Message {
   id: string | number;
-  role: 'user' | 'bot' | 'system'; // 'system' for neutral info if needed
-  content: string; // For now, simple text. Later can be structured content.
+  role: 'user' | 'bot' | 'system';
+  content: string;
   timestamp?: string;
-  // Future: richMedia?: { type: 'image' | 'video' | 'graph', url: string }
-  // Future: interactiveElements?: any;
 }
 
 interface MessageItemProps {
@@ -16,38 +13,38 @@ interface MessageItemProps {
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  const isUser = message && message.role === 'user';
-
-  if (!message || typeof message.role !== 'string' || typeof message.content !== 'string') {
-    // Optionally render nothing or a fallback UI
+  if (!message) {
+    // console.error('MessageItem rendered with undefined message prop'); // Already logged if it happens
     return null;
   }
 
+  const isUser = message.role === 'user';
+  const isBot = message.role === 'bot';
+  // const isSystem = message.role === 'system'; // For neutral system messages, not explicitly styled in new HTML
+
+  // Choose class based on role
+  let bubbleClass = 'message-bubble'; // Base class from new CSS
+  if (isUser) {
+    bubbleClass += ' user';
+  } else if (isBot) {
+    bubbleClass += ' ai'; // HTML uses 'ai', not 'bot'
+  } else {
+    bubbleClass += ' system'; // Fallback or specific system styling if needed
+  }
+
   return (
-    <div className={`message-item-wrapper ${isUser ? 'user-message-wrapper' : 'bot-message-wrapper'}`}>
-      <div className={`message-item ${isUser ? 'user-message' : 'bot-message'}`}>
-        {/*
-          Future Avatar Placeholder:
-          <div className="message-avatar">
-            {isUser ? <UserIcon /> : <AIStateVisualizer state="idle" /> }
-          </div>
-        */}
-        <div className="message-content">
-          <p>{message.content}</p>
-        </div>
-        {message.timestamp && (
-          <div className="message-timestamp">
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        )}
-      </div>
-      {/* Placeholder for rich media or interactive elements below the message bubble */}
+    // The wrapper div might not be needed if align-self is applied directly to message-bubble
+    // For now, keeping it to ensure structure is similar if complex alignments are needed.
+    // The new CSS uses align-self on .message-bubble directly.
+    <div className={bubbleClass}>
+      <p>{message.content}</p>
+      {/* Timestamp can be added here if desired, new HTML doesn't show it in bubble */}
       {/*
-        message.richMedia && (
-          <div className="rich-media-container">
-            {message.richMedia.type === 'image' && <img src={message.richMedia.url} alt="Rich content" />}
-          </div>
-        )
+      {message.timestamp && (
+        <div className="message-timestamp-futuristic"> // new class if styled differently
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      )}
       */}
     </div>
   );
