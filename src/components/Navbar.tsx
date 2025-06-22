@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { MenuIcon, MessageCircle, User, X } from 'lucide-react';
+import { MenuIcon, MessageCircle, User } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import SignInDialog from "@/components/auth/SignInDialog";
@@ -12,6 +12,7 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
+  // Use 'isRouterLink' consistently
   const navLinks = [
     { href: "#features", label: "Features" },
     { href: "#how-it-works", label: "How It Works" },
@@ -22,6 +23,7 @@ const Navbar = () => {
 
   const handleStartPlanning = () => {
     navigate('/dashboard/chat');
+    setIsOpen(false); // Also close mobile menu if open
   };
 
   return (
@@ -40,7 +42,7 @@ const Navbar = () => {
         
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map(link => 
-            link.isRoute ? (
+            link.isRouterLink ? (
               <Link 
                 key={link.href}
                 to={link.href} 
@@ -91,7 +93,8 @@ const Navbar = () => {
             </>
           )}
           
-          <Sheet>
+          {/* Mobile Menu */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="ml-2">
                 <MenuIcon className="h-6 w-6" />
@@ -111,7 +114,7 @@ const Navbar = () => {
                   </Link>
                   <nav className="flex flex-col space-y-4">
                     {navLinks.map(link => 
-                      link.isRoute ? (
+                      link.isRouterLink ? (
                         <Link
                           key={link.href}
                           to={link.href}
@@ -125,6 +128,7 @@ const Navbar = () => {
                           key={link.href}
                           href={link.href}
                           className="nav-link py-2"
+                          onClick={() => setIsOpen(false)}
                         >
                           {link.label}
                         </a>
@@ -137,14 +141,14 @@ const Navbar = () => {
                     <Button 
                       variant="ghost" 
                       className="nav-link w-full justify-start"
-                      onClick={() => signOut()}
+                      onClick={() => { signOut(); setIsOpen(false); }}
                     >
                       <User size={18} className="mr-2" />
                       Sign Out
                     </Button>
                   ) : (
                     <SignInDialog>
-                      <Button variant="ghost" className="nav-link w-full justify-start">
+                      <Button variant="ghost" className="nav-link w-full justify-start" onClick={() => setIsOpen(false)}>
                         <User size={18} className="mr-2" />
                         Sign In
                       </Button>

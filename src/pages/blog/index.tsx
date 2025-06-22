@@ -65,20 +65,20 @@ const BlogListPage: React.FC = () => {
   };
 
   return (
-    // Applied .font-inter and .blog-body for overall page styling from new CSS.
-    // The actual body tag styling from blog.html (`background: #faf7f2; color: #3a3a3a;`)
-    // is encapsulated by .blog-body in index.css
-    <div className="min-h-screen flex flex-col blog-body font-inter">
+    <div className="min-h-screen flex flex-col blog-body font-inter relative">
       <Helmet>
         <title>Sanskara Blog - Hindu Wedding Insights & Traditions</title>
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
       </Helmet>
 
-      <Navbar /> {/* Using existing Navbar. */}
+      {/* Move gradient background to a fixed div for proper stacking */}
+      <div className="gradient-bg" aria-hidden="true"></div>
 
-      {/* Hero Section - Add top padding to content below fixed navbar */}
-      <section className="gradient-bg py-20 pt-32 md:pt-36 lg:pt-40"> {/* Increased top padding */}
-        <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in"> {/* Using existing animate-fade-in from index.css */}
+      <Navbar />
+
+      {/* Hero Section - now relative, not fixed bg */}
+      <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
+        <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 font-inter">
                 Hindu Wedding <span className="gradient-text">Insights</span>
             </h1>
@@ -86,7 +86,6 @@ const BlogListPage: React.FC = () => {
                 Discover the latest insights about Hindu wedding traditions, cultural ceremonies,
                 and the future of AI-powered wedding planning with Sanskara.
             </p>
-
             <div className="flex flex-wrap justify-center gap-3 mt-12">
                 <button
                   type="button"
@@ -108,7 +107,7 @@ const BlogListPage: React.FC = () => {
         </div>
       </section>
 
-      <main className="flex-grow container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      <main className="flex-grow container mx-auto px-4 py-16 sm:px-6 lg:px-8 relative z-10">
         {displayedPosts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Updated grid classes */}
             {displayedPosts.map(post => (
@@ -169,8 +168,8 @@ const BlogListPage: React.FC = () => {
         )}
       </main>
 
-      {/* CTA Section */}
-      <section className="gradient-bg py-20">
+      {/* CTA Section - also relative, not fixed bg */}
+      <section className="py-20 relative z-10">
         <div className="max-w-4xl mx-auto text-center px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 font-inter">
                 Ready to Plan Your Dream Hindu Wedding?
@@ -185,7 +184,7 @@ const BlogListPage: React.FC = () => {
         </div>
       </section>
 
-      <Footer /> {/* Using existing Footer */}
+      <Footer />
     </div>
   );
 };
