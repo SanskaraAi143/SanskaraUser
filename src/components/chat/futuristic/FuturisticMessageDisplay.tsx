@@ -18,14 +18,13 @@ const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ mes
     scrollToBottom();
   }, [messages]); // Scroll to bottom whenever messages change
 
-  // Log messages before rendering to help debug
-  console.log('[FuturisticMessageDisplay] Rendering messages:', JSON.parse(JSON.stringify(messages)));
-
+  const isValidMessage = (msg: any): msg is Message =>
+    msg && typeof msg === 'object' && typeof msg.role === 'string' && typeof msg.content === 'string';
 
   return (
     <div className="futuristic-message-display-container">
       <div className="message-list">
-        {messages.filter(Boolean).map((msg) => ( // Added .filter(Boolean) to remove any null/undefined entries
+        {messages.filter(isValidMessage).map((msg) => (
           <MessageItem key={msg.id} message={msg} />
         ))}
         {/* AI Typing indicator could be a special type of MessageItem or a separate component here */}
