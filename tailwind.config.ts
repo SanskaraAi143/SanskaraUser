@@ -65,7 +65,8 @@ const config: Config = {
       },
       fontFamily: {
         playfair: ['"Playfair Display"', 'serif'],
-        poppins: ['Poppins', 'sans-serif']
+        poppins: ['Poppins', 'sans-serif'],
+        sans: ['Poppins', 'sans-serif'], // Set Poppins as default for font-sans
       },
       borderRadius: {
         lg: 'var(--radius)',

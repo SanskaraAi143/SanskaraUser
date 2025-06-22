@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faChartLine, faHeart } from '@fortawesome/free-solid-svg-icons'; // faOm removed as it's not used in this file directly
+import ProgressBar from '@/components/ProgressBar';
 
 const POSTS_PER_PAGE = 6; // Updated to 6 for better grid layout (2 rows of 3, or 3 rows of 2)
 
@@ -64,18 +65,18 @@ const BlogListPage: React.FC = () => {
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
+  // Find the featured blog post (hardcoded or by a property)
+  const featuredPost = allPosts.find(p => p.slug === 'the-sanskaraai-advantage') || allPosts[0];
+
   return (
     <div className="min-h-screen flex flex-col blog-body font-inter relative">
       <Helmet>
         <title>Sanskara Blog - Hindu Wedding Insights & Traditions</title>
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
       </Helmet>
-
-      {/* Move gradient background to a fixed div for proper stacking */}
+      <ProgressBar />
       <div className="gradient-bg" aria-hidden="true"></div>
-
       <Navbar />
-
       {/* Hero Section - now relative, not fixed bg */}
       <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
         <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
@@ -106,8 +107,14 @@ const BlogListPage: React.FC = () => {
             </div>
         </div>
       </section>
+      {/* Featured Blog Card below hero section */}
+      {featuredPost && (
+        <div className="max-w-3xl mx-auto">
+          <BlogPostCard post={{ ...featuredPost, category: 'Featured' }} />
+        </div>
+      )}
 
-      <main className="flex-grow container mx-auto px-4 py-16 sm:px-6 lg:px-8 relative z-10">
+      <main className="flex-grow container mx-auto px-4 pt-0 pb-8 sm:px-6 lg:px-8 relative z-10">
         {displayedPosts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Updated grid classes */}
             {displayedPosts.map(post => (

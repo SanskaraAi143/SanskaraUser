@@ -385,9 +385,8 @@
 
 /* Specific body style for blog pages if needed, can be applied via a wrapper in React */
 .blog-body {
-  background: #faf7f2;
-  color: #3a3a3a;
-  font-family: 'Nunito', 'Inter', sans-serif;
+  background: #faf7f2 !important;
+  color: #3a3a3a !important;
 }
 
 /* Update existing logo-pulse if different from new one, or choose one */
@@ -468,6 +467,12 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Utility for fade-in on scroll or mount */
+.fade-in-on-mount {
+  opacity: 0;
+  animation: fadeIn 1.2s ease-out forwards;
 }
 
 @layer utilities {

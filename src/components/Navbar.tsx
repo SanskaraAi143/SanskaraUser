@@ -5,21 +5,26 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import SignInDialog from "@/components/auth/SignInDialog";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Use 'isRouterLink' consistently
-  const navLinks = [
-    { href: "#features", label: "Features" },
-    { href: "#how-it-works", label: "How It Works" },
-    { href: "#pricing", label: "Pricing" },
-    { href: "#testimonials", label: "Testimonials" },
-    { href: "/blog", label: "Blog", isRouterLink: true },
-  ];
+  // Hide main nav links on blog pages
+  const isBlogPage = location.pathname.startsWith('/blog');
+
+  const navLinks = isBlogPage
+    ? [{ href: "/blog", label: "Blog", isRouterLink: true }]
+    : [
+        { href: "#features", label: "Features" },
+        { href: "#how-it-works", label: "How It Works" },
+        { href: "#pricing", label: "Pricing" },
+        { href: "#testimonials", label: "Testimonials" },
+        { href: "/blog", label: "Blog", isRouterLink: true },
+      ];
 
   const handleStartPlanning = () => {
     navigate('/dashboard/chat');
