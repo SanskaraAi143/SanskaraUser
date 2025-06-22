@@ -21,7 +21,7 @@ const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ mes
   return (
     <div className="futuristic-message-display-container">
       <div className="message-list">
-        {messages.map((msg) => (
+        {messages.filter(Boolean).map((msg) => ( // Added .filter(Boolean) to remove any null/undefined entries
           <MessageItem key={msg.id} message={msg} />
         ))}
         {/* AI Typing indicator could be a special type of MessageItem or a separate component here */}

@@ -25,11 +25,21 @@ const FuturisticChatView: React.FC = () => {
   // const [jwt, setJwt] = useState<string | null>(null); // If needed directly, else Supabase client handles it
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const savedMessages = sessionStorage.getItem('futuristicChatMessages');
-    if (savedMessages) {
-      return JSON.parse(savedMessages);
+    const savedMessagesString = sessionStorage.getItem('futuristicChatMessages');
+    let parsedMessages: ChatMessage[] | null = null;
+    if (savedMessagesString) {
+      try {
+        const potentiallyParsed = JSON.parse(savedMessagesString);
+        // Ensure it's an array and filter out any null/undefined items from bad storage
+        if (Array.isArray(potentiallyParsed)) {
+          parsedMessages = potentiallyParsed.filter(Boolean) as ChatMessage[];
+        }
+      } catch (error) {
+        console.error("Error parsing messages from sessionStorage:", error);
+        // Fallback to default if parsing fails
+      }
     }
-    return [
+    return parsedMessages || [
       {
         id: 'initial-bot-msg',
         role: 'bot',
@@ -40,7 +50,9 @@ const FuturisticChatView: React.FC = () => {
   });
 
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
-    return sessionStorage.getItem('futuristicChatSessionId');
+    const sessionId = sessionStorage.getItem('futuristicChatSessionId');
+    // Ensure it's not "null" or "undefined" as a string
+    return (sessionId && sessionId !== "null" && sessionId !== "undefined") ? sessionId : null;
   });
   const [aiState, setAiState] = useState<AIState>('idle');
   const [isSending, setIsSending] = useState(false);
