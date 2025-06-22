@@ -101,6 +101,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                 <option value="high">High</option>
               </select>
             </div>
+            <div className="flex-1">
+              <label className="block mb-1 font-medium text-wedding-gold">Status</label>
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value as any)}
+                className="glass-card border-wedding-gold/20 w-full px-3 py-2 rounded-lg"
+              >
+                <option value="No Status">No Status</option>
+                <option value="To Do">To Do</option>
+                <option value="Doing">Doing</option>
+                <option value="Done">Done</option>
+              </select>
+            </div>
           </div>
           <div>
             <label className="block mb-1 font-medium text-wedding-gold">Category</label>

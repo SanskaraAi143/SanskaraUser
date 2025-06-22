@@ -52,7 +52,6 @@ export const addUserTask = async (
     .from('tasks')
     .insert([
       {
-        task_id: uuidv4(),
         user_id,
         title,
         description,

@@ -90,8 +90,26 @@ const TaskTracker = () => {
   // Handle save from modal
   const handleModalSave = async (updates: Partial<Task>) => {
     if (!modalTask) return;
+    if (!user?.id) {
+      setError('User not authenticated. Please log in again.');
+      return;
+    }
     try {
-      await updateUserTask(modalTask.task_id, updates);
+      if (!modalTask.task_id) {
+        // Add new task if no task_id
+        await addUserTask(
+          user.id,
+          updates.title || '',
+          updates.description || '',
+          updates.due_date || '',
+          (updates.priority as 'low' | 'medium' | 'high') || 'medium',
+          updates.category || '',
+          (updates.status as 'No Status' | 'To Do' | 'Doing' | 'Done') || 'No Status'
+        );
+      } else {
+        // Update existing task
+        await updateUserTask(modalTask.task_id, updates);
+      }
       setTasks(await getUserTasks(user.id));
       setModalTask(null);
     } catch (err) {
