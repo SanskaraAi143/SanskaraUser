@@ -18,6 +18,10 @@ const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ mes
     scrollToBottom();
   }, [messages]); // Scroll to bottom whenever messages change
 
+  // Log messages before rendering to help debug
+  console.log('[FuturisticMessageDisplay] Rendering messages:', JSON.parse(JSON.stringify(messages)));
+
+
   return (
     <div className="futuristic-message-display-container">
       <div className="message-list">

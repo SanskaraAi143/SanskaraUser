@@ -16,6 +16,12 @@ interface MessageItemProps {
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+  // Safeguard: If message is undefined or null, render nothing or a placeholder
+  if (!message) {
+    console.error('MessageItem rendered with undefined message prop');
+    return null; // Or return <div className="message-item-error">Error: Message data missing</div>;
+  }
+
   const isUser = message.role === 'user';
   // const isBot = message.role === 'bot';
   // const isSystem = message.role === 'system'; // For neutral system messages
