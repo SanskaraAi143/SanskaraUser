@@ -1,0 +1,13 @@
+.futuristic-chat-page-container {
+  width: 100%;
+  height: 100%; /* This should take the full height provided by the layout */
+  overflow: hidden; /* The chat view itself handles scrolling */
+  display: flex; /* Ensure child (FuturisticChatView) can also take full height */
+  flex-direction: column;
+}
+
+/* Ensure FuturisticChatView inside the page also expands if it's not already doing so */
+.futuristic-chat-page-container > * {
+  flex-grow: 1;
+  min-height: 0; /* Prevent flex items from overflowing if their content is too large */
+}

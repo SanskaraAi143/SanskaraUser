@@ -1,0 +1,147 @@
+.ai-state-visualizer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px; /* Adjust size as needed */
+  height: 150px; /* Adjust size as needed */
+}
+
+.ai-orb {
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* Allow glows/waves to exceed viewbox if needed */
+}
+
+/* Base Orb Style */
+.base-orb {
+  fill: #4A90E2; /* A calm blue, can be themed later */
+  transition: fill 0.5s ease, r 0.5s ease;
+  filter: drop-shadow(0px 0px 5px rgba(74, 144, 226, 0.7));
+}
+
+/* Idle State */
+.ai-orb.idle .base-orb {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* Listening State */
+.ai-orb.listening .base-orb {
+  fill: #50E3C2; /* A greenish-teal for listening */
+}
+.listening-waves .wave {
+  fill: none;
+  stroke: #50E3C2;
+  stroke-width: 1;
+  opacity: 0;
+  transform-origin: center;
+  animation: ripple 2s infinite ease-out;
+}
+.listening-waves .wave:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.listening-waves .wave:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes ripple {
+  0% {
+    r: 30; /* start from base orb radius */
+    opacity: 0.8;
+  }
+  100% {
+    r: 50; /* expand outwards */
+    opacity: 0;
+  }
+}
+
+/* Processing State */
+.ai-orb.processing .base-orb {
+  fill: #F5A623; /* An orange for thinking/processing */
+}
+.processing-pulse-1, .processing-pulse-2 {
+  fill: none;
+  stroke: #F5A623;
+  stroke-width: 1.5;
+  transform-origin: center;
+  opacity: 0.7;
+}
+.processing-pulse-1 {
+  animation: sonar 2s infinite linear;
+}
+.processing-pulse-2 {
+  animation: sonar 2s infinite linear;
+  animation-delay: 1s;
+}
+
+@keyframes sonar {
+  0% {
+    r: 15;
+    opacity: 0.8;
+    stroke-width: 2;
+  }
+  50% {
+    r: 28;
+    opacity: 0.2;
+    stroke-width: 0.5;
+  }
+  100% {
+    r: 15;
+    opacity: 0.8;
+    stroke-width: 2;
+  }
+}
+
+
+/* Speaking State */
+.ai-orb.speaking .base-orb {
+  fill: #7ED321; /* A vibrant green for speaking */
+}
+.speaking-glow {
+  fill: #7ED321;
+  opacity: 0.5;
+  transform-origin: center;
+  animation: speak-glow 1.5s infinite ease-in-out;
+}
+
+@keyframes speak-glow {
+  0%, 100% {
+    r: 30;
+    opacity: 0.3;
+  }
+  50% {
+    r: 35;
+    opacity: 0.7;
+  }
+}
+
+/* Confused State (Optional - basic placeholder) */
+.ai-orb.confused .base-orb {
+  fill: #9B9B9B; /* Grey for confused */
+  animation: shake 0.5s linear infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+
+/* Optional: Text for debugging */
+.ai-state-text {
+  margin-top: 10px;
+  font-size: 0.8em;
+  color: #333;
+}

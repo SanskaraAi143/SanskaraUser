@@ -1,0 +1,55 @@
+/* FuturisticChatView.css */
+
+.futuristic-chat-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Assumes parent container (DynamicBackground's content-on-top) provides height */
+  width: 100%;
+  color: #f0f0f0; /* Default text color for the view */
+  position: relative; /* For absolute positioning of children if needed */
+  overflow: hidden; /* Prevent content from spilling out and causing scrollbars on the view itself */
+}
+
+.ai-visualizer-section {
+  /* Positioning for the AI Visualizer, e.g., top center, or corner */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0; /* Add some padding */
+  /* background-color: rgba(0, 0, 0, 0.1); */ /* Optional subtle background */
+  z-index: 10; /* Ensure it's above messages if overlapping */
+  flex-shrink: 0; /* Prevent this section from shrinking */
+  /* Example: Fixed height for the visualizer area */
+  /* height: 180px; */
+}
+
+.messages-section {
+  flex-grow: 1; /* This section takes up the most space */
+  display: flex; /* Use flex to ensure FuturisticMessageDisplay fills it */
+  flex-direction: column;
+  overflow: hidden; /* Important: FuturisticMessageDisplay handles its own scrolling */
+  /* The actual FuturisticMessageDisplay component inside will handle its own padding and scrolling */
+}
+
+.input-section {
+  flex-shrink: 0; /* Prevent this section from shrinking */
+  /* MultimodalInput handles its own padding and background */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.1); */ /* Moved to MultimodalInput */
+  z-index: 10; /* Ensure input is above messages if any overlap is possible */
+}
+
+/* Example of how one might place the AI visualizer differently, e.g., top-left corner */
+/*
+.ai-visualizer-section.corner-placement {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 100px; // Smaller size for corner
+  height: 100px;
+  padding: 0;
+}
+.ai-visualizer-section.corner-placement .ai-state-visualizer-container {
+  width: 100px;
+  height: 100px;
+}
+*/

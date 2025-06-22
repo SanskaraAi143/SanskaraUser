@@ -1,0 +1,159 @@
+/* MultimodalInput.css */
+
+.multimodal-input-area {
+  padding: 15px 20px;
+  background: rgba(20, 20, 40, 0.7); /* Dark, slightly transparent base */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between suggestions and input bar */
+}
+
+/* Proactive Suggestions */
+.proactive-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center; /* Or flex-start */
+  margin-bottom: 5px; /* Space below suggestions if input bar is next */
+}
+
+.suggestion-chip {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.suggestion-chip:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Main Input Bar */
+.input-bar {
+  display: flex;
+  align-items: flex-end; /* Align items to bottom, useful for multi-line textarea */
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 25px; /* Rounded bar */
+  padding: 8px;
+  min-height: 50px; /* Minimum height for the bar */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.voice-button,
+.send-button {
+  background: transparent;
+  border: none;
+  color: #b0b0b0;
+  padding: 8px; /* Clickable area */
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+  width: 40px;
+  height: 40px;
+}
+
+.voice-button:hover,
+.send-button:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.voice-button.active {
+  color: #50E3C2; /* Active voice color (matches listening state of visualizer) */
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.text-input-field {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+  font-size: 1rem;
+  padding: 10px;
+  resize: none; /* Disable manual resize */
+  overflow-y: auto; /* Scroll for long input, capped by max-height */
+  max-height: 120px; /* Max 5-6 lines approx */
+  line-height: 1.4;
+  outline: none; /* Remove default focus outline */
+}
+
+.text-input-field::placeholder {
+  color: #707070;
+}
+
+/* Voice Visualizer Stub Styling */
+.input-bar.voice-active-bar {
+  /* Styles for when voice is active, e.g., different border */
+  /* border: 1px solid #50E3C2; */
+}
+
+.voice-visualizer-stub {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #50E3C2;
+  font-size: 0.9rem;
+  gap: 5px;
+}
+
+.voice-visualizer-stub .voice-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #50E3C2;
+  border-radius: 50%;
+  animation: voicePulse 1.2s infinite ease-in-out;
+}
+
+.voice-visualizer-stub .voice-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.voice-visualizer-stub .voice-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes voicePulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Sending Spinner for Send Button */
+.sending-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.input-helper-text {
+  font-size: 0.75rem;
+  color: #888;
+  text-align: center;
+  margin-top: 5px; /* Space from the input bar */
+}

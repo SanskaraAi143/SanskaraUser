@@ -48,6 +48,7 @@ const MobileDashboardLayout = () => {
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
     { name: "Chat with AI", icon: MessageCircle, href: "/dashboard/chat" },
+    { name: "Futuristic Chat", icon: MessageCircle, href: "/dashboard/futuristic-chat" }, // New Link
     { name: "Tasks", icon: CheckSquare, href: "/dashboard/tasks" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
     { name: "Mood Board", icon: Paintbrush, href: "/dashboard/moodboard" },

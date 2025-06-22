@@ -8,6 +8,7 @@ import ChatPage from './pages/dashboard/ChatPage';
 import TasksPage from './pages/dashboard/TasksPage';
 import TimelinePage from './pages/dashboard/TimelinePage';
 import MoodBoardPage from './pages/dashboard/MoodBoardPage';
+import FuturisticChatPage from './pages/dashboard/FuturisticChatPage'; // Import the new page
 import BudgetPage from './pages/dashboard/BudgetPage';
 import GuestsPage from './pages/dashboard/GuestsPage';
 import VendorsPage from './pages/dashboard/VendorsPage';
@@ -52,6 +53,7 @@ function App() {
             <Route path="guests" element={<GuestsPage />} />
             <Route path="vendors" element={<VendorsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="futuristic-chat" element={<FuturisticChatPage />} /> {/* Add the new route */}
           </Route>
           <Route path="/blog" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />
