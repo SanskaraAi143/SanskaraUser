@@ -1,41 +1,29 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Sparkles, Calendar, Heart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "@/context/AuthContext";
-import SignInDialog from "@/components/auth/SignInDialog";
+// useNavigate and useAuth will be handled by AuthActionButton or are already part of it
+// SignInDialog will be handled by AuthActionButton
 import { useIsMobile } from "@/hooks/use-mobile";
+import FloatingParticles from '@/components/effects/FloatingParticles';
+import AuthActionButton from '@/components/auth/AuthActionButton';
+
 
 const Hero = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const isMobile = useIsMobile();
+  // const navigate = useNavigate(); // No longer needed directly here for the main CTA
+  // const { user } = useAuth(); // No longer needed directly here for the main CTA
   
-  const handleStartPlanning = () => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  };
+  // const handleStartPlanning = () => { // This logic is now inside AuthActionButton
+  //   if (user) {
+  //     navigate('/dashboard');
+  //   }
+  // };
   
   return (
     <div className="relative min-h-[90vh] flex items-center">
       <div className="gradient-bg"></div>
-      {/* Floating particles */}
-      <div className="floating-particles">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 10 + 5}px`,
-              height: `${Math.random() * 10 + 5}px`,
-              animationDelay: `${Math.random() * 15}s`,
-              animationDuration: `${Math.random() * 15 + 15}s`
-            }}
-          />
-        ))}
-      </div>
+      <FloatingParticles count={20} />
       
       <div className="container mx-auto px-4 pt-20">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -51,22 +39,13 @@ const Hero = () => {
                 rituals, vendors, and traditions to create your perfect ceremony.
               </p>
               <div className="mt-8 md:mt-10 flex flex-col sm:flex-row gap-4">
-                {user ? (
-                  <Button 
-                    className="cta-button text-lg"
-                    onClick={handleStartPlanning}
-                  >
-                    <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
-                    Chat with Sanskara
-                  </Button>
-                ) : (
-                  <SignInDialog>
-                    <Button className="cta-button text-lg">
-                      <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
-                      Chat with Sanskara
-                    </Button>
-                  </SignInDialog>
-                )}
+                <AuthActionButton
+                  navigateTo="/dashboard" // Or use loggedInAction for more complex logic
+                  className="cta-button text-lg"
+                >
+                  <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
+                  Chat with Sanskara
+                </AuthActionButton>
               </div>
               <Button 
                 variant="outline" 

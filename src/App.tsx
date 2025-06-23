@@ -1,62 +1,64 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Index from './pages/Index';
-import Dashboard from './pages/dashboard/Dashboard';
-import ProfilePage from './pages/dashboard/ProfilePage';
-import ChatPage from './pages/dashboard/ChatPage';
-import TasksPage from './pages/dashboard/TasksPage';
-import TimelinePage from './pages/dashboard/TimelinePage';
-import MoodBoardPage from './pages/dashboard/MoodBoardPage';
-import BudgetPage from './pages/dashboard/BudgetPage';
-import GuestsPage from './pages/dashboard/GuestsPage';
-import VendorsPage from './pages/dashboard/VendorsPage';
-import SettingsPage from './pages/dashboard/SettingsPage';
-import NotFound from './pages/NotFound';
-import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 import { Toaster } from './components/ui/toaster';
 import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+// import MobileDashboardLayout from './layouts/MobileDashboardLayout'; // Eagerly load layout for dashboard
 
-const FloatingChatButton = () => {
-  const navigate = useNavigate();
-  return (
-    <button
-      className="fixed bottom-6 right-6 z-50 bg-gradient-primary text-white shadow-xl rounded-full p-4 flex items-center justify-center hover:scale-105 transition-all duration-300"
-      onClick={() => navigate('/dashboard/chat')}
-      aria-label="Chat with Sanskara AI"
-    >
-      <MessageCircle size={28} />
-    </button>
-  );
-};
+// Page Components - Lazy Loaded
+const Index = lazy(() => import('./pages/Index'));
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
+const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
+const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
+const TimelinePage = lazy(() => import('./pages/dashboard/TimelinePage'));
+const MoodBoardPage = lazy(() => import('./pages/dashboard/MoodBoardPage'));
+const BudgetPage = lazy(() => import('./pages/dashboard/BudgetPage'));
+const GuestsPage = lazy(() => import('./pages/dashboard/GuestsPage'));
+const VendorsPage = lazy(() => import('./pages/dashboard/VendorsPage'));
+const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const BlogListPage = lazy(() => import('./pages/blog/index'));
+const BlogDetailPage = lazy(() => import('./pages/blog/[slug]'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
 
-// Blog Pages
-import BlogListPage from './pages/blog/index';
-import BlogDetailPage from './pages/blog/[slug]';
+// Layouts - Eagerly load common layouts if they are small or contain fallbacks
+import MobileDashboardLayout from './layouts/MobileDashboardLayout';
+
+// Import the shared FloatingChatButton
+import FloatingChatButton from './components/ui/FloatingChatButton';
+// MessageCircle and useNavigate are no longer directly needed here for FloatingChatButton
+
+// Use the new PageLoader component
+import PageLoader from './components/ui/PageLoader';
+
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<MobileDashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-            <Route path="timeline" element={<TimelinePage />} />
-            <Route path="moodboard" element={<MoodBoardPage />} />
-            <Route path="budget" element={<BudgetPage />} />
-            <Route path="guests" element={<GuestsPage />} />
-            <Route path="vendors" element={<VendorsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-          <Route path="/blog" element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/dashboard" element={<MobileDashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="timeline" element={<TimelinePage />} />
+              <Route path="moodboard" element={<MoodBoardPage />} />
+              <Route path="budget" element={<BudgetPage />} />
+              <Route path="guests" element={<GuestsPage />} />
+              <Route path="vendors" element={<VendorsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="/blog" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
         <Toaster />
         <FloatingChatButton />
       </AuthProvider>

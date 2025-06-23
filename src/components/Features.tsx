@@ -58,6 +58,8 @@ const features: Feature[] = [
 	},
 ];
 
+import FeatureCard from '@/components/ui/FeatureCard'; // Import the new component
+
 const Features: React.FC = () => {
 	return (
 		<section id="features" className="relative py-20 md:py-32 overflow-hidden">
@@ -76,18 +78,12 @@ const Features: React.FC = () => {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
 					{features.map((feature, index) => (
-						<div
+						<FeatureCard
 							key={index}
-							className="glass-card p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-						>
-							<div className="h-14 w-14 rounded-full bg-gradient-primary flex items-center justify-center mb-6 shadow-lg">
-								{feature.icon}
-							</div>
-							<h3 className="text-xl font-playfair font-semibold title-gradient mb-3">
-								{feature.title}
-							</h3>
-							<p className="text-wedding-gold/80">{feature.description}</p>
-						</div>
+							icon={feature.icon}
+							title={feature.title}
+							description={feature.description}
+						/>
 					))}
 				</div>
 			</div>

@@ -73,6 +73,18 @@ const BlogListPage: React.FC = () => {
       <Helmet>
         <title>Sanskara Blog - Hindu Wedding Insights & Traditions</title>
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
+        <link rel="canonical" href="https://sanskaraai.com/blog/" />
+        {/* Open Graph Tags */}
+        <meta property="og:title" content="Sanskara Blog - Hindu Wedding Insights & Traditions" />
+        <meta property="og:description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
+        <meta property="og:url" content="https://sanskaraai.com/blog/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://sanskaraai.com/logo.jpeg" /> {/* Replace with a specific blog banner if available */}
+        {/* Twitter Card Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sanskara Blog - Hindu Wedding Insights & Traditions" />
+        <meta name="twitter:description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
+        <meta name="twitter:image" content="https://sanskaraai.com/logo.jpeg" /> {/* Replace with a specific blog banner if available */}
       </Helmet>
       <ProgressBar />
       <div className="gradient-bg" aria-hidden="true"></div>

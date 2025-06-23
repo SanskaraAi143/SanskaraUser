@@ -39,9 +39,9 @@ const Navbar = () => {
             <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
               <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
             </div>
-            <h1 className="text-2xl font-playfair font-semibold title-gradient">
+            <div className="text-2xl font-playfair font-semibold title-gradient">
               Sanskara<span className="font-bold">AI</span>
-            </h1>
+            </div>
           </Link>
         </div>
         

@@ -175,8 +175,59 @@ const BlogDetailPage: React.FC = () => {
       </div>
       <div className="blog-body font-nunito min-h-screen flex flex-col">
         <Helmet>
-          <title>{post.title} - Sanskara AI Blog</title>
+          <title>{`${post.title} - Sanskara AI Blog`}</title>
           {post.excerpt && <meta name="description" content={post.excerpt} />}
+          <link rel="canonical" href={`https://sanskaraai.com/blog/${slug}`} />
+          {/* Open Graph Tags */}
+          <meta property="og:title" content={`${post.title} - Sanskara AI Blog`} />
+          {post.excerpt && <meta property="og:description" content={post.excerpt} />}
+          <meta property="og:url" content={`https://sanskaraai.com/blog/${slug}`} />
+          <meta property="og:type" content="article" />
+          {post.image && <meta property="og:image" content={post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`} />}
+          {!post.image && <meta property="og:image" content="https://sanskaraai.com/logo.jpeg" />} {/* Default image */}
+          <meta property="article:published_time" content={new Date(post.date).toISOString()} />
+          {post.author && <meta property="article:author" content={post.author} />}
+          {/* Add publisher if consistent for all blog posts, e.g., Sanskara AI */}
+          {/* <meta property="article:publisher" content="Sanskara AI" /> */}
+          {post.tags && post.tags.map(tag => <meta property="article:tag" content={tag} key={tag} />)}
+
+          {/* Twitter Card Tags */}
+          <meta name="twitter:card" content={post.image ? "summary_large_image" : "summary"} />
+          <meta name="twitter:title" content={`${post.title} - Sanskara AI Blog`} />
+          {post.excerpt && <meta name="twitter:description" content={post.excerpt} />}
+          {post.image && <meta name="twitter:image" content={post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`} />}
+          {!post.image && <meta name="twitter:image" content="https://sanskaraai.com/logo.jpeg" />} {/* Default image */}
+          {/* <meta name="twitter:site" content="@SanskaraAI" /> Assuming a Twitter handle */}
+
+          {post && slug && (
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": `https://sanskaraai.com/blog/${slug}`
+                },
+                "headline": post.title,
+                "description": post.excerpt || "", // Ensure description is not undefined
+                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",
+                "author": {
+                  "@type": "Organization", // Or "Person" if individual authors are used
+                  "name": post.author || "Sanskara AI Team"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "Sanskara AI",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://sanskaraai.com/logo.jpeg"
+                  }
+                },
+                "datePublished": new Date(post.date).toISOString(),
+                "dateModified": new Date(post.date).toISOString() // Assuming date is also modified date, update if a separate modified_date is available
+              })}
+            </script>
+          )}
         </Helmet>
         <Navbar /> {/* Using the main site Navbar */}
 
@@ -203,7 +254,7 @@ const BlogDetailPage: React.FC = () => {
           {/* Main Post Image - if available in frontmatter */}
           {post.image && (
               <div className="my-8 rounded-lg overflow-hidden shadow-xl fade-in-up">
-                  <img src={post.image} alt={post.title} className="w-full h-auto object-cover" />
+                  <img src={post.image} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
               </div>
           )}
 

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bookmark, ChevronRight, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "@/context/AuthContext";
-import SignInDialog from "@/components/auth/SignInDialog";
+// useAuth and SignInDialog will be handled by AuthActionButton
+import AuthActionButton from '@/components/auth/AuthActionButton';
 import {
   Carousel,
   CarouselContent,
@@ -18,36 +18,42 @@ const rituals = [
     name: "Mehndi",
     description: "A pre-wedding celebration where the bride's hands and feet are adorned with intricate henna designs symbolizing beauty, joy, and spiritual awakening.",
     image: "/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png",
+    alt: "Intricate Mehndi designs on a bride's hands during a Hindu wedding ceremony"
   },
   {
     id: 2,
     name: "Haldi",
     description: "A cleansing ritual where turmeric paste is applied to the bride and groom, believed to purify and bless the couple before marriage.",
     image: "https://images.unsplash.com/photo-1622556498246-755f44ca76f3?w=800&auto=format&fit=crop",
+    alt: "Bride and groom participating in a Haldi ceremony, with turmeric paste on their faces"
   },
   {
     id: 3,
     name: "Sangeet",
     description: "A musical celebration where families come together to sing, dance, and celebrate the upcoming union with performances and festivities.",
     image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop",
+    alt: "Guests dancing and celebrating during a Sangeet ceremony at an Indian wedding"
   },
   {
     id: 4,
     name: "Saptapadi",
     description: "The seven steps taken by the couple around the sacred fire, with each step representing a vow and blessing for their married life.",
     image: "https://images.unsplash.com/photo-1600578248539-48bdb9db48f2?w=800&auto=format&fit=crop",
+    alt: "Bride and groom taking the seven sacred steps (Saptapadi) around the holy fire"
   },
   {
     id: 5,
     name: "Kanyadaan",
     description: "The giving away of the bride by her father, symbolizing the acceptance of the bride into her new family.",
     image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&auto=format&fit=crop",
+    alt: "Father of the bride performing the Kanyadaan ritual, giving his daughter's hand to the groom"
   },
   {
     id: 6,
     name: "Mangalsutra",
     description: "The tying of the sacred necklace by the groom around the bride's neck, symbolizing their union and the groom's commitment.",
     image: "https://images.unsplash.com/photo-1626195790682-5481864033e0?w=800&auto=format&fit=crop",
+    alt: "Groom tying the Mangalsutra necklace around the bride's neck during a Hindu wedding"
   }
 ];
 
@@ -82,22 +88,13 @@ const RitualGuide = () => {
                 {activeRitual.description}
               </p>
               
-              {user ? (
-                <Button 
-                  className="cta-button"
-                  onClick={() => navigate('/dashboard/rituals')}
-                >
-                  <Info size={20} className="mr-2" />
-                  Learn More
-                </Button>
-              ) : (
-                <SignInDialog>
-                  <Button className="cta-button">
-                    <Info size={20} className="mr-2" />
-                    Learn More
-                  </Button>
-                </SignInDialog>
-              )}
+              <AuthActionButton
+                navigateTo="/dashboard/rituals" // Or use loggedInAction if more complex logic is needed
+                className="cta-button"
+              >
+                <Info size={20} className="mr-2" />
+                Learn More
+              </AuthActionButton>
               
               <div className="mt-8 pt-8 border-t border-wedding-gold/10">
                 <div className="flex items-center justify-between">
@@ -119,16 +116,19 @@ const RitualGuide = () => {
               <CarouselContent>
                 {rituals.map((ritual) => (
                   <CarouselItem key={ritual.id}>
-                    <div 
-                      className="glass-card p-2 aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-300 hover:scale-[1.02]"
+                    <button
+                      type="button"
+                      aria-label={`View details for ${ritual.name}`}
+                      className="glass-card p-2 aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-300 hover:scale-[1.02] w-full block focus:outline-none focus:ring-2 focus:ring-wedding-gold focus:ring-offset-2"
                       onClick={() => setActiveRitual(ritual)}
                     >
                       <img
                         src={ritual.image}
-                        alt={ritual.name}
+                        alt={ritual.alt || ritual.name}
                         className="w-full h-full object-cover rounded-xl"
+                        loading="lazy"
                       />
-                    </div>
+                    </button>
                   </CarouselItem>
                 ))}
               </CarouselContent>

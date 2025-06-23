@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import SignInDialog from "@/components/auth/SignInDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
   const { user } = useAuth();
@@ -23,8 +24,123 @@ const Index = () => {
     }
   };
   
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Sanskara AI",
+    "url": "https://sanskaraai.com/",
+    "logo": "https://sanskaraai.com/logo.jpeg",
+    "sameAs": [
+      "https://www.linkedin.com/company/sanskaraai/",
+      "https://www.instagram.com/sanskaraai/"
+      // Add other social media links if available
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "admin@sanskaraai.com",
+      "contactType": "Customer Service"
+    }
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Sanskara AI",
+    "url": "https://sanskaraai.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://sanskaraai.com/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  // Considering LocalBusiness or Service for "wedding planner India"
+  // This is a more specific schema and might be better if the primary service is wedding planning.
+  // For now, Organization is a good general fit. If LocalBusiness is more accurate:
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness", // Could also be "ProfessionalService" or a more specific "WeddingPlanningService" if it exists
+    "name": "Sanskara AI",
+    "url": "https://sanskaraai.com/",
+    "logo": "https://sanskaraai.com/logo.jpeg",
+    "image": "https://sanskaraai.com/logo.jpeg", // A representative image
+    "description": "AI-powered Hindu wedding planning assistant. Personalized guidance, ritual explanations, and vendor recommendations for your perfect Indian wedding.",
+    "address": { // Assuming a general India focus, not a specific physical address unless available
+      "@type": "PostalAddress",
+      "addressCountry": "IN"
+    },
+    "telephone": "+91-XXX-XXXXXXX", // Add if available
+    "email": "admin@sanskaraai.com",
+    "areaServed": {
+      "@type": "Country",
+      "name": "India"
+    },
+    "priceRange": "$$$", // Or more specific if applicable
+    "openingHoursSpecification": [ // Example, adjust if it's an online service primarily
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
+            "opens": "00:00",
+            "closes": "23:59"
+        }
+    ],
+    "sameAs": [
+      "https://www.linkedin.com/company/sanskaraai/",
+      "https://www.instagram.com/sanskaraai/"
+    ]
+    // "potentialAction": { ... SearchAction could also be here ... }
+  };
+
+
   return (
     <div className="min-h-screen">
+      <Helmet>
+        {/* Existing meta tags from index.html will be overridden if also defined here,
+            but it's good practice to have them defined per-page for clarity & SPAs.
+            The ones in index.html serve as fallbacks.
+        */}
+        <title>Sanskara AI - AI Powered Hindu Wedding Planner India</title>
+        <meta name="description" content="Plan your perfect Hindu wedding in India with Sanskara AI. Get AI-driven guidance, ritual explanations, vendor matching, and create your dream Indian wedding." />
+        <link rel="canonical" href="https://sanskaraai.com/" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://sanskaraai.com/" />
+        <meta property="og:title" content="Sanskara AI - AI Powered Hindu Wedding Planner India" />
+        <meta property="og:description" content="Plan your perfect Hindu wedding in India with Sanskara AI. Get AI-driven guidance, ritual explanations, vendor matching, and create your dream Indian wedding." />
+        <meta property="og:image" content="https://sanskaraai.com/logo.jpeg" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://sanskaraai.com/" />
+        <meta property="twitter:title" content="Sanskara AI - AI Powered Hindu Wedding Planner India" />
+        <meta property="twitter:description" content="Plan your perfect Hindu wedding in India with Sanskara AI. Get AI-driven guidance, ritual explanations, vendor matching, and create your dream Indian wedding." />
+        <meta property="twitter:image" content="https://sanskaraai.com/logo.jpeg" />
+
+        <script type="application/ld+json">
+          {JSON.stringify(organizationSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
+        </script>
+        {/* Decide whether to use LocalBusiness or keep Organization. For now, sticking with Organization + WebSite.
+            If LocalBusiness is preferred for "wedding planner India" targeting:
+        <script type="application/ld+json">
+          {JSON.stringify(localBusinessSchema)}
+        </script>
+        */}
+      </Helmet>
       <Navbar />
       <main>
         <Hero />
