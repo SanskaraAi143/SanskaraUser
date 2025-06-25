@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { runAgent, listSessions, createSession, listArtifacts, listArtifactVersions, getArtifact } from '@/services/api';
+import { runAgent, listSessions, createSession, listArtifacts, listArtifactVersions, getArtifact, getSession } from '@/services/api';
 
 interface Message {
   id: number;
@@ -104,7 +104,7 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ selectedTopic }) => {
       if (!user || !selectedSession) return;
       try {
         const userId = user.id;
-        const session = await (await import('@/services/api')).getSession(appName, userId, selectedSession);
+        const session = await getSession(appName, userId, selectedSession);
         setSessionEvents(session.events || []);
         // Optionally, reconstruct chat messages from session events
         const chatMessages = (session.events || [])

@@ -16,26 +16,22 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ post }) => {
 
   return (
     <article className="card-hover bg-white/70 rounded-2xl p-8 shadow-lg floating-animation font-inter">
-      {/* Image can be added here if desired, similar to old card */}
-      {/* Example:
       {post.image && (
         <div className="aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md">
           <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
         </div>
       )}
-      */}
       <div className="mb-4">
         <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-semibold">
           {categoryToDisplay}
         </span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 leading-tight hover:text-orange-600 transition-colors">
+      </div>      <h2 className="text-2xl font-bold mb-4 leading-tight hover:text-orange-600 transition-colors" style={{color: '#1a202c'}}>
         <Link to={`/blog/${post.slug}`}>{post.title}</Link>
       </h2>
-      <p className="text-gray-600 mb-6 leading-relaxed">
+      <p className="mb-6 leading-relaxed" style={{color: '#374151'}}>
         {post.excerpt || "No excerpt available."}
       </p>
-      <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4">
+      <div className="flex items-center text-sm mb-6 space-x-4" style={{color: '#374151'}}>
         <span>
           <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
           {new Date(post.date).toLocaleDateString('en-US', {

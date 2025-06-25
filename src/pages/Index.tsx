@@ -98,8 +98,49 @@ const Index = () => {
     "sameAs": [
       "https://www.linkedin.com/company/sanskaraai/",
       "https://www.instagram.com/sanskaraai/"
-    ]
-    // "potentialAction": { ... SearchAction could also be here ... }
+    ]    // "potentialAction": { ... SearchAction could also be here ... }
+  };
+
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "AI-Powered Hindu Wedding Planning",
+    "description": "Comprehensive Hindu wedding planning service powered by artificial intelligence. Get personalized guidance, ritual explanations, vendor recommendations, and complete wedding management.",
+    "provider": {
+      "@type": "Organization",
+      "name": "Sanskara AI",
+      "url": "https://sanskaraai.com/"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "India"
+    },
+    "serviceType": "Wedding Planning",
+    "category": "Hindu Wedding Planning",
+    "offers": {
+      "@type": "Offer",
+      "description": "AI-powered wedding planning with ritual guidance",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  };
+
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Hindu Wedding Planning Services",
+    "description": "Complete Hindu wedding planning with AI assistance, from engagement to reception",
+    "organizer": {
+      "@type": "Organization",
+      "name": "Sanskara AI",
+      "url": "https://sanskaraai.com/"
+    },
+    "location": {
+      "@type": "Country",
+      "name": "India"
+    },
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode"
   };
 
 
@@ -126,23 +167,25 @@ const Index = () => {
         <meta property="twitter:url" content="https://sanskaraai.com/" />
         <meta property="twitter:title" content="Sanskara AI - AI Powered Hindu Wedding Planner India" />
         <meta property="twitter:description" content="Plan your perfect Hindu wedding in India with Sanskara AI. Get AI-driven guidance, ritual explanations, vendor matching, and create your dream Indian wedding." />
-        <meta property="twitter:image" content="https://sanskaraai.com/logo.jpeg" />
-
-        <script type="application/ld+json">
+        <meta property="twitter:image" content="https://sanskaraai.com/logo.jpeg" />        <script type="application/ld+json">
           {JSON.stringify(organizationSchema)}
         </script>
         <script type="application/ld+json">
           {JSON.stringify(websiteSchema)}
         </script>
-        {/* Decide whether to use LocalBusiness or keep Organization. For now, sticking with Organization + WebSite.
-            If LocalBusiness is preferred for "wedding planner India" targeting:
         <script type="application/ld+json">
           {JSON.stringify(localBusinessSchema)}
         </script>
-        */}
-      </Helmet>
-      <Navbar />
-      <main>
+        <script type="application/ld+json">
+          {JSON.stringify(serviceSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(eventSchema)}
+        </script>      </Helmet>
+      <header>
+        <Navbar />
+      </header>
+      <main role="main" aria-label="Main content">
         <Hero />
         <Features />
         <RitualGuide />
@@ -152,12 +195,14 @@ const Index = () => {
         {/* Divine Planning Crew Section (match New Latest.html style) */}
         <section id="crew" className="py-16 md:py-28 bg-wedding-cream flex justify-center items-center">
           <div className="planning-crew glass-card max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center gap-10 p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden">
-            <div className="crew-image-container flex-1 flex justify-center items-center">
-              <img
+            <div className="crew-image-container flex-1 flex justify-center items-center">              <img
                 src="/crew-bitemoji.jpeg"
                 alt="Divine Planning Crew"
                 className="crew-image rounded-2xl w-full max-w-md object-cover shadow-lg"
                 style={{ minHeight: '320px', background: '#fff8e1' }}
+                loading="lazy"
+                width="400"
+                height="320"
               />
             </div>
             <div className="crew-description flex-1">
@@ -171,10 +216,9 @@ const Index = () => {
                   <span className="inline-flex items-center px-3 py-1 rounded-xl bg-yellow-100 text-wedding-gold font-semibold text-base"><span className="text-xl mr-2">🎧</span>Tech Guide - Your digital planning assistant</span>
                 </li>
               </ul>
-            </div>
-          </div>
+            </div>          </div>
         </section>
-        
+
         {/* CTA Section */}
         <section className="py-12 md:py-20 bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white">
           <div className="container mx-auto px-4 text-center animate-fade-in">
@@ -199,10 +243,11 @@ const Index = () => {
                 </Button>
               </SignInDialog>
             )}
-          </div>
-        </section>
+          </div>        </section>
       </main>
-      <Footer />
+      <footer>
+        <Footer />
+      </footer>
     </div>
   );
 };

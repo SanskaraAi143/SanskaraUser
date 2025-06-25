@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-06-25T10:05:18.415Z",
+  "url": "http://localhost:4173",
+  "businessScore": 45,
+  "growthScore": 65,
+  "marketFitScore": 100,
+  "grade": "B-",
+  "strengths": [
+    "Clear value proposition identified",
+    "Product dashboard/app interface exists",
+    "Monetization strategy visible",
+    "Clear problem identification",
+    "Solution clearly communicated",
+    "Target audience clearly defined",
+    "AI differentiation clearly positioned",
+    "Niche market focus (Hindu weddings) - excellent for YC",
+    "Content marketing strategy (blog) in place",
+    "Network effects potential identified",
+    "Mobile-optimized for broader reach"
+  ],
+  "opportunities": [
+    "HIGH: Add user signup/registration flow",
+    "MEDIUM: Add social sharing for viral growth"
+  ],
+  "ycReadiness": {
+    "clearProblem": true,
+    "uniqueSolution": true,
+    "largeTAM": true,
+    "earlyTraction": 0,
+    "growthPotential": true,
+    "techAdvantage": true,
+    "scalableModel": true
+  }
+}

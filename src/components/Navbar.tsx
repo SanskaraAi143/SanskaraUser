@@ -15,10 +15,10 @@ const Navbar = () => {
 
   // Hide main nav links on blog pages
   const isBlogPage = location.pathname.startsWith('/blog');
-
   const navLinks = isBlogPage
     ? [{ href: "/blog", label: "Blog", isRouterLink: true }]
     : [
+        { href: "/about", label: "About", isRouterLink: true },
         { href: "#features", label: "Features" },
         { href: "#how-it-works", label: "How It Works" },
         { href: "#pricing", label: "Pricing" },

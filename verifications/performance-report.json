@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-06-24T16:44:08.671Z",
+  "url": "http://localhost:8030",
+  "metrics": {
+    "webVitals": {
+      "FCP": 0,
+      "TTFB": 3.5,
+      "DOMContentLoaded": 0.09999990463256836,
+      "LoadComplete": 0.7000000476837158,
+      "LCP": 500,
+      "CLS": 0
+    },
+    "performance": {
+      "domainLookup": 0,
+      "tcpConnect": 43.199999928474426,
+      "request": 3.5,
+      "response": 9.100000023841858,
+      "domProcessing": 169,
+      "firstPaint": 0,
+      "firstContentfulPaint": 0,
+      "totalResources": 20,
+      "usedJSHeapSize": 6285849,
+      "totalJSHeapSize": 8750149
+    },
+    "resources": {
+      "images": {
+        "count": 4,
+        "totalSize": 213476,
+        "largestSize": 88132
+      },
+      "scripts": {
+        "count": 9,
+        "totalSize": 116642,
+        "largestSize": 67079
+      },
+      "stylesheets": {
+        "count": 3,
+        "totalSize": 20949,
+        "largestSize": 18710
+      },
+      "fonts": {
+        "count": 0,
+        "totalSize": 0,
+        "largestSize": 0
+      },
+      "other": {
+        "count": 4,
+        "totalSize": 90789,
+        "largestSize": 53400
+      }
+    },
+    "bundle": {
+      "scripts": [
+        "http://localhost:8030/assets/index-DJt53oe-.js"
+      ],
+      "stylesheets": [
+        "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap",
+        "http://localhost:8030/assets/index-Blt2_5cX.css"
+      ],
+      "inlineScripts": 9,
+      "inlineStyles": 0
+    },
+    "responseTime": 1728,
+    "statusCode": 200
+  },
+  "grade": "A+",
+  "recommendations": [
+    "ℹ️ INFO: Consider moving inline scripts to external files for better caching"
+  ],
+  "score": 97
+}

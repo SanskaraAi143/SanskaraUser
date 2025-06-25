@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-06-24T12:43:13.343Z",
+  "results": {
+    "performance": {
+      "score": 74,
+      "grade": "B-",
+      "status": "FAILED"
+    },
+    "security": {
+      "score": 0,
+      "grade": "F",
+      "status": "FAILED"
+    },
+    "business": {
+      "score": 0,
+      "grade": "F",
+      "status": "FAILED"
+    },
+    "overall": {
+      "score": 26,
+      "grade": "F",
+      "status": "🔴 NOT READY"
+    }
+  },
+  "recommendations": [
+    {
+      "category": "Performance",
+      "priority": "HIGH",
+      "actions": [
+        "Implement image compression and WebP format",
+        "Code splitting and lazy loading",
+        "CDN implementation",
+        "Bundle size optimization"
+      ]
+    },
+    {
+      "category": "Security",
+      "priority": "CRITICAL",
+      "actions": [
+        "Add security headers (HSTS, CSP, X-Frame-Options)",
+        "GDPR compliance implementation",
+        "Vulnerability scanning and fixes",
+        "Data encryption and secure storage"
+      ]
+    },
+    {
+      "category": "Business",
+      "priority": "CRITICAL",
+      "actions": [
+        "Clear problem/solution statement",
+        "User traction and growth metrics",
+        "Revenue model clarification",
+        "Competitive advantage documentation"
+      ]
+    }
+  ],
+  "ycReadiness": false
+}

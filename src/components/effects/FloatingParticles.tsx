@@ -6,23 +6,29 @@ import React from 'react';
 // .particle { position: absolute; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; animation-name: float; animation-timing-function: linear; animation-iteration-count: infinite; }
 // @keyframes float { /* ... animation ... */ }
 
-
 const FloatingParticles: React.FC<{ count?: number }> = ({ count = 20 }) => {
+  const particles = Array.from({ length: count });
   return (
     <div className="floating-particles" aria-hidden="true">
-      {[...Array(count)].map((_, i) => (
-        <div
-          key={i}
-          className="particle"
-          style={{
-            left: `${Math.random() * 100}%`,
-            width: `${Math.random() * 10 + 5}px`,
-            height: `${Math.random() * 10 + 5}px`,
-            animationDelay: `${Math.random() * 15}s`,
-            animationDuration: `${Math.random() * 10 + 15}s`, // Ensure duration is always reasonably long
-          }}
-        />
-      ))}
+      {particles.map((_, i) => {
+        const size = Math.random() * 16 + 8; // 8px to 24px
+        const left = Math.random() * 100;
+        const duration = Math.random() * 10 + 10; // 10s to 20s
+        const delay = Math.random() * 10;
+        return (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              width: size,
+              height: size,
+              left: `${left}%`,
+              animationDuration: `${duration}s`,
+              animationDelay: `${delay}s`,
+            }}
+          />
+        );
+      })}
     </div>
   );
 };

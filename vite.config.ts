@@ -1,23 +1,48 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
+  plugins: [react()],
+  
   server: {
-    host: "::",
-    port: 8030,
-    allowedHosts: ["sanskaraai.com"],
+    port: 5173,
+    host: true,
+    strictPort: false
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  
+  preview: {
+    port: 4173,
+    host: true,
+    strictPort: false,
+    cors: true,
+    middlewareMode: false
+  },
+  
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      '@': path.resolve(__dirname, './src')
+    }
   },
-}));
+  
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'esbuild',
+    target: 'esnext',
+    assetsDir: 'assets',
+    emptyOutDir: true,    rollupOptions: {
+      external: ['gray-matter/lib/engines'],
+      output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-tabs']
+        }
+      }
+    }
+  }
+});

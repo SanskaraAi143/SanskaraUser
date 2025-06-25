@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useAuth } from "@/context/AuthContext";
 
 const rituals = [
   {
@@ -101,11 +102,14 @@ const RitualGuide = () => {
                   <div className="flex items-center gap-2">
                     <Bookmark className="h-5 w-5 text-wedding-gold" />
                     <span className="text-wedding-brown/80">Save for later</span>
-                  </div>
-                  <Button variant="ghost" className="nav-link">
+                  </div>                  <AuthActionButton 
+                    variant="ghost" 
+                    className="nav-link"
+                    navigateTo="/dashboard/rituals"
+                  >
                     All Rituals
                     <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  </AuthActionButton>
                 </div>
               </div>
             </div>

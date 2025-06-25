@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-06-24T15:20:23.451Z",
+  "url": "http://localhost:8030",
+  "securityScore": 100,
+  "complianceScore": 100,
+  "grade": "A+",
+  "vulnerabilities": [],
+  "recommendations": [],
+  "compliance": {
+    "gdpr": true,
+    "ccpa": true,
+    "accessibility": "Not tested in this audit",
+    "dataProtection": true
+  }
+}

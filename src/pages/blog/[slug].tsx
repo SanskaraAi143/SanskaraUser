@@ -101,7 +101,7 @@ const BlogDetailPage: React.FC = () => {
               calloutTitle: fetchedPost.calloutTitle || "Transform Your Event Planning!",
               calloutText: fetchedPost.calloutText || "Join the AI-powered wedding revolution and unlock your full potential with SanskaraAI. Start your personalized, tradition-rich planning journey now.",
               calloutButtonText: fetchedPost.calloutButtonText || "Start Your AI Wedding Journey",
-              calloutButtonLink: fetchedPost.calloutButtonLink || "https://sanskaraai.com/get-started/"
+              calloutButtonLink: fetchedPost.calloutButtonLink || "/get-started"
             };
             setPost(augmentedPost);
           } else {
@@ -210,30 +210,42 @@ const BlogDetailPage: React.FC = () => {
                 },
                 "headline": post.title,
                 "description": post.excerpt || "", // Ensure description is not undefined
-                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",
-                "author": {
-                  "@type": "Organization", // Or "Person" if individual authors are used
-                  "name": post.author || "Sanskara AI Team"
-                },
-                "publisher": {
+                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",                "author": {
+                  "@type": "Person",
+                  "name": post.author || "Sanskara AI Team",
+                  "url": "https://sanskaraai.com/about",
+                  "sameAs": [
+                    "https://www.linkedin.com/company/sanskaraai/",
+                    "https://www.instagram.com/sanskaraai/"
+                  ]
+                },                "publisher": {
                   "@type": "Organization",
                   "name": "Sanskara AI",
+                  "url": "https://sanskaraai.com",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://sanskaraai.com/logo.jpeg"
-                  }
+                    "url": "https://sanskaraai.com/logo.jpeg",
+                    "width": 512,
+                    "height": 512
+                  },
+                  "sameAs": [
+                    "https://www.linkedin.com/company/sanskaraai/",
+                    "https://www.instagram.com/sanskaraai/"
+                  ]
                 },
                 "datePublished": new Date(post.date).toISOString(),
                 "dateModified": new Date(post.date).toISOString() // Assuming date is also modified date, update if a separate modified_date is available
-              })}
-            </script>
+              })}            </script>
           )}
         </Helmet>
-        <Navbar /> {/* Using the main site Navbar */}
+        
+        <header>
+          <Navbar />
+        </header>
 
         {/* Main Article Content - applied max-w-3xl and mx-auto for centering */}
         {/* Added pt-20 (or similar) to account for fixed Navbar height */}
-        <main ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28"> {/* Adjust top padding as needed */}
+        <main role="main" aria-label="Blog post content" ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
           <div className="mb-6 fade-in-up">
             {post.category && <span className="tag-pill">{post.category}</span>}
           </div>
@@ -276,21 +288,19 @@ const BlogDetailPage: React.FC = () => {
                   </a>
                 )}
             </div>
-          )}
-
-          {/* Example of how further static content or links could be added as per article.html */}
+          )}          {/* Example of how further static content or links could be added as per article.html */}
           <div className="prose-sanskara fade-in-up">
-              <h3>Take the First Step: Explore SanskaraAI Today! ✨</h3>
-              <p>
-                  <a href="https://sanskaraai.com/features/" target="_blank" rel="noopener noreferrer">Visit our Features Page</a><br />
-                  <a href="https://sanskaraai.com/get-started/" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
+              <h2>Take the First Step: Explore SanskaraAI Today! ✨</h2>
+              <p>                  <a href="/features" target="_blank" rel="noopener noreferrer">Visit our Features Page</a><br />
+                  <a href="/get-started" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
                   {/* Add social media links here */}
-              </p>
-          </div>
+              </p>          </div>
 
         </main>
 
-        <Footer /> {/* Using the main site Footer */}
+        <footer>
+          <Footer />
+        </footer>
       </div>
     </>
   );

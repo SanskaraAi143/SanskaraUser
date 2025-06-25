@@ -1,3 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /.env
+Disallow: /src/
+Crawl-delay: 1
+
 User-agent: Googlebot
 Allow: /
 
@@ -10,8 +18,10 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
-Disallow: /dashboard/
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
 
 Sitemap: https://sanskaraai.com/sitemap.xml

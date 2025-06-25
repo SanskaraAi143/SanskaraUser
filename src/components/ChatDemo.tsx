@@ -39,7 +39,7 @@ const ChatDemo = () => {
             <div className="bg-gradient-primary bg-opacity-10 p-6 border-b border-wedding-gold/20">
               <div className="flex items-center justify-center gap-3">
                 <div className="h-10 w-10 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
-                  <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Sanskara Logo" className="h-8 w-8" />
+                  <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" alt="Sanskara Logo" className="h-8 w-8" />
                 </div>
                 <h3 className="font-playfair text-2xl font-semibold title-gradient">
                   Chat with Sanskara AI

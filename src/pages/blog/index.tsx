@@ -68,8 +68,7 @@ const BlogListPage: React.FC = () => {
   // Find the featured blog post (hardcoded or by a property)
   const featuredPost = allPosts.find(p => p.slug === 'the-sanskaraai-advantage') || allPosts[0];
 
-  return (
-    <div className="min-h-screen flex flex-col blog-body font-inter relative">
+  return (    <div className="min-h-screen flex flex-col blog-body font-inter relative">
       <Helmet>
         <title>Sanskara Blog - Hindu Wedding Insights & Traditions</title>
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
@@ -88,21 +87,25 @@ const BlogListPage: React.FC = () => {
       </Helmet>
       <ProgressBar />
       <div className="gradient-bg" aria-hidden="true"></div>
-      <Navbar />
+      <header>
+        <Navbar />
+      </header>
+      
       {/* Hero Section - now relative, not fixed bg */}
-      <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
+      <main role="main" aria-label="Blog main content">      <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
         <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 font-inter">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 font-inter" style={{color: '#1a202c'}}>
                 Hindu Wedding <span className="gradient-text">Insights</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed font-inter">
+            <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-inter" style={{color: '#374151'}}>
                 Discover the latest insights about Hindu wedding traditions, cultural ceremonies,
                 and the future of AI-powered wedding planning with Sanskara.
             </p>
             <div className="flex flex-wrap justify-center gap-3 mt-12">
                 <button
                   type="button"
-                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Wedding Traditions" ? "active-tag" : "text-orange-600 hover:bg-orange-500 hover:text-white"}`}
+                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Wedding Traditions" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
+                  style={{color: activeFilter === "Wedding Traditions" ? '#ffffff' : '#1a202c'}}
                   onClick={() => handleFilterClick("Wedding Traditions")}
                 >
                     <FontAwesomeIcon icon={faStar} className="mr-2" />
@@ -110,7 +113,8 @@ const BlogListPage: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Planning Insights" ? "active-tag" : "text-orange-600 hover:bg-orange-500 hover:text-white"}`}
+                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Planning Insights" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
+                  style={{color: activeFilter === "Planning Insights" ? '#ffffff' : '#1a202c'}}
                   onClick={() => handleFilterClick("Planning Insights")}
                 >
                     <FontAwesomeIcon icon={faChartLine} className="mr-2" />
@@ -122,11 +126,10 @@ const BlogListPage: React.FC = () => {
       {/* Featured Blog Card below hero section */}
       {featuredPost && (
         <div className="max-w-3xl mx-auto">
-          <BlogPostCard post={{ ...featuredPost, category: 'Featured' }} />
-        </div>
+          <BlogPostCard post={{ ...featuredPost, category: 'Featured' }} />        </div>
       )}
 
-      <main className="flex-grow container mx-auto px-4 pt-0 pb-8 sm:px-6 lg:px-8 relative z-10">
+      <section className="flex-grow container mx-auto px-4 pt-0 pb-8 sm:px-6 lg:px-8 relative z-10">
         {displayedPosts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Updated grid classes */}
             {displayedPosts.map(post => (
@@ -182,18 +185,18 @@ const BlogListPage: React.FC = () => {
               className="text-orange-600 border-orange-400 hover:bg-orange-100 disabled:opacity-50"
             >
               Next
-            </Button>
-          </div>
+            </Button>          </div>
         )}
+      </section>
       </main>
 
       {/* CTA Section - also relative, not fixed bg */}
       <section className="py-20 relative z-10">
         <div className="max-w-4xl mx-auto text-center px-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 font-inter">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-inter" style={{color: '#1a202c'}}>
                 Ready to Plan Your Dream Hindu Wedding?
             </h2>
-            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto font-inter">
+            <p className="text-xl mb-12 max-w-3xl mx-auto font-inter" style={{color: '#374151'}}>
                 Join thousands of couples who have created their perfect Hindu wedding celebration with personalized AI guidance, cultural insights, and traditional wisdom.
             </p>
             <Button className="btn-gradient text-white px-8 py-4 rounded-full text-lg font-semibold inline-flex items-center space-x-2 hover:scale-105 transition-transform">
@@ -203,7 +206,9 @@ const BlogListPage: React.FC = () => {
         </div>
       </section>
 
-      <Footer />
+      <footer>
+        <Footer />
+      </footer>
     </div>
   );
 };

@@ -2,9 +2,10 @@ const puppeteer = require('puppeteer');
 const https = require('https');
 const http = require('http');
 const { parseString } = require('xml2js');
+const axeCore = require('axe-core');
 
 // Configuration
-const DEFAULT_BASE_URL = 'http://localhost:3000'; // Default if no URL is provided via CLI
+const DEFAULT_BASE_URL = 'http://localhost:4173'; // Default if no URL is provided via CLI
 const USER_AGENT = 'SanskaraAI-VerificationBot/1.0';
 
 const pagesToTest = [
@@ -95,12 +96,130 @@ async function checkPage(browser, pageConfig) {
     } else {
       log('FAIL', `Found ${h1s.length} H1 tags. Expected 1.`, `H1s: ${JSON.stringify(h1s)}`);
     }
-    // Optional: Log other headings for manual review
-    // const h2s = await page.$$eval('h2', els => els.map(el => el.textContent?.trim()));
-    // log('INFO', `Found ${h2s.length} H2 tags.`);
 
+    // 4a. Advanced Heading Structure
+    const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', els => els.map(el => ({ tagName: el.tagName, text: el.textContent?.trim() })));
+    let lastLevel = 1;
+    for (const heading of headings) {
+      const level = parseInt(heading.tagName.substring(1));
+      if (level > lastLevel + 1) {
+        log('WARN', `Heading level skipped: from H${lastLevel} to H${level}`, `Heading: "${heading.text}"`);
+      }
+      lastLevel = level;
+    }    // 5. Image SEO
+    const images = await page.$$eval('img', els => els.map(el => ({ src: el.src, alt: el.alt, width: el.width, height: el.height })));
+    images.forEach(img => {
+      if (!img.alt) {
+        log('FAIL', 'Image missing alt attribute', `Image src: ${img.src}`);
+      } else if (img.alt.length < 5) {
+        log('WARN', 'Image alt attribute is very short', `Image src: ${img.src}, Alt: "${img.alt}"`);
+      }
+      if (!img.width || !img.height) {
+        log('WARN', 'Image missing explicit dimensions (can cause layout shift)', `Image src: ${img.src}`);
+      }
+    });
 
-    // 5. JSON-LD Schemas
+    // 5a. Social Media Meta Tags
+    const ogTitle = await page.$eval('meta[property="og:title"]', el => el.content).catch(() => null);
+    const ogDescription = await page.$eval('meta[property="og:description"]', el => el.content).catch(() => null);
+    const ogImage = await page.$eval('meta[property="og:image"]', el => el.content).catch(() => null);
+    const twitterCard = await page.$eval('meta[name="twitter:card"]', el => el.content).catch(() => null);
+    
+    if (ogTitle) {
+      log('PASS', `Open Graph title: "${ogTitle}"`);
+    } else {
+      log('FAIL', 'Open Graph title missing');
+    }
+    
+    if (ogDescription) {
+      log('PASS', `Open Graph description: "${ogDescription.substring(0, 80)}..."`);
+    } else {
+      log('FAIL', 'Open Graph description missing');
+    }
+    
+    if (ogImage) {
+      log('PASS', `Open Graph image: "${ogImage}"`);
+    } else {
+      log('FAIL', 'Open Graph image missing');
+    }
+    
+    if (twitterCard) {
+      log('PASS', `Twitter Card type: "${twitterCard}"`);
+    } else {
+      log('FAIL', 'Twitter Card meta tag missing');
+    }
+
+    // 5b. Performance Metrics
+    const performanceMetrics = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const metrics = {};
+          entries.forEach(entry => {
+            if (entry.entryType === 'navigation') {
+              metrics.loadTime = entry.loadEventEnd - entry.loadEventStart;
+              metrics.domContentLoaded = entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart;
+            }
+            if (entry.entryType === 'largest-contentful-paint') {
+              metrics.lcp = entry.startTime;
+            }
+          });
+          resolve(metrics);
+        }).observe({ entryTypes: ['navigation', 'largest-contentful-paint'] });
+        
+        // Fallback timeout
+        setTimeout(() => resolve({}), 1000);
+      });
+    });
+
+    if (performanceMetrics.lcp) {
+      if (performanceMetrics.lcp < 2500) {
+        log('PASS', `Largest Contentful Paint: ${Math.round(performanceMetrics.lcp)}ms (Good)`);
+      } else if (performanceMetrics.lcp < 4000) {
+        log('WARN', `Largest Contentful Paint: ${Math.round(performanceMetrics.lcp)}ms (Needs Improvement)`);
+      } else {
+        log('FAIL', `Largest Contentful Paint: ${Math.round(performanceMetrics.lcp)}ms (Poor)`);
+      }
+    }
+
+    // 5c. Mobile Viewport
+    const viewport = await page.$eval('meta[name="viewport"]', el => el.content).catch(() => null);
+    if (viewport) {
+      log('PASS', `Viewport meta tag: "${viewport}"`);
+    } else {
+      log('FAIL', 'Viewport meta tag missing');
+    }    // 5d. External Links Security
+    const externalLinks = await page.$$eval('a[href^="http"]:not([href*="sanskaraai.com"])', els => 
+      els.map(el => ({ href: el.href, rel: el.rel, target: el.target }))
+    );
+    externalLinks.forEach(link => {
+      if (link.target === '_blank' && !link.rel.includes('noopener')) {
+        log('WARN', 'External link missing rel="noopener"', `Link: ${link.href}`);
+      }
+    });    // 5e. Accessibility Check with axe-core
+    try {
+      await page.addScriptTag({ content: axeCore.source });
+      const accessibilityResults = await page.evaluate(async () => {
+        return await axe.run();
+      });
+      
+      const violations = accessibilityResults.violations;
+      if (violations.length === 0) {
+        log('PASS', 'No accessibility violations found');
+      } else {
+        violations.forEach(violation => {
+          if (violation.impact === 'critical' || violation.impact === 'serious') {
+            log('FAIL', `Accessibility violation: ${violation.description}`, `Impact: ${violation.impact}, Nodes: ${violation.nodes.length}`);
+          } else {
+            log('WARN', `Accessibility issue: ${violation.description}`, `Impact: ${violation.impact}, Nodes: ${violation.nodes.length}`);
+          }
+        });
+      }
+    } catch (error) {
+      log('WARN', 'Could not run accessibility check', error.message);
+    }
+
+    // 6. JSON-LD Schemas
     const ldJsonScripts = await page.$$eval('script[type="application/ld+json"]', els => els.map(el => el.innerHTML));
     if (ldJsonScripts.length > 0) {
       log('PASS', `Found ${ldJsonScripts.length} JSON-LD script(s).`);
@@ -134,16 +253,41 @@ async function checkPage(browser, pageConfig) {
       log('FAIL', `No JSON-LD scripts found on ${pageConfig.name}, but expected: ${pageConfig.schemas.join(', ')}`);
     } else {
       log('INFO', 'No JSON-LD scripts expected or found.');
-    }
-
-    // 6. Internal Links
+    }    // 6. Internal Links with validation
     if (pageConfig.checkInternalLinks) {
-        const internalLinks = await page.$$eval('a[href^="/"], a[href^="' + BASE_URL + '"]', els =>
-            els.map(el => el.href).filter(href => !href.startsWith('mailto:') && !href.startsWith('tel:'))
-        );
+        const baseUrl = BASE_URL;        const internalLinks = await page.$$eval('a[href^="/"]', (elements, capturedBaseUrl) => {
+            return elements.map(el => ({ 
+                href: el.href, 
+                text: el.textContent?.trim() 
+            })).filter(link => 
+                link.href && 
+                typeof link.href === 'string' &&
+                !link.href.startsWith('mailto:') && 
+                !link.href.startsWith('tel:') &&
+                link.href !== capturedBaseUrl + '/'
+            );
+        }, baseUrl);
+        
         if (internalLinks.length > 0) {
             log('PASS', `Found ${internalLinks.length} internal links.`);
-            // log('INFO', `Sample internal links: ${internalLinks.slice(0, 5).join(', ')}`);
+            
+            // Check a sample of internal links for validity
+            const linksToCheck = internalLinks.slice(0, 5); // Check first 5 to avoid too many requests
+            for (const link of linksToCheck) {
+              try {
+                const linkPage = await browser.newPage();
+                await linkPage.setUserAgent(USER_AGENT);
+                const response = await linkPage.goto(link.href, { waitUntil: 'domcontentloaded', timeout: 5000 });
+                if (response && response.status() === 200) {
+                  log('PASS', `Internal link works: "${link.text}" -> ${link.href}`);
+                } else {
+                  log('FAIL', `Internal link broken (${response?.status()}): "${link.text}" -> ${link.href}`);
+                }
+                await linkPage.close();
+              } catch (error) {
+                log('FAIL', `Internal link error: "${link.text}" -> ${link.href}`, `Error: ${error.message}`);
+              }
+            }
         } else {
             log('WARN', `No internal links found on ${pageConfig.name}. This might be an issue.`);
         }
