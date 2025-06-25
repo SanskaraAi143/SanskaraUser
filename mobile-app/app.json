@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "mobile-app",
+    "slug": "mobile-app",
+    "owner": "your-expo-account-username", // TODO: Replace with your Expo account username if applicable
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png", // TODO: Replace with your app's icon
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png", // TODO: Replace with your app's splash screen
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.mobileapp" // TODO: Replace with your actual bundle ID
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png", // TODO: Replace with your app's adaptive icon
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.example.mobileapp", // TODO: Replace with your actual package name
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png" // TODO: Replace with your app's favicon
+    },
+    "extra": {
+      // This 'extra' field in app.json will be merged by app.config.js
+      // if app.config.js includes '...config.extra' in its returned 'extra'.
+      // It's often cleaner to define all 'extra' fields in one place (e.g., app.config.js).
+      // For this example, I'll add eas.projectId here.
+      // The supabase keys are already in app.config.js's extra.
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID" // TODO: Replace with your EAS Build Project ID
+      }
+    }
+  }
+}
