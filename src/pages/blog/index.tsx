@@ -68,7 +68,10 @@ const BlogListPage: React.FC = () => {
   // Find the featured blog post (hardcoded or by a property)
   const featuredPost = allPosts.find(p => p.slug === 'the-sanskaraai-advantage') || allPosts[0];
 
-  return (    <div className="min-h-screen flex flex-col blog-body font-inter relative">
+  return (
+    <div className="min-h-screen flex flex-col blog-body font-inter relative">
+      {/* Skip to main content link for accessibility */}
+      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 z-50 bg-yellow-400 text-black px-4 py-2 rounded focus:outline-dashed focus:outline-2 focus:outline-offset-2 focus:outline-yellow-600 transition-all">Skip to main content</a>
       <Helmet>
         <title>Sanskara Blog - Hindu Wedding Insights & Traditions</title>
         <meta name="description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
@@ -85,112 +88,108 @@ const BlogListPage: React.FC = () => {
         <meta name="twitter:description" content="Discover the latest insights about Hindu wedding traditions, cultural ceremonies, and the future of AI-powered wedding planning with Sanskara." />
         <meta name="twitter:image" content="https://sanskaraai.com/logo.jpeg" /> {/* Replace with a specific blog banner if available */}
       </Helmet>
-      <ProgressBar />
-      <div className="gradient-bg" aria-hidden="true"></div>
-      <header>
+      <header role="banner">
         <Navbar />
       </header>
-      
-      {/* Hero Section - now relative, not fixed bg */}
-      <main role="main" aria-label="Blog main content">      <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
-        <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 font-inter" style={{color: '#1a202c'}}>
-                Hindu Wedding <span className="gradient-text">Insights</span>
-            </h1>
-            <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-inter" style={{color: '#374151'}}>
-                Discover the latest insights about Hindu wedding traditions, cultural ceremonies,
-                and the future of AI-powered wedding planning with Sanskara.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 mt-12">
-                <button
-                  type="button"
-                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Wedding Traditions" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
-                  style={{color: activeFilter === "Wedding Traditions" ? '#ffffff' : '#1a202c'}}
-                  onClick={() => handleFilterClick("Wedding Traditions")}
-                >
-                    <FontAwesomeIcon icon={faStar} className="mr-2" />
-                    Wedding Traditions
-                </button>
-                <button
-                  type="button"
-                  className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Planning Insights" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
-                  style={{color: activeFilter === "Planning Insights" ? '#ffffff' : '#1a202c'}}
-                  onClick={() => handleFilterClick("Planning Insights")}
-                >
-                    <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-                    Planning Insights
-                </button>
-            </div>
-        </div>
-      </section>
-      {/* Featured Blog Card below hero section */}
-      {featuredPost && (
-        <div className="max-w-3xl mx-auto">
-          <BlogPostCard post={{ ...featuredPost, category: 'Featured' }} />        </div>
-      )}
-
-      <section className="flex-grow container mx-auto px-4 pt-0 pb-8 sm:px-6 lg:px-8 relative z-10">
-        {displayedPosts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Updated grid classes */}
-            {displayedPosts.map(post => (
-              <BlogPostCard key={post.slug} post={post} />
-            ))}
-          </div>
-        ) : (
-           <div className="text-center py-10">
-            <p className="text-xl text-gray-500">No blog posts found.</p>
-            {/* TODO: Add a loading state */}
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <div className="mt-12 flex justify-center items-center space-x-2">
-            <Button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-              variant="outline"
-              className="text-orange-600 border-orange-400 hover:bg-orange-100 disabled:opacity-50"
-            >
-              Previous
-            </Button>
-            {/* Simple pagination display logic */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(pageNumber => { // Logic to show limited page numbers
-                if (totalPages <= 5) return true;
-                if (pageNumber === 1 || pageNumber === totalPages) return true;
-                if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1) return true;
-                if ((currentPage === 1 && pageNumber <=3) || (currentPage === totalPages && pageNumber >= totalPages - 2)) return true;
-                return false;
-              })
-              .map((pageNumber, index, arr) => (
-                <React.Fragment key={pageNumber}>
-                  {index > 0 && arr[index-1] + 1 !== pageNumber && <span className="text-orange-600">...</span>}
-                  <Button
-                    onClick={() => paginate(pageNumber)}
-                    variant={currentPage === pageNumber ? 'default' : 'outline'}
-                    className={
-                      currentPage === pageNumber
-                      ? 'btn-gradient text-white'
-                      : 'text-orange-600 border-orange-400 hover:bg-orange-100'
-                    }
+      <main id="main-content" role="main" aria-label="Blog main content">
+        {/* Hero Section - now relative, not fixed bg */}
+        <section className="py-20 pt-32 md:pt-36 lg:pt-40 relative z-10">
+          <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 font-inter" style={{color: '#1a202c'}}>
+                  Hindu Wedding <span className="gradient-text">Insights</span>
+              </h1>
+              <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-inter" style={{color: '#374151'}}>
+                  Discover the latest insights about Hindu wedding traditions, cultural ceremonies,
+                  and the future of AI-powered wedding planning with Sanskara.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3 mt-12">
+                  <button
+                    type="button"
+                    className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Wedding Traditions" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
+                    style={{color: activeFilter === "Wedding Traditions" ? '#ffffff' : '#1a202c'}}
+                    onClick={() => handleFilterClick("Wedding Traditions")}
                   >
-                    {pageNumber}
-                  </Button>
-                </React.Fragment>
-            ))}
-            <Button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              variant="outline"
-              className="text-orange-600 border-orange-400 hover:bg-orange-100 disabled:opacity-50"
-            >
-              Next
-            </Button>          </div>
+                      <FontAwesomeIcon icon={faStar} className="mr-2" />
+                      Wedding Traditions
+                  </button>
+                  <button
+                    type="button"
+                    className={`tag-gradient px-6 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === "Planning Insights" ? "active-tag" : "hover:bg-orange-500 hover:text-white"}`}
+                    style={{color: activeFilter === "Planning Insights" ? '#ffffff' : '#1a202c'}}
+                    onClick={() => handleFilterClick("Planning Insights")}
+                  >
+                      <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+                      Planning Insights
+                  </button>
+              </div>
+          </div>
+        </section>
+        {/* Featured Blog Card below hero section */}
+        {featuredPost && (
+          <div className="max-w-3xl mx-auto">
+            <BlogPostCard post={{ ...featuredPost, category: 'Featured' }} />        </div>
         )}
-      </section>
-      </main>
 
-      {/* CTA Section - also relative, not fixed bg */}
+        <section className="flex-grow container mx-auto px-4 pt-0 pb-8 sm:px-6 lg:px-8 relative z-10">
+          {displayedPosts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Updated grid classes */}
+              {displayedPosts.map(post => (
+                <BlogPostCard key={post.slug} post={post} />
+              ))}
+            </div>
+          ) : (
+             <div className="text-center py-10">
+              <p className="text-xl text-gray-500">No blog posts found.</p>
+              {/* TODO: Add a loading state */}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center items-center space-x-2">
+              <Button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                variant="outline"
+                className="text-orange-600 border-orange-400 hover:bg-orange-100 disabled:opacity-50"
+              >
+                Previous
+              </Button>
+              {/* Simple pagination display logic */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(pageNumber => { // Logic to show limited page numbers
+                  if (totalPages <= 5) return true;
+                  if (pageNumber === 1 || pageNumber === totalPages) return true;
+                  if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1) return true;
+                  if ((currentPage === 1 && pageNumber <=3) || (currentPage === totalPages && pageNumber >= totalPages - 2)) return true;
+                  return false;
+                })
+                .map((pageNumber, index, arr) => (
+                  <React.Fragment key={pageNumber}>
+                    {index > 0 && arr[index-1] + 1 !== pageNumber && <span className="text-orange-600">...</span>}
+                    <Button
+                      onClick={() => paginate(pageNumber)}
+                      variant={currentPage === pageNumber ? 'default' : 'outline'}
+                      className={
+                        currentPage === pageNumber
+                        ? 'btn-gradient text-white'
+                        : 'text-orange-600 border-orange-400 hover:bg-orange-100'
+                      }
+                    >
+                      {pageNumber}
+                    </Button>
+                  </React.Fragment>
+              ))}
+              <Button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                variant="outline"
+                className="text-orange-600 border-orange-400 hover:bg-orange-100 disabled:opacity-50"
+              >
+                Next
+              </Button>          </div>
+          )}
+        </section>
+      </main>
       <section className="py-20 relative z-10">
         <div className="max-w-4xl mx-auto text-center px-4">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 font-inter" style={{color: '#1a202c'}}>
@@ -205,8 +204,7 @@ const BlogListPage: React.FC = () => {
             </Button>
         </div>
       </section>
-
-      <footer>
+      <footer role="contentinfo">
         <Footer />
       </footer>
     </div>

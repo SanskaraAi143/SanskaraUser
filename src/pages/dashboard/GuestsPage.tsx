@@ -106,26 +106,44 @@ export default function GuestsPage() {
       {error && <div className="text-red-500 mb-2">{error}</div>}
       {showForm && (
         <form className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleFormSubmit}>
-          <input className="input" placeholder="Name" value={form.guest_name || ''} onChange={e => setForm(f => ({ ...f, guest_name: e.target.value }))} required />
-          <input className="input" placeholder="Contact Info" value={form.contact_info || ''} onChange={e => setForm(f => ({ ...f, contact_info: e.target.value }))} />
-          <input className="input" placeholder="Relation" value={form.relation || ''} onChange={e => setForm(f => ({ ...f, relation: e.target.value }))} />
-          <select className="input" value={form.side || ''} onChange={e => setForm(f => ({ ...f, side: e.target.value }))}>
-            <option value="">Side</option>
-            <option value="Groom">Groom</option>
-            <option value="Bride">Bride</option>
-            <option value="Both">Both</option>
-          </select>
-          <select className="input" value={form.status || ''} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-            <option value="">Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Invited">Invited</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Declined">Declined</option>
-          </select>
-          <input className="input md:col-span-2" placeholder="Dietary Requirements" value={form.dietary_requirements || ''} onChange={e => setForm(f => ({ ...f, dietary_requirements: e.target.value }))} />
+          <div className="flex flex-col gap-1">
+            <label htmlFor="guest_name" className="font-semibold text-gray-700">Name<span className="text-red-500 ml-1">*</span></label>
+            <input id="guest_name" className="input" placeholder="Name" value={form.guest_name || ''} onChange={e => setForm(f => ({ ...f, guest_name: e.target.value }))} required aria-required="true" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact_info" className="font-semibold text-gray-700">Contact Info</label>
+            <input id="contact_info" className="input" placeholder="Contact Info" value={form.contact_info || ''} onChange={e => setForm(f => ({ ...f, contact_info: e.target.value }))} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="relation" className="font-semibold text-gray-700">Relation</label>
+            <input id="relation" className="input" placeholder="Relation" value={form.relation || ''} onChange={e => setForm(f => ({ ...f, relation: e.target.value }))} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="side" className="font-semibold text-gray-700">Side</label>
+            <select id="side" className="input" value={form.side || ''} onChange={e => setForm(f => ({ ...f, side: e.target.value }))}>
+              <option value="">Side</option>
+              <option value="Groom">Groom</option>
+              <option value="Bride">Bride</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="status" className="font-semibold text-gray-700">Status</label>
+            <select id="status" className="input" value={form.status || ''} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+              <option value="">Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Invited">Invited</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Declined">Declined</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1 md:col-span-2">
+            <label htmlFor="dietary_requirements" className="font-semibold text-gray-700">Dietary Requirements</label>
+            <input id="dietary_requirements" className="input md:col-span-2" placeholder="Dietary Requirements" value={form.dietary_requirements || ''} onChange={e => setForm(f => ({ ...f, dietary_requirements: e.target.value }))} />
+          </div>
           <div className="md:col-span-2 flex gap-2 mt-2">
-            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow">{editingId ? 'Update' : 'Add'}</button>
-            <button type="button" className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold" onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }}>Cancel</button>
+            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow" aria-label={editingId ? 'Update guest' : 'Add guest'}>{editingId ? 'Update' : 'Add'}</button>
+            <button type="button" className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold" onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }} aria-label="Cancel guest form">Cancel</button>
           </div>
         </form>
       )}
