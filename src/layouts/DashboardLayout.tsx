@@ -58,9 +58,6 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80">
-      {/* Skip to main content link for accessibility */}
-      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 z-50 bg-wedding-gold text-white px-4 py-2 rounded focus:outline-dashed focus:outline-2 focus:outline-offset-2 focus:outline-wedding-red transition-all">Skip to main content</a>
-
       {/* Floating particles background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="floating-particles">
@@ -82,8 +79,8 @@ const DashboardLayout = () => {
 
       {/* Dashboard Layout */}
       <div className="flex">
-        {/* Sidebar as nav landmark */}
-        <nav aria-label="Dashboard navigation" className="fixed inset-y-0 left-0 w-64 bg-[#fffbe7] border-r border-[#ffd700]/30 shadow-lg flex flex-col justify-between z-30" role="navigation">
+        {/* Sidebar */}
+        <aside className="fixed inset-y-0 left-0 w-64 bg-[#fffbe7] border-r border-[#ffd700]/30 shadow-lg flex flex-col justify-between z-30">
           <div className="p-6">
             <Link to="/" className="flex items-center gap-3 mb-8">
               <div className="h-10 w-10 flex items-center justify-center bg-gradient-to-br from-[#ffd700] to-[#ffecb3] rounded-full shadow-lg">
@@ -97,7 +94,7 @@ const DashboardLayout = () => {
                 Sanskara<span style={{color:'#8d6e63'}}>AI</span>
               </span>
             </Link>
-            <div className="space-y-1">
+            <nav className="space-y-1">
               {sidebarLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
@@ -111,19 +108,18 @@ const DashboardLayout = () => {
                   </Link>
                 );
               })}
-            </div>
+            </nav>
           </div>
-          <div className="px-6 py-4">
-            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
+          <div className="px-6 py-4">            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
               <Link to="/dashboard/chat">Ask AI</Link>
             </Button>
           </div>
-        </nav>
+        </aside>
 
         {/* Main Content */}
-        <main id="main-content" className="flex-1 ml-64" tabIndex={-1} role="main">
-          {/* Header as header landmark */}
-          <header className="glass-card border-b border-wedding-gold/20 sticky top-0 z-50" role="banner">
+        <main className="flex-1 ml-64">
+          {/* Header */}
+          <header className="glass-card border-b border-wedding-gold/20 sticky top-0 z-50">
             <div className="px-8 py-4 flex items-center justify-between">
               <h1 className="text-2xl font-playfair font-semibold title-gradient">
                 {sidebarLinks.find(link => link.href === location.pathname)?.name || 'Dashboard'}

@@ -3,7 +3,7 @@ import { Github, Twitter, Instagram, Mail, Linkedin } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="relative overflow-hidden" role="contentinfo" aria-label="Site footer">
+    <footer className="relative overflow-hidden">
       <div className="gradient-bg opacity-30"></div>
       <div className="glass-card border-t border-wedding-gold/20">
         <div className="container mx-auto px-4 py-16">

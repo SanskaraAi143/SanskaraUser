@@ -62,18 +62,12 @@
     @apply fixed top-0 w-full px-6 py-4 flex justify-between items-center bg-gradient-glass backdrop-blur-lg border-b border-wedding-gold/30 z-50 transition-all duration-300;
   }
   .nav-link {
-    @apply font-playfair text-lg font-semibold px-4 py-2 rounded-full transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-gradient-primary after:transition-all after:duration-300 hover:after:w-full;
-    color: #744210 !important; /* Luxury dark gold */
-    letter-spacing: 0.01em;
-    background: transparent;
-    box-shadow: none;
-    margin: 0 0.25rem;
+    @apply font-medium transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-gradient-primary after:transition-all after:duration-300 hover:after:w-full;
+    color: #1a202c !important; /* Very dark text for maximum contrast */
   }
-  .nav-link:hover, .nav-link.active {
-    color: #fff !important;
-    background: linear-gradient(90deg, #ffd700 0%, #ffb300 100%);
-    box-shadow: 0 2px 12px 0 rgba(255, 193, 7, 0.08);
-    text-shadow: 0 1px 8px #ffd70033;
+  
+  .nav-link:hover {
+    color: #744210 !important; /* Dark gold on hover */
   }
 
   .cta-button {
@@ -537,15 +531,15 @@
   }
   
   .text-gray-500 {
-    color: #1a202c !important; /* Very dark for maximum contrast */
+    color: #374151 !important; /* Darker gray for 4.5:1 contrast */
   }
   
   .text-gray-600 {
-    color: #1a202c !important; /* Very dark for maximum contrast */
+    color: #1f2937 !important; /* Very dark for 7:1 contrast */
   }
   
   .text-gray-700 {
-    color: #1a202c !important; /* Very dark for maximum contrast */
+    color: #111827 !important; /* Extremely dark for maximum contrast */
   }
   
   .text-muted-foreground {
@@ -584,31 +578,4 @@
     background-color: #744210 !important;
     color: #ffffff !important;
   }
-}
-
-/* WCAG 2.1 AA Color Contrast Fixes */
-.text-gray-500, .text-gray-600, .text-gray-700, .text-wedding-gold, .text-wedding-gold\/80, .text-yellow-800 {
-  color: #1a202c !important; /* Very dark for maximum contrast */
-}
-
-.text-wedding-brown {
-  color: #2d3748 !important; /* Very dark brown for 7:1 contrast ratio */
-}
-
-.text-wedding-gold {
-  color: #744210 !important; /* Much darker gold for 7:1 contrast ratio */
-}
-
-h1, h2, h3, h4, h5, h6 {
-  color: #1a202c !important;
-}
-
-p, span, div, a, li {
-  color: #1a202c !important;
-}
-
-/* Add visible focus style for accessibility */
-:focus {
-  outline: 2px solid #F59E0B !important;
-  outline-offset: 2px;
 }

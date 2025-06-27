@@ -170,8 +170,6 @@ const BlogDetailPage: React.FC = () => {
   // Render actual post
   return (
     <>
-      {/* Skip to main content link for accessibility */}
-      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 z-50 bg-yellow-400 text-black px-4 py-2 rounded focus:outline-dashed focus:outline-2 focus:outline-offset-2 focus:outline-yellow-600 transition-all">Skip to main content</a>
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 4, zIndex: 1000, pointerEvents: 'none' }}>
         <ProgressBar />
       </div>
@@ -189,14 +187,9 @@ const BlogDetailPage: React.FC = () => {
           {!post.image && <meta property="og:image" content="https://sanskaraai.com/logo.jpeg" />} {/* Default image */}
           <meta property="article:published_time" content={new Date(post.date).toISOString()} />
           {post.author && <meta property="article:author" content={post.author} />}
-          {/* Defensive: Only render meta tag if tag is a string */}
-          {post.tags && Array.isArray(post.tags) && post.tags.map((tag, idx) =>
-            typeof tag === 'string' ? (
-              <meta property="article:tag" content={tag} key={tag + idx} />
-            ) : (
-              (() => { console.warn('[BlogDetailPage] Skipping non-string tag:', tag); return null; })()
-            )
-          )}
+          {/* Add publisher if consistent for all blog posts, e.g., Sanskara AI */}
+          {/* <meta property="article:publisher" content="Sanskara AI" /> */}
+          {post.tags && post.tags.map(tag => <meta property="article:tag" content={tag} key={tag} />)}
 
           {/* Twitter Card Tags */}
           <meta name="twitter:card" content={post.image ? "summary_large_image" : "summary"} />
@@ -217,8 +210,7 @@ const BlogDetailPage: React.FC = () => {
                 },
                 "headline": post.title,
                 "description": post.excerpt || "", // Ensure description is not undefined
-                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",
-                "author": {
+                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",                "author": {
                   "@type": "Person",
                   "name": post.author || "Sanskara AI Team",
                   "url": "https://sanskaraai.com/about",
@@ -226,8 +218,7 @@ const BlogDetailPage: React.FC = () => {
                     "https://www.linkedin.com/company/sanskaraai/",
                     "https://www.instagram.com/sanskaraai/"
                   ]
-                },
-                "publisher": {
+                },                "publisher": {
                   "@type": "Organization",
                   "name": "Sanskara AI",
                   "url": "https://sanskaraai.com",
@@ -244,18 +235,17 @@ const BlogDetailPage: React.FC = () => {
                 },
                 "datePublished": new Date(post.date).toISOString(),
                 "dateModified": new Date(post.date).toISOString() // Assuming date is also modified date, update if a separate modified_date is available
-              })}
-            </script>
+              })}            </script>
           )}
         </Helmet>
         
-        <header role="banner">
+        <header>
           <Navbar />
         </header>
 
         {/* Main Article Content - applied max-w-3xl and mx-auto for centering */}
         {/* Added pt-20 (or similar) to account for fixed Navbar height */}
-        <main id="main-content" role="main" aria-label="Blog post content" ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
+        <main role="main" aria-label="Blog post content" ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
           <div className="mb-6 fade-in-up">
             {post.category && <span className="tag-pill">{post.category}</span>}
           </div>
@@ -308,7 +298,7 @@ const BlogDetailPage: React.FC = () => {
 
         </main>
 
-        <footer role="contentinfo">
+        <footer>
           <Footer />
         </footer>
       </div>

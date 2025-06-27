@@ -5,11 +5,6 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   
-  define: {
-    global: 'globalThis',
-    'process.env': {},
-  },
-  
   server: {
     port: 5173,
     host: true,
@@ -26,13 +21,8 @@ export default defineConfig({
   
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      buffer: 'buffer'
+      '@': path.resolve(__dirname, './src')
     }
-  },
-  
-  optimizeDeps: {
-    include: ['buffer']
   },
   
   build: {
@@ -41,8 +31,8 @@ export default defineConfig({
     minify: 'esbuild',
     target: 'esnext',
     assetsDir: 'assets',
-    emptyOutDir: true,
-    rollupOptions: {
+    emptyOutDir: true,    rollupOptions: {
+      external: ['gray-matter/lib/engines'],
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

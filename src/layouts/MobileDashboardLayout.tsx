@@ -63,11 +63,8 @@ const MobileDashboardLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Skip to main content link for accessibility */}
-      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 z-50 bg-wedding-gold text-white px-4 py-2 rounded focus:outline-dashed focus:outline-2 focus:outline-offset-2 focus:outline-wedding-red transition-all">Skip to main content</a>
-
-      {/* Mobile Header as header landmark */}
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-30 md:hidden" role="banner">
+      {/* Mobile Header */}
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-30 md:hidden">
         <div className="flex h-16 items-center justify-between px-4">
           <div className="flex items-center">
             <Sheet open={open} onOpenChange={setOpen}>
@@ -83,15 +80,13 @@ const MobileDashboardLayout = () => {
                     <img 
                       src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
                       alt="Sanskara AI Logo" 
-                      className="h-8 w-8 object-contain" 
-                      role="img" 
-                      aria-label="Sanskara AI Logo" 
+                      className="h-8 w-8 object-contain"
                     />            <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
               Sanskara<span className="text-wedding-red">AI</span>
             </h1>
                   </Link>
                 </div>
-                <nav className="flex-1 space-y-1 px-2 py-4" aria-label="Dashboard navigation" role="navigation">
+                <nav className="flex-1 space-y-1 px-2 py-4">
                   {sidebarLinks.map((link) => {
                     const isActive = location.pathname === link.href;
                     return (
@@ -130,9 +125,7 @@ const MobileDashboardLayout = () => {
               <img 
                 src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
                 alt="Sanskara AI Logo" 
-                className="h-8 w-8 object-contain" 
-                role="img" 
-                aria-label="Sanskara AI Logo" 
+                className="h-8 w-8 object-contain"
               />              <h2 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
                 Sanskara<span className="text-wedding-red">AI</span>
               </h2>
@@ -156,8 +149,8 @@ const MobileDashboardLayout = () => {
         </div>
       </header>
 
-      {/* Desktop Sidebar as nav landmark */}
-      <nav aria-label="Dashboard navigation" className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-[#fffbe7] border-[#ffd700]/30 min-h-screen shadow-lg" role="navigation">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r bg-[#fffbe7] border-[#ffd700]/30 min-h-screen shadow-lg">
         <div className="flex h-16 items-center justify-between border-b px-4 bg-gradient-to-br from-[#ffd700] to-[#ffecb3]">
           <Link to="/" className="flex items-center gap-2">
             <img 
@@ -169,7 +162,7 @@ const MobileDashboardLayout = () => {
             </h2>
           </Link>
         </div>
-        <nav className="flex-1 space-y-1 px-2 py-4" aria-label="Dashboard navigation" role="navigation">
+        <nav className="flex-1 space-y-1 px-2 py-4">
           {sidebarLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
@@ -188,12 +181,12 @@ const MobileDashboardLayout = () => {
             <Link to="/dashboard/chat">Ask AI</Link>
           </Button>
         </div>
-      </nav>
+      </aside>
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Desktop Header as header landmark */}
-        <header className="hidden md:block bg-white shadow-sm z-10" role="banner">
+        {/* Desktop Header */}
+        <header className="hidden md:block bg-white shadow-sm z-10">
           <div className="flex h-16 items-center justify-between px-4">            <h3 className="text-lg font-semibold text-gray-700">
               {getCurrentPageTitle()}
             </h3>
@@ -211,8 +204,8 @@ const MobileDashboardLayout = () => {
           </div>
         </header>
 
-        {/* Main Content as main landmark */}
-        <main id="main-content" className="flex-1 overflow-auto bg-gray-50 p-4 md:py-6 md:px-8 mt-28 md:mt-0" tabIndex={-1} role="main">
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto bg-gray-50 p-4 md:py-6 md:px-8 mt-28 md:mt-0">
           <Outlet />
         </main>
       </div>

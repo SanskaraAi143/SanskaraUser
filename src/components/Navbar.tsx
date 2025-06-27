@@ -7,50 +7,32 @@ import SignInDialog from "@/components/auth/SignInDialog";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-const scrollToHash = (hash: string) => {
-  if (!hash) return;
-  const el = document.getElementById(hash.replace('#', ''));
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-};
-
-const navLinks = [
-  { href: "/about", label: "About", isRouterLink: true },
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "/blog", label: "Blog", isRouterLink: true },
-];
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Hide main nav links on blog pages
+  const isBlogPage = location.pathname.startsWith('/blog');
+  const navLinks = isBlogPage
+    ? [{ href: "/blog", label: "Blog", isRouterLink: true }]
+    : [
+        { href: "/about", label: "About", isRouterLink: true },
+        { href: "#features", label: "Features" },
+        { href: "#how-it-works", label: "How It Works" },
+        { href: "#pricing", label: "Pricing" },
+        { href: "#testimonials", label: "Testimonials" },
+        { href: "/blog", label: "Blog", isRouterLink: true },
+      ];
+
   const handleStartPlanning = () => {
     navigate('/dashboard/chat');
     setIsOpen(false); // Also close mobile menu if open
   };
 
-  const handleAnchorNav = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, href: string) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      if (location.pathname !== '/') {
-        navigate('/', { replace: false });
-        setTimeout(() => scrollToHash(href), 300); // Wait for navigation
-      } else {
-        scrollToHash(href);
-      }
-    }
-  };
-
-  // Always show all nav links
-  const filteredNavLinks = navLinks;
-
   return (
-    <nav className="glass-nav" role="navigation" aria-label="Main navigation">
+    <nav className="glass-nav">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3">
@@ -64,24 +46,23 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex items-center gap-8">
-          {filteredNavLinks.map(link =>
-            link.href.startsWith('#') ? (
-              <a
+          {navLinks.map(link => 
+            link.isRouterLink ? (
+              <Link 
                 key={link.href}
-                href={link.href}
-                className="nav-link font-sans text-base font-medium text-wedding-brown transition-colors hover:text-wedding-gold"
-                onClick={e => handleAnchorNav(e, link.href)}
-              >
-                {link.label}
-              </a>
-            ) : (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="nav-link font-sans text-base font-medium text-wedding-brown transition-colors hover:text-wedding-gold"
+                to={link.href} 
+                className="nav-link"
               >
                 {link.label}
               </Link>
+            ) : (
+              <a 
+                key={link.href}
+                href={link.href} 
+                className="nav-link"
+              >
+                {link.label}
+              </a>
             )
           )}
         </div>
@@ -137,25 +118,25 @@ const Navbar = () => {
                     </h2>
                   </Link>
                   <nav className="flex flex-col space-y-4">
-                    {filteredNavLinks.map(link =>
-                      link.href.startsWith('#') ? (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          className="nav-link font-sans text-lg font-medium text-wedding-brown transition-colors hover:text-wedding-gold"
-                          onClick={e => { handleAnchorNav(e, link.href); setIsOpen(false); }}
-                        >
-                          {link.label}
-                        </a>
-                      ) : (
+                    {navLinks.map(link => 
+                      link.isRouterLink ? (
                         <Link
                           key={link.href}
                           to={link.href}
-                          className="nav-link font-sans text-lg font-medium text-wedding-brown transition-colors hover:text-wedding-gold"
+                          className="nav-link py-2"
                           onClick={() => setIsOpen(false)}
                         >
                           {link.label}
                         </Link>
+                      ) : (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          className="nav-link py-2"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {link.label}
+                        </a>
                       )
                     )}
                   </nav>
