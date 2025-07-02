@@ -63,17 +63,20 @@ CREATE INDEX idx_user_vendors_user_id ON user_shortlisted_vendors (user_id);
 CREATE INDEX idx_user_vendors_vendor_name ON user_shortlisted_vendors USING gin (vendor_name gin_trgm_ops);
 CREATE INDEX idx_user_vendors_vendor_category ON user_shortlisted_vendors (vendor_category);
 
--- Chat Sessions Table
+-- Chat Sessions Table (MODIFIED FOR VENDOR CHAT)
 CREATE TABLE chat_sessions (
     session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    vendor_id UUID NULL REFERENCES vendors(vendor_id) ON DELETE SET NULL, -- Link to vendor
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     last_updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    summary TEXT NULL
+    summary TEXT NULL,
+    CONSTRAINT unique_user_vendor_chat UNIQUE (user_id, vendor_id) -- Ensures only one active session per user-vendor pair
 );
 CREATE INDEX idx_chat_sessions_user_id ON chat_sessions (user_id);
+CREATE INDEX idx_chat_sessions_vendor_id ON chat_sessions (vendor_id) WHERE vendor_id IS NOT NULL; -- Index for vendor lookups
 
--- Chat Messages Table
+-- Chat Messages Table (Structure unchanged, but sender_type interpretation will adapt)
 CREATE TABLE chat_messages (
     message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     session_id UUID NOT NULL REFERENCES chat_sessions(session_id) ON DELETE CASCADE,
@@ -179,3 +182,34 @@ CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE PROCEDURE public.handle_new_auth_user();
 
+-- Trigger function to set 'last_updated_at' on table update
+CREATE OR REPLACE FUNCTION trigger_set_last_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.last_updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to chat_sessions for its own updates (e.g. summary changes)
+CREATE TRIGGER set_chat_sessions_last_updated_at_on_update
+BEFORE UPDATE ON chat_sessions
+FOR EACH ROW
+EXECUTE FUNCTION trigger_set_last_updated_at();
+
+-- Trigger function to update parent chat_session's last_updated_at when a new message is added
+CREATE OR REPLACE FUNCTION update_chat_session_last_updated_on_new_message()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE chat_sessions
+  SET last_updated_at = NOW()
+  WHERE session_id = NEW.session_id;
+  RETURN NEW; -- For AFTER trigger, what is returned is usually ignored, but NEW is common.
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger on chat_messages to update its parent chat_session
+CREATE TRIGGER on_new_chat_message_update_session
+AFTER INSERT ON chat_messages
+FOR EACH ROW
+EXECUTE FUNCTION update_chat_session_last_updated_on_new_message();

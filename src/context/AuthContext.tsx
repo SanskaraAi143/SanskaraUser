@@ -4,14 +4,21 @@ import { toast } from "@/hooks/use-toast";
 
 // Types for our authentication context
 type User = {
-  id: string;
+  id: string; // Internal application user_id from public.users table
   email: string | null;
   name?: string;
 };
 
+type VendorProfile = {
+  vendorId: string; // Corresponds to vendor_id in vendors table
+  vendorName?: string;
+};
+
 type AuthContextType = {
   user: User | null;
+  vendorProfile: VendorProfile | null;
   loading: boolean;
+  isVendorLoading: boolean; // Separate loading state for vendor profile
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -20,7 +27,9 @@ type AuthContextType = {
 // Create the context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  vendorProfile: null,
   loading: true,
+  isVendorLoading: true,
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
@@ -31,96 +40,106 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [vendorProfile, setVendorProfile] = useState<VendorProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const [isVendorLoading, setIsVendorLoading] = useState(true);
+  // const [supabaseUser, setSupabaseUser] = useState<any>(null); // We might not need to store the full supabase user in state
 
-  // Helper to map Supabase user to our User type
-  const mapSupabaseUser = (sbUser: any): User => ({
-    id: sbUser.id,
-    email: sbUser.email,
-    name: sbUser.user_metadata?.name || sbUser.email,
-  });
+  const fetchAndSetUserAndVendorProfile = async (sbUser: any) => {
+    if (!sbUser) {
+      setUser(null);
+      setVendorProfile(null);
+      setLoading(false);
+      setIsVendorLoading(false);
+      return;
+    }
+
+    // Fetch internal user_id (from public.users)
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .select('user_id, display_name') // Assuming display_name is in users table
+      .eq('supabase_auth_uid', sbUser.id)
+      .single();
+
+    if (userError && userError.code !== 'PGRST116') { // PGRST116: no rows found
+      console.error("Error fetching internal user:", userError);
+      // Potentially handle this error, e.g. by signing out the user or setting a default
+    }
+
+    const internalUserId = userRow?.user_id || sbUser.id; // Fallback to supabase id if internal not found (should be rare with trigger)
+    const userName = userRow?.display_name || sbUser.user_metadata?.name || sbUser.email;
+
+    setUser({
+      id: internalUserId,
+      email: sbUser.email,
+      name: userName,
+    });
+    setLoading(false); // User loading is done
+
+    // Fetch vendor profile
+    setIsVendorLoading(true);
+    const { data: vendorRow, error: vendorError } = await supabase
+      .from('vendors')
+      .select('vendor_id, vendor_name')
+      .eq('supabase_auth_uid', sbUser.id) // Assuming vendors table has supabase_auth_uid
+      .single();
+
+    if (vendorError && vendorError.code !== 'PGRST116') { // PGRST116: no rows found
+      console.error("Error fetching vendor profile:", vendorError);
+    }
+
+    if (vendorRow) {
+      setVendorProfile({
+        vendorId: vendorRow.vendor_id,
+        vendorName: vendorRow.vendor_name,
+      });
+    } else {
+      setVendorProfile(null);
+    }
+    setIsVendorLoading(false); // Vendor profile loading is done
+  };
+
 
   // Effect to initialize auth state and restore user on reload
   useEffect(() => {
-    const getSession = async () => {
+    const getSessionAndProfiles = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
-      if (data?.user) {
-        setSupabaseUser(data.user);
-        // Restore internal user_id mapping
-        const { data: userRow } = await supabase
-          .from('users')
-          .select('user_id')
-          .eq('supabase_auth_uid', data.user.id)
-          .single();
-        setUser({
-          id: userRow?.user_id || data.user.id,
-          email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email,
-        });
-      } else {
-        setSupabaseUser(null);
-        setUser(null);
-      }
-      setLoading(false);
+      setIsVendorLoading(true);
+      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      await fetchAndSetUserAndVendorProfile(sbUser);
     };
-    getSession();
-    // Listen to auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setSupabaseUser(session.user);
-        // Restore internal user_id mapping
-        supabase
-          .from('users')
-          .select('user_id')
-          .eq('supabase_auth_uid', session.user.id)
-          .single()
-          .then(({ data: userRow }) => {
-            setUser({
-              id: userRow?.user_id || session.user.id,
-              email: session.user.email,
-              name: session.user.user_metadata?.name || session.user.email,
-            });
-          });
-      } else {
-        setSupabaseUser(null);
-        setUser(null);
-      }
+
+    getSessionAndProfiles();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setLoading(true);
+      setIsVendorLoading(true);
+      await fetchAndSetUserAndVendorProfile(session?.user || null);
     });
+
     return () => {
       listener?.subscription.unsubscribe();
     };
   }, []);
 
-  // Remove polling: fetch internal user_id only once at login/signup
-  const fetchInternalUserId = async (sbUser: any) => {
-    const { data } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('supabase_auth_uid', sbUser.id)
-      .single();
-    return data?.user_id || sbUser.id;
-  };
 
   // Sign up function
   const signUp = async (email: string, password: string, name: string) => {
     try {
       setLoading(true);
+      setIsVendorLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name, user_type: 'customer' } },
+        options: { data: { name, user_type: 'customer' } }, // raw_user_meta_data for trigger
       });
       if (error) throw error;
+      // onAuthStateChange will handle setting user and vendor profile due to the trigger
+      // and subsequent user creation in `users` table.
+      // We might need to manually call fetchAndSetUserAndVendorProfile if onAuthStateChange is not fast enough
+      // or if the public.users table is not populated immediately by the trigger for the vendor query.
       if (data.user) {
-        const internalId = await fetchInternalUserId(data.user);
-        setUser({
-          id: internalId,
-          email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email,
-        });
-        setSupabaseUser(data.user);
+         await fetchAndSetUserAndVendorProfile(data.user); // Explicitly fetch after signup
       }
       toast({
         title: "Account created successfully",
