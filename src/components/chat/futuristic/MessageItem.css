@@ -1,0 +1,65 @@
+/* MessageItem.css */
+.message-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.user-message-wrapper {
+  align-items: flex-end;
+}
+
+.bot-message-wrapper {
+  align-items: flex-start;
+}
+
+.message-item {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-message {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+  margin-left: auto;
+}
+
+.bot-message {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  color: #374151;
+  border-bottom-left-radius: 0.25rem;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.message-content {
+  margin-bottom: 0.25rem;
+}
+
+.message-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  align-self: flex-end;
+}
+
+.rich-media-container {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rich-media-container img {
+  max-width: 100%;
+  border-radius: 0.25rem;
+}

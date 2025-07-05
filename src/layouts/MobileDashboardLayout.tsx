@@ -78,13 +78,12 @@ const MobileDashboardLayout = () => {
                 <div className="flex h-16 items-center justify-between border-b px-4">
                   <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
                     <img 
-                      src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
-                      alt="Sanskara Logo" 
+                      src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
+                      alt="Sanskara AI Logo" 
                       className="h-8 w-8 object-contain"
-                    />
-                    <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
-                      Sanskara<span className="text-wedding-red">AI</span>
-                    </h1>
+                    />            <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
+              Sanskara<span className="text-wedding-red">AI</span>
+            </h1>
                   </Link>
                 </div>
                 <nav className="flex-1 space-y-1 px-2 py-4">
@@ -124,19 +123,18 @@ const MobileDashboardLayout = () => {
 
             <Link to="/" className="flex items-center ml-4">
               <img 
-                src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" 
-                alt="Sanskara Logo" 
+                src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
+                alt="Sanskara AI Logo" 
                 className="h-8 w-8 object-contain"
-              />
-              <h1 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
+              />              <h2 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
                 Sanskara<span className="text-wedding-red">AI</span>
-              </h1>
+              </h2>
             </Link>
           </div>
           <UserProfileDropdown />
         </div>
         <div className="px-4 py-2 border-t flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-700">{getCurrentPageTitle()}</h2>
+          <h3 className="text-lg font-semibold text-gray-700">{getCurrentPageTitle()}</h3>
           <Button
             variant="outline"
             size="sm"
@@ -159,10 +157,9 @@ const MobileDashboardLayout = () => {
               src="/logo.jpeg" 
               alt="SanskaraAI Logo" 
               className="h-10 w-10 object-contain"
-            />
-            <h1 className="text-lg font-playfair font-semibold" style={{color:'#ff8f00'}}>
+            />            <h2 className="text-lg font-playfair font-semibold" style={{color:'#ff8f00'}}>
               Sanskara<span style={{color:'#8d6e63'}}>AI</span>
-            </h1>
+            </h2>
           </Link>
         </div>
         <nav className="flex-1 space-y-1 px-2 py-4">
@@ -180,9 +177,8 @@ const MobileDashboardLayout = () => {
             );
           })}
         </nav>
-        <div className="px-4 py-4">
-          <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200">
-            Ask AI
+        <div className="px-4 py-4">          <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
+            <Link to="/dashboard/chat">Ask AI</Link>
           </Button>
         </div>
       </aside>
@@ -191,10 +187,9 @@ const MobileDashboardLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Desktop Header */}
         <header className="hidden md:block bg-white shadow-sm z-10">
-          <div className="flex h-16 items-center justify-between px-4">
-            <h2 className="text-lg font-semibold text-gray-700">
+          <div className="flex h-16 items-center justify-between px-4">            <h3 className="text-lg font-semibold text-gray-700">
               {getCurrentPageTitle()}
-            </h2>
+            </h3>
             <Button
               variant="outline"
               size="sm"

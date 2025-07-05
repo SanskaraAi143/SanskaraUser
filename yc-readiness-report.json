@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-06-25T10:50:31.455Z",
+  "scores": {
+    "technical": 100,
+    "productMarket": 100,
+    "growth": 80,
+    "execution": 85
+  },
+  "overallScore": 92.75,
+  "grade": "A-",
+  "ycReady": true,
+  "recommendations": [
+    "Implement comprehensive SEO strategy with schema markup",
+    "Add social sharing and viral features",
+    "Create content marketing strategy with regular blog posts"
+  ]
+}

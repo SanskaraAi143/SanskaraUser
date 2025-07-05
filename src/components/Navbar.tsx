@@ -14,15 +14,17 @@ const Navbar = () => {
   const location = useLocation();
 
   // Hide main nav links on blog pages
+  const isLandingPage = location.pathname === '/';
   const isBlogPage = location.pathname.startsWith('/blog');
 
   const navLinks = isBlogPage
     ? [{ href: "/blog", label: "Blog", isRouterLink: true }]
     : [
-        { href: "#features", label: "Features" },
-        { href: "#how-it-works", label: "How It Works" },
-        { href: "#pricing", label: "Pricing" },
-        { href: "#testimonials", label: "Testimonials" },
+        { href: "/about", label: "About", isRouterLink: true },
+        { href: "/features", label: "Features", isRouterLink: true },
+        { href: isLandingPage ? "#how-it-works" : "/#how-it-works", label: "How It Works" },
+        { href: isLandingPage ? "#pricing" : "/#pricing", label: "Pricing" },
+        { href: isLandingPage ? "#testimonials" : "/#testimonials", label: "Testimonials" },
         { href: "/blog", label: "Blog", isRouterLink: true },
       ];
 
@@ -39,9 +41,9 @@ const Navbar = () => {
             <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
               <img src="/logo.jpeg" alt="Site Logo" className="h-10 w-10 object-contain rounded-full" />
             </div>
-            <h1 className="text-2xl font-playfair font-semibold title-gradient">
+            <div className="text-2xl font-playfair font-semibold title-gradient">
               Sanskara<span className="font-bold">AI</span>
-            </h1>
+            </div>
           </Link>
         </div>
         

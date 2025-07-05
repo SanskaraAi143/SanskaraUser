@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-06-25T10:05:11.585Z",
+  "url": "http://localhost:4173",
+  "securityScore": 42,
+  "complianceScore": 100,
+  "grade": "B-",
+  "vulnerabilities": [
+    "CRITICAL: Missing HSTS header - susceptible to downgrade attacks",
+    "CRITICAL: Missing CSP header - vulnerable to XSS attacks",
+    "HIGH: Missing X-Frame-Options - vulnerable to clickjacking",
+    "MEDIUM: Missing X-Content-Type-Options header",
+    "LOW: Missing Referrer-Policy header"
+  ],
+  "recommendations": [
+    "Add Strict-Transport-Security header with long max-age",
+    "Implement Content-Security-Policy to prevent XSS",
+    "Add X-Frame-Options: DENY or SAMEORIGIN",
+    "Add X-Content-Type-Options: nosniff",
+    "Add Referrer-Policy: strict-origin-when-cross-origin"
+  ],
+  "compliance": {
+    "gdpr": true,
+    "ccpa": true,
+    "accessibility": "Not tested in this audit",
+    "dataProtection": true
+  }
+}

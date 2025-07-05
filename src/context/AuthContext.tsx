@@ -39,50 +39,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     id: sbUser.id,
     email: sbUser.email,
     name: sbUser.user_metadata?.name || sbUser.email,
-  });
-
-  // Effect to initialize auth state and restore user on reload
+  });  // Effect to initialize auth state and restore user on reload
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
-      if (data?.user) {
-        setSupabaseUser(data.user);
-        // Restore internal user_id mapping
-        const { data: userRow } = await supabase
-          .from('users')
-          .select('user_id')
-          .eq('supabase_auth_uid', data.user.id)
-          .single();
-        setUser({
-          id: userRow?.user_id || data.user.id,
-          email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email,
-        });
-      } else {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (data?.user) {
+          setSupabaseUser(data.user);
+          // Restore internal user_id mapping
+          try {
+            const { data: userRow } = await supabase
+              .from('users')
+              .select('user_id')
+              .eq('supabase_auth_uid', data.user.id)
+              .single();
+            setUser({
+              id: userRow?.user_id || data.user.id,
+              email: data.user.email,
+              name: data.user.user_metadata?.name || data.user.email,
+            });
+          } catch (userError) {
+            // If user table query fails, still set the user with Supabase ID
+            setUser({
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.user_metadata?.name || data.user.email,
+            });
+          }
+        } else {
+          setSupabaseUser(null);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
         setSupabaseUser(null);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-    getSession();
-    // Listen to auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
+    
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth initialization timeout - proceeding without auth');
+        setLoading(false);
+      }
+    }, 5000);
+    
+    getSession().finally(() => {
+      clearTimeout(timeoutId);
+    });// Listen to auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {      if (session?.user) {
         setSupabaseUser(session.user);
         // Restore internal user_id mapping
-        supabase
-          .from('users')
-          .select('user_id')
-          .eq('supabase_auth_uid', session.user.id)
-          .single()
-          .then(({ data: userRow }) => {
+        const fetchUserData = async () => {
+          try {
+            const { data: userRow } = await supabase
+              .from('users')
+              .select('user_id')
+              .eq('supabase_auth_uid', session.user.id)
+              .single();
             setUser({
               id: userRow?.user_id || session.user.id,
               email: session.user.email,
               name: session.user.user_metadata?.name || session.user.email,
             });
-          });
+          } catch (error) {
+            console.error('User table query error:', error);
+            // Fallback to Supabase user ID if user table query fails
+            setUser({
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.user_metadata?.name || session.user.email,
+            });
+          }
+        };
+        fetchUserData();
       } else {
         setSupabaseUser(null);
         setUser(null);

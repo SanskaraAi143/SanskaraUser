@@ -1,78 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import TaskDetailModal from './TaskDetailModal';
+import TaskDetailModal, { TaskFormValues } from './TaskDetailModal'; // Import TaskFormValues
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from '@/context/AuthContext';
 import { getUserTasks, addUserTask, updateUserTask, removeUserTask } from '@/services/api/tasksApi';
-import TaskRow from './TaskRow';
+// TaskRow seems unused in this Kanban view, so removing import for now to avoid confusion.
+// import TaskRow from './TaskRow';
 import Pagination from './Pagination';
 import CategoryManager from './CategoryManager';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, PlusCircle } from 'lucide-react'; // Added PlusCircle for Add button
 
 import type { Task } from '@/services/api/tasksApi';
-import { getPriorityColor } from '@/lib/utils';
+import { getPriorityColor } from '@/lib/utils'; // Assuming this utility exists and works
 
 const TaskTracker = () => {
   const { user } = useAuth();
-  // Modal state for task details
-  const [modalTask, setModalTask] = useState<Task | null>(null);
-  // Loading state for tasks
+  const [modalTask, setModalTask] = useState<Partial<Task> | null>(null); // Use Partial<Task> for new task object
   const [loading, setLoading] = useState<boolean>(true);
-  // Kanban tasks
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [category, setCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
-  // Advanced features state
   const [categories, setCategories] = useState<string[]>(() => JSON.parse(localStorage.getItem('categories') || '[]'));
+
+  // Filtering, sorting, and search state - Initialized from localStorage via userPrefs
+  const [userPrefs, setUserPrefs] = useState(() => {
+    const savedPrefs = localStorage.getItem('userPrefs');
+    return savedPrefs ? JSON.parse(savedPrefs) : {
+      filterStatus: 'all',
+      filterPriority: 'all',
+      filterCategory: 'all',
+      sortBy: 'due_date',
+      sortOrder: 'asc',
+      search: '',
+    };
+  });
+
+  const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'incomplete'>(userPrefs.filterStatus);
+  const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>(userPrefs.filterPriority);
+  const [filterCategory, setFilterCategory] = useState(userPrefs.filterCategory);
+  const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'created_at'>(userPrefs.sortBy);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(userPrefs.sortOrder);
+  const [search, setSearch] = useState(userPrefs.search);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tasksPerPage, setTasksPerPage] = useState(() => Number(localStorage.getItem('tasksPerPage')) || 10); // Increased default
+
+  // Unused state related to a direct form or undo/redo - can be removed or completed later
+  // const [title, setTitle] = useState("");
+  // const [description, setDescription] = useState("");
+  // const [dueDate, setDueDate] = useState("");
+  // const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  // const [category, setCategory] = useState("");
+  // const [undoStack, setUndoStack] = useState<any[]>([]);
+  // const [redoStack, setRedoStack] = useState<any[]>([]);
+  // const [showUndo, setShowUndo] = useState(false);
+  // const [undoAction, setUndoAction] = useState<null | (() => void)>(null);
+
 
   // Load tasks from Supabase on mount
   useEffect(() => {
-    if (!user?.id) return;
-    setLoading(true);
-    getUserTasks(user.id)
-      .then(setTasks)
-      .finally(() => setLoading(false));
-  }, [user?.id]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [tasksPerPage, setTasksPerPage] = useState(() => Number(localStorage.getItem('tasksPerPage')) || 5);
-  const [undoStack, setUndoStack] = useState<any[]>([]);
-  const [redoStack, setRedoStack] = useState<any[]>([]);
-  const [showUndo, setShowUndo] = useState(false);
-  const [undoAction, setUndoAction] = useState<null | (() => void)>(null);
-  const [userPrefs, setUserPrefs] = useState(() => JSON.parse(localStorage.getItem('userPrefs') || '{}'));
-
-  // Inline edit handler
-  const handleEditTask = async (taskId: string, updates: Partial<Task>) => {
-    setLoading(true);
-    try {
-      await updateUserTask(taskId, updates);
-      setTasks(await getUserTasks(user.id));
-    } catch (err) {
-      setError('Edit failed');
-      setTimeout(() => setError(null), 4000);
-    } finally {
-      setLoading(false);
+    if (!user?.id) {
+      setLoading(false); // Stop loading if no user
+      setTasks([]); // Clear tasks if no user
+      return;
     }
-  };
-
-  // Filtering, sorting, and search state
-  const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'incomplete'>(userPrefs.filterStatus || 'all');
-  const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>(userPrefs.filterPriority || 'all');
-  const [filterCategory, setFilterCategory] = useState(userPrefs.filterCategory || 'all');
-  const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'created_at'>(userPrefs.sortBy || 'due_date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(userPrefs.sortOrder || 'asc');
-  const [search, setSearch] = useState(userPrefs.search || '');
-
-  useEffect(() => {
-    if (!user?.id) return;
     setLoading(true);
     getUserTasks(user.id)
       .then(setTasks)
+      .catch(err => {
+        console.error("Failed to load tasks:", err);
+        setError("Could not load your tasks. Please try again later.");
+      })
       .finally(() => setLoading(false));
   }, [user?.id]);
 
@@ -80,249 +78,318 @@ const TaskTracker = () => {
   useEffect(() => {
     localStorage.setItem('userPrefs', JSON.stringify({ filterStatus, filterPriority, filterCategory, sortBy, sortOrder, search }));
   }, [filterStatus, filterPriority, filterCategory, sortBy, sortOrder, search]);
+
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
   }, [categories]);
+
   useEffect(() => {
     localStorage.setItem('tasksPerPage', String(tasksPerPage));
   }, [tasksPerPage]);
 
-  // Handle save from modal
-  const handleModalSave = async (updates: Partial<Task>) => {
-    if (!modalTask) return;
+  // Commenting out unused inline edit handler - modal is primary edit method now
+  // const handleEditTask = async (taskId: string, updates: Partial<Task>) => { ... };
+
+  const handleModalSave = async (data: TaskFormValues, taskId?: string) => {
     if (!user?.id) {
       setError('User not authenticated. Please log in again.');
+      setModalTask(null);
       return;
     }
+    setLoading(true);
+    setError(null);
     try {
-      if (!modalTask.task_id) {
-        // Add new task if no task_id
+      const taskDataPayload: Partial<Task> = {
+        title: data.title,
+        description: data.description || null,
+        due_date: data.due_date || null,
+        priority: data.priority,
+        status: data.status,
+        category: data.category || null,
+        is_complete: data.status === 'Done',
+      };
+
+      if (taskId && taskId !== 'new') {
+        await updateUserTask(taskId, taskDataPayload);
+      } else {
         await addUserTask(
           user.id,
-          updates.title || '',
-          updates.description || '',
-          updates.due_date || '',
-          (updates.priority as 'low' | 'medium' | 'high') || 'medium',
-          updates.category || '',
-          (updates.status as 'No Status' | 'To Do' | 'Doing' | 'Done') || 'No Status'
+          taskDataPayload.title!,
+          taskDataPayload.description,
+          taskDataPayload.due_date,
+          taskDataPayload.priority!,
+          taskDataPayload.category,
+          taskDataPayload.status!,
+          taskDataPayload.is_complete
         );
-      } else {
-        // Update existing task
-        await updateUserTask(modalTask.task_id, updates);
       }
       setTasks(await getUserTasks(user.id));
       setModalTask(null);
-    } catch (err) {
-      // Optionally handle error
-    }
-  };
-
-  const handleAdd = async () => {
-    setModalTask({ task_id: 'new', user_id: user?.id || '', title: '', description: '', due_date: null, priority: 'medium', category: null, status: 'No Status', is_complete: false });
-  };
-
-  const handleToggle = async (task: Task) => {
-    if (!user?.id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      await updateUserTask(task.task_id, { is_complete: !task.is_complete });
-      setTasks(await getUserTasks(user.id));
-      setError(null);
     } catch (err: any) {
-      console.error(err);
-      setError("Failed to update task.");
-      setTimeout(() => setError(null), 5000);
+      console.error("Failed to save task:", err);
+      const errorMessage = err.message || 'Failed to save task. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (task_id: string) => {
+  const handleOpenNewTaskModal = () => {
+    setModalTask({ task_id: 'new' }); // task_id 'new' signifies a new task for the modal
+  };
+
+  const handleToggleComplete = async (task: Task) => {
     if (!user?.id) return;
     setLoading(true);
     setError(null);
     try {
-      await removeUserTask(task_id);
+      // If current status is 'Done', toggling means moving it to 'To Do' (or 'No Status' if preferred)
+      // If not 'Done', toggling means moving it to 'Done'
+      const newStatus = task.status === 'Done' ? 'To Do' : 'Done';
+      await updateUserTask(task.task_id, {
+        is_complete: newStatus === 'Done',
+        status: newStatus
+      });
       setTasks(await getUserTasks(user.id));
-      setError(null);
     } catch (err: any) {
-      console.error(err);
-      setError("Failed to delete task.");
-      setTimeout(() => setError(null), 5000);
+      console.error("Failed to update task completion:", err);
+      setError("Failed to update task. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Drag-and-drop handler for Kanban
+  const handleDeleteTask = async (taskId: string) => {
+    if (!user?.id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await removeUserTask(taskId);
+      setTasks(await getUserTasks(user.id));
+      setModalTask(null); // Close modal if delete was initiated from there
+    } catch (err: any) {
+      console.error("Failed to delete task:", err);
+      setError("Failed to delete task. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   function handleDragEnd(result: DropResult) {
     const { source, destination, draggableId } = result;
-    if (!destination || source.droppableId === destination.droppableId) return;
-    const task = tasks.find(t => t.task_id === draggableId);
-    if (!task) return;
-    const prevTasks = [...tasks];
-    setTasks(prev => prev.map(t => t.task_id === task.task_id ? { ...t, status: destination.droppableId as 'No Status' | 'To Do' | 'Doing' | 'Done' } : t));
-    updateUserTask(task.task_id, { status: destination.droppableId as 'No Status' | 'To Do' | 'Doing' | 'Done' })
-      .catch(() => {
-        setTasks(prevTasks);
-        alert('Failed to update task status. Please try again.');
+    if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+      return;
+    }
+
+    const taskToUpdate = tasks.find(t => t.task_id === draggableId);
+    if (!taskToUpdate) return;
+
+    const newStatus = destination.droppableId as Task['status'];
+    const newIsComplete = newStatus === 'Done';
+
+    // Optimistic UI update
+    const updatedTasks = tasks.map(t =>
+      t.task_id === draggableId ? { ...t, status: newStatus, is_complete: newIsComplete } : t
+    );
+    // Reorder tasks within the new column
+    // This part is complex if strict ordering is needed within columns based on drag.
+    // For now, just updating status. A full reordering might involve splicing and inserting.
+    setTasks(updatedTasks);
+
+    updateUserTask(taskToUpdate.task_id, { status: newStatus, is_complete: newIsComplete })
+      .catch(async () => {
+        setError('Failed to update task status. Reverting.');
+        // Revert to previous state on error
+        setTasks(await getUserTasks(user.id));
       });
   }
 
-  const kanbanStatuses = ["No Status", "To Do", "Doing", "Done"];
+  const kanbanStatuses: Array<Task['status']> = ["No Status", "To Do", "Doing", "Done"];
   
-  // Show error toast if error occurs
   useEffect(() => {
     if (error) {
-      // Optionally use a toast here if you have a toast system
-      // toast({ title: 'Error', description: error, variant: 'destructive' });
-      // For now, just log
-      console.error(error);
+      // Basic error display, can be replaced with toast
+      console.error("TaskTracker Error:", error);
+      // Clear error after some time
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
-  // Render error message if error exists
+  // Filtered and Sorted Tasks for display
+  const processedTasks = tasks
+    .filter(task => {
+      if (filterStatus === 'all') return true;
+      return filterStatus === 'complete' ? task.is_complete : !task.is_complete;
+    })
+    .filter(task => filterPriority === 'all' || task.priority === filterPriority)
+    .filter(task => filterCategory === 'all' || task.category === filterCategory)
+    .filter(task => search === '' || task.title.toLowerCase().includes(search.toLowerCase()) || (task.description && task.description.toLowerCase().includes(search.toLowerCase())));
+    // Sorting logic can be added here if needed for a list view, Kanban typically relies on manual order or status.
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-1"> {/* Added p-1 for slight breathing room */}
       {error && (
-        <div className="glass-card p-4 bg-red-100 border border-red-300 text-red-700 text-center font-semibold">
-          {error}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
         </div>
       )}
       {/* Header with Actions */}
-      <div className="glass-card p-6 bg-gradient-to-br from-wedding-gold/80 via-wedding-cream/90 to-white border border-wedding-gold/30 shadow-xl rounded-2xl">
+      <div className="glass-card p-4 sm:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-playfair font-bold bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent mb-2 drop-shadow">
-              Wedding Planning Tasks
+            <h2 className="text-2xl sm:text-3xl font-playfair font-bold title-gradient mb-1 sm:mb-2">
+              Wedding Tasks
             </h2>
-            <p className="text-wedding-gold/90 font-medium">
-              Track and manage all your wedding preparation tasks in one place
+            <p className="text-sm text-wedding-brown/80">
+              Organize your wedding preparations with this Kanban board.
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="ghost" className="rounded-full bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white shadow-lg hover:scale-105 transition" onClick={() => setModalTask({} as Task)}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+            <Button className="cta-button px-4 py-2 text-sm" onClick={handleOpenNewTaskModal}>
+              <PlusCircle size={18} className="mr-2" />
               Add New Task
             </Button>
             <CategoryManager
               categories={categories}
-              onAdd={cat => setCategories([...categories, cat])}
-              onDelete={cat => setCategories(categories.filter(c => c !== cat))}
+              onAdd={cat => setCategories(prev => [...prev, cat])}
+              onDelete={cat => setCategories(prev => prev.filter(c => c !== cat))}
             />
           </div>
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {kanbanStatuses.map((status) => (
-            <Droppable key={status} droppableId={status}>
-              {(provided, snapshot) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className={`rounded-2xl p-4 min-h-[340px] transition-all duration-300 border-2 shadow-xl
-                    bg-gradient-to-br from-wedding-cream/80 via-white/60 to-wedding-gold/10
-                    ${snapshot.isDraggingOver ? 'ring-2 ring-wedding-gold scale-105' : 'border-wedding-gold/30'}
-                  `}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-playfair font-bold text-xl bg-gradient-to-r from-wedding-gold via-wedding-cream to-wedding-secondaryGold bg-clip-text text-transparent drop-shadow">
-                      {status}
-                    </h3>
-                    <span className="bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white text-sm px-3 py-1 rounded-full shadow font-semibold border border-wedding-gold/40">
-                      {tasks.filter((task) => task.status === status).length}
-                    </span>
-                  </div>
+      {/* TODO: Add Filter controls component here (search, filter by status/priority/category, sort by) */}
 
-                  <div className="space-y-4">
-                    {tasks
-                      .filter((task) => task.status === status)
-                      .map((task, index) => (
-                        <Draggable
-                          key={task.task_id}
-                          draggableId={task.task_id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`
-                                bg-gradient-to-br from-white/70 via-[#f8e7c7]/60 to-[#d4af37]/10
-                                backdrop-blur-md rounded-xl p-4 border-2 border-[#d4af37]/20 shadow-lg
-                                transition-all duration-300 cursor-pointer
-                                ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-[#d4af37] scale-105' : ''}
-                                hover:shadow-2xl hover:scale-[1.03]
-                              `}
-                              onClick={() => setModalTask(task)}
-                            >
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <Checkbox
-                                    checked={task.status === 'Done'}
-                                    onCheckedChange={() => handleToggle(task)}
-                                    className="mt-1 border-[#d4af37] focus:ring-[#d4af37]"
-                                  />
-                                  <div className="min-w-0">
-                                    <h4 className="font-semibold text-wedding-gold truncate">
-                                      {task.title}
-                                    </h4>
-                                    {task.description && (
-                                      <p className="text-sm text-wedding-gold/70 truncate mt-1">
-                                        {task.description}
-                                      </p>
-                                    )}
+      {loading && <div className="text-center py-10 text-wedding-brown">Loading tasks...</div>}
+
+      {!loading && tasks.length === 0 && (
+        <div className="text-center py-10 glass-card p-6">
+          <h3 className="text-xl font-semibold text-wedding-brown mb-2">No tasks yet!</h3>
+          <p className="text-wedding-brown/80 mb-4">Click "Add New Task" to start planning.</p>
+        </div>
+      )}
+
+      {!loading && tasks.length > 0 && (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {kanbanStatuses.map((statusValue) => (
+              <Droppable key={statusValue} droppableId={statusValue}>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={`rounded-xl p-3 sm:p-4 min-h-[200px] transition-colors duration-200 border
+                      ${snapshot.isDraggingOver ? 'bg-wedding-gold/20 border-wedding-gold' : 'bg-wedding-cream/50 border-wedding-cream'}
+                    `}
+                  >
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <h3 className="font-semibold text-lg text-wedding-brown">
+                        {statusValue}
+                      </h3>
+                      <span className="bg-wedding-gold/20 text-wedding-orange text-xs font-semibold px-2 py-0.5 rounded-full">
+                        {processedTasks.filter((task) => task.status === statusValue).length}
+                      </span>
+                    </div>
+                    <div className="space-y-3 sm:space-y-4">
+                      {processedTasks
+                        .filter((task) => task.status === statusValue)
+                        .map((task, index) => (
+                          <Draggable
+                            key={task.task_id}
+                            draggableId={task.task_id}
+                            index={index}
+                          >
+                            {(providedDraggable, snapshotDraggable) => (
+                              <div
+                                ref={providedDraggable.innerRef}
+                                {...providedDraggable.draggableProps}
+                                {...providedDraggable.dragHandleProps}
+                                className={`glass-card p-3 rounded-lg border border-wedding-gold/30 shadow-sm hover:shadow-md
+                                  ${snapshotDraggable.isDragging ? 'shadow-xl ring-2 ring-wedding-orange' : ''}
+                                `}
+                                onClick={() => setModalTask(task)}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex items-start gap-2.5 min-w-0">
+                                    <Checkbox
+                                      id={`task-checkbox-${task.task_id}`}
+                                      checked={task.is_complete}
+                                      onCheckedChange={(e) => {
+                                        e.stopPropagation(); // Prevent modal from opening
+                                        handleToggleComplete(task);
+                                      }}
+                                      aria-label={`Mark task ${task.title} as ${task.is_complete ? 'incomplete' : 'complete'}`}
+                                      className="mt-1 border-wedding-gold data-[state=checked]:bg-wedding-gold data-[state=checked]:text-white"
+                                    />
+                                    <div className="min-w-0">
+                                      <h4 className="font-medium text-sm text-wedding-brown truncate" title={task.title}>
+                                        {task.title}
+                                      </h4>
+                                      {task.description && (
+                                        <p className="text-xs text-wedding-brown/70 truncate mt-0.5" title={task.description}>
+                                          {task.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border self-start
+                                    ${task.priority === 'high' ? 'bg-red-100 text-red-700 border-red-200' :
+                                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                      'bg-green-100 text-green-700 border-green-200'
+                                    }`}>
+                                    {task.priority}
                                   </div>
                                 </div>
-                                <div className={`px-2.5 py-1 rounded-full text-xs font-semibold border border-[#d4af37]/40
-                                  ${getPriorityColor(task.priority)}
-                                  bg-gradient-to-r from-[#fffbe6]/80 to-[#d4af37]/20
-                                `}>
-                                  {task.priority}
-                                </div>
+                                {(task.due_date || task.category) && (
+                                  <div className="mt-2 pt-2 border-t border-wedding-gold/10 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                                    {task.due_date && (
+                                      <div className="flex items-center text-wedding-brown/70">
+                                        <CalendarDays className="h-3 w-3 mr-1" />
+                                        <span>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                      </div>
+                                    )}
+                                    {task.category && (
+                                      <span className="bg-wedding-cream px-1.5 py-0.5 rounded text-wedding-orange border border-wedding-orange/50">
+                                        {task.category}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                              {task.due_date && (
-                                <div className="mt-3 flex items-center gap-2 text-sm text-wedding-gold/60">
-                                  <CalendarDays className="h-4 w-4 text-[#d4af37]" />
-                                  <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                            )}
+                          </Draggable>
+                        ))}
+                      {provided.placeholder}
+                    </div>
                   </div>
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
+      )}
 
-      {/* Task Detail Modal */}
       {modalTask && (
         <TaskDetailModal
           task={modalTask}
           open={!!modalTask}
           onClose={() => setModalTask(null)}
-          onSave={handleModalSave}
-          onDelete={handleDelete}
+          onSave={handleModalSave} // Already async
+          onDelete={handleDeleteTask} // Already async
         />
       )}
 
-      {/* Pagination */}
-      <div className="glass-card p-4 mt-6">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={Math.ceil(tasks.length / tasksPerPage)}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {tasks.length > tasksPerPage && ( // Show pagination only if needed
+        <div className="glass-card p-3 mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(processedTasks.length / tasksPerPage)} // Paginate based on processed tasks
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 }

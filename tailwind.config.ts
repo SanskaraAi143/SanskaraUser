@@ -17,15 +17,15 @@ const config: Config = {
         '2xl': '1400px'
       }
     },
-    extend: {
-      colors: {
+    extend: {      colors: {
         'wedding-red': '#D62F32',
         'wedding-orange': '#F7941D',
-        'wedding-gold': '#FFD700',
-        'wedding-secondaryGold': '#FF8F00',
+        'wedding-gold': '#B8860B', // Darker gold for better contrast (4.5:1 ratio)
+        'wedding-secondaryGold': '#E67E00', // Darker secondary gold
         'wedding-cream': '#FFF8E1',
+        'wedding-brown': '#4A3728', // Dark brown for high contrast
         'from-wedding-cream': '#FFF8E1', // alias for gradient usage
-        'to-wedding-gold': '#FFD700',    // alias for gradient usage
+        'to-wedding-gold': '#B8860B',    // Updated alias for gradient usage
         border: 'hsl(43 30% 90%)',
         input: 'hsl(45 30% 96%)',
         ring: 'hsl(43 100% 50%)',

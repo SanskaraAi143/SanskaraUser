@@ -224,7 +224,7 @@ const MoodBoard = () => {
                 <div key={image.item_id} className="relative group rounded-2xl overflow-hidden cursor-pointer glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105" onClick={() => handleOpenImageModal(image)}>
                   <img 
                     src={image.image_url} 
-                    alt={image.note} 
+                    alt={image.note || 'Moodboard image'}
                     className="w-full aspect-square object-cover bg-white rounded-2xl shadow-md transition-transform"
                     style={{ maxHeight: 260 }}
                   />

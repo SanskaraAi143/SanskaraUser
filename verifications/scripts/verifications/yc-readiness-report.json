@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-06-25T10:04:36.548Z",
+  "url": "http://localhost:4173",
+  "scores": {
+    "Technical SEO & Accessibility": 0,
+    "Performance & Core Web Vitals": 97,
+    "Security & Compliance": 0,
+    "Business Readiness & Market Fit": 0
+  },
+  "grades": {
+    "Technical SEO & Accessibility": "F",
+    "Performance & Core Web Vitals": "A+",
+    "Security & Compliance": "F",
+    "Business Readiness & Market Fit": "F"
+  },
+  "overallScore": 97,
+  "overallGrade": "A+",
+  "ycReadiness": false,
+  "summary": {
+    "strengths": [
+      "Excellent technical performance"
+    ],
+    "criticalIssues": [
+      "Business model needs strengthening",
+      "Security vulnerabilities must be addressed",
+      "SEO and accessibility improvements needed"
+    ],
+    "recommendations": []
+  }
+}

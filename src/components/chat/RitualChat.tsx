@@ -173,7 +173,7 @@ const RitualChat = ({ initialRitual, selectedTopic }: RitualChatProps) => {
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-md border border-gray-200">
       <div className="bg-wedding-maroon/10 p-3 flex items-center">
         <Avatar className="h-9 w-9 mr-2">
-          <AvatarImage src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.png" alt="Ritual Expert" />
+          <AvatarImage src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" alt="Ritual Expert" />
           <AvatarFallback className="bg-wedding-deepred text-white">RE</AvatarFallback>
         </Avatar>
         <div>

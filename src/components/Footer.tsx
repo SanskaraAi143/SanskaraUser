@@ -13,15 +13,14 @@ const Footer = () => {
                 <div className="h-12 w-12 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
                   <img
                     src="/logo.jpeg"
-                    alt="Site Logo"
+                    alt="Sanskara AI Logo"
                     className="h-10 w-10 object-contain rounded-full"
                   />
                 </div>
                 <span className="text-2xl font-playfair font-semibold title-gradient">
                   Sanskara<span className="font-bold">AI</span>
                 </span>
-              </div>
-              <p className="text-gray-700 max-w-md text-lg">
+              </div>              <p className="max-w-md text-lg" style={{color: '#374151'}}>
                 Your AI-powered guide to planning a beautiful, authentic Hindu wedding that honors
                 traditions while reflecting your unique love story.
               </p>
@@ -61,10 +60,8 @@ const Footer = () => {
                   <Github size={20} />
                 </a>
               </div>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-playfair font-bold title-gradient mb-4">Company</h4>
+            </div>            <div>
+              <h3 className="text-lg font-playfair font-bold title-gradient mb-4">Company</h3>
               <ul className="space-y-3">
                 <li><a href="/about" className="nav-link">About Us</a></li>
                 <li><a href="/careers" className="nav-link">Careers</a></li>
@@ -74,18 +71,17 @@ const Footer = () => {
             </div>
 
             <div>
-              <h4 className="text-lg font-playfair font-bold title-gradient mb-4">Resources</h4>
+              <h3 className="text-lg font-playfair font-bold title-gradient mb-4">Resources</h3>
               <ul className="space-y-3">
-                <li><a href="/guides" className="nav-link">Wedding Guides</a></li>
-                <li><a href="/vendors" className="nav-link">Vendor Directory</a></li>
+                <li><a href="/blog" className="nav-link">Wedding Guides</a></li>
+                <li><a href="/dashboard/vendors" className="nav-link">Vendor Directory</a></li>
                 <li><a href="/faq" className="nav-link">FAQs</a></li>
-                <li><a href="/support" className="nav-link">Support</a></li>
+                <li><a href="mailto:admin@sanskaraai.com" className="nav-link">Support</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-wedding-gold/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-wedding-brown/60 text-sm">
+          <div className="mt-16 pt-8 border-t border-wedding-gold/10 flex flex-col md:flex-row justify-between items-center gap-6">            <p className="text-sm" style={{color: '#374151'}}>
               © {new Date().getFullYear()} SanskaraAI. All rights reserved.
             </p>
             <div className="flex gap-6">

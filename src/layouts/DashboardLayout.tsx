@@ -86,7 +86,7 @@ const DashboardLayout = () => {
               <div className="h-10 w-10 flex items-center justify-center bg-gradient-to-br from-[#ffd700] to-[#ffecb3] rounded-full shadow-lg">
                 <img
                   src="/logo.jpeg"
-                  alt="Site Logo"
+                  alt="Sanskara AI Logo"
                   className="h-8 w-8 object-contain rounded-full"
                 />
               </div>
@@ -110,9 +110,8 @@ const DashboardLayout = () => {
               })}
             </nav>
           </div>
-          <div className="px-6 py-4">
-            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200">
-              Ask AI
+          <div className="px-6 py-4">            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
+              <Link to="/dashboard/chat">Ask AI</Link>
             </Button>
           </div>
         </aside>

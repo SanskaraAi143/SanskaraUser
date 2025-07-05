@@ -26,9 +26,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ color: 'red', padding: 24 }}>
+        <div style={{ padding: 32, textAlign: 'center', color: '#b91c1c', background: '#fffbe7' }}>
           <h2>Something went wrong.</h2>
-          <pre>{this.state.error?.message}</pre>
+          <pre style={{ color: '#b91c1c', marginTop: 16 }}>{this.state.error?.message}</pre>
         </div>
       );
     }

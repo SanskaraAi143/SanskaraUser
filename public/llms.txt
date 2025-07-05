@@ -1,0 +1,22 @@
+User-agent: *
+Disallow: /dashboard/ # Disallow all paths under /dashboard/
+Disallow: /auth/ # Disallow authentication specific paths if any exist directly under /auth/
+Disallow: /user/ # Disallow user profile specific paths if any exist directly under /user/
+Disallow: /settings/ # Disallow settings paths
+
+# Key pages for LLM indexing - Allow specific public pages
+Allow: /$
+Allow: /blog/$
+Allow: /blog/[^/]+/$ # Allow individual blog posts like /blog/my-post-slug/
+Allow: /faq/$
+Allow: /#features$
+Allow: /#how-it-works$
+Allow: /#pricing$
+Allow: /#testimonials$ # Assuming this section exists or will be added on the homepage
+
+# Explicitly list new blog posts for clarity, though the pattern above should cover them
+Allow: /blog/ai-wedding-tools-indian-marriages/$
+Allow: /blog/bangalore-wedding-venues-ai-planning/$
+Allow: /blog/choose-wedding-planner-india-ai-edge/$
+
+Sitemap: https://sanskaraai.com/sitemap.xml

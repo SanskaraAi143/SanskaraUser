@@ -63,16 +63,15 @@ const FeaturedBlog: React.FC = () => (
       <div className="callout-box">
         <div style={{fontSize: '2.2rem', color: '#e07a3f', marginBottom: '0.5rem'}}>🌟</div>
         <h4>Transform your event planning experience today!</h4>
-        <div style={{fontSize: '1.18rem', color: '#7a5a2f', marginBottom: '1.2rem'}}>Join the AI-powered wedding revolution and unlock your full potential with SanskaraAI.<br />Start your personalized, tradition-rich planning journey now.</div>
-        <a href="https://sanskaraai.com/get-started/" target="_blank" rel="noopener noreferrer">
+        <div style={{fontSize: '1.18rem', color: '#7a5a2f', marginBottom: '1.2rem'}}>Join the AI-powered wedding revolution and unlock your full potential with SanskaraAI.<br />Start your personalized, tradition-rich planning journey now.</div>        <a href="/get-started" target="_blank" rel="noopener noreferrer">
           <button className="callout-btn">Start Your AI Wedding Journey</button>
         </a>
       </div>
       <h3>Take the First Step: Explore SanskaraAI Today! ✨</h3>
       <p>
-        <a href="https://sanskaraai.com/features/" target="_blank" rel="noopener noreferrer">Visit our Features Page</a><br />
-        <a href="https://sanskaraai.com/get-started/" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
-        <a href="#" target="_blank" rel="noopener noreferrer">Connect with Us</a> (You'll add links to your social media here)
+        <a href="/features" target="_blank" rel="noopener noreferrer">Visit our Features Page</a><br />
+        <a href="/get-started" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
+        <a href="mailto:admin@sanskaraai.com" rel="noopener noreferrer">Connect with Us</a> - Get personalized wedding guidance
       </p>
     </article>
   </section>

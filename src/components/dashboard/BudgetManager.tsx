@@ -157,10 +157,10 @@ const BudgetManager = () => {
                       </span>
                     </td>
                     <td className="p-3 flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" className="hover:bg-blue-100" onClick={() => { setEditingExpense(exp); setExpenseForm({ item_name: exp.item_name, category: exp.category, amount: exp.amount, vendor_name: exp.vendor_name, status: exp.status }); setShowExpenseDialog(true); }} title="Edit">
+                      <Button variant="outline" size="sm" className="hover:bg-blue-100" onClick={() => { setEditingExpense(exp); setExpenseForm({ item_name: exp.item_name, category: exp.category, amount: exp.amount, vendor_name: exp.vendor_name, status: exp.status }); setShowExpenseDialog(true); }} aria-label={`Edit expense ${exp.item_name}`}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16.862 5.487l1.65 1.65a2.25 2.25 0 0 1 0 3.182l-7.5 7.5a2.25 2.25 0 0 1-1.591.659H6v-3.421c0-.597.237-1.17.659-1.591l7.5-7.5a2.25 2.25 0 0 1 3.182 0z"/></svg>
                       </Button>
-                      <Button variant="destructive" size="sm" className="hover:bg-rose-100" onClick={() => handleExpenseDelete(exp.item_id)} title="Delete">
+                      <Button variant="destructive" size="sm" className="hover:bg-rose-100" onClick={() => handleExpenseDelete(exp.item_id)} aria-label={`Delete expense ${exp.item_name}`}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 7h12M9 7v10m6-10v10M4 7h16"/></svg>
                       </Button>
                     </td>
@@ -171,37 +171,60 @@ const BudgetManager = () => {
           </div>
           {/* Budget Edit Dialog */}
           <Dialog open={showBudgetEdit} onOpenChange={open => setShowBudgetEdit(open)}>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Edit Budget</DialogTitle></DialogHeader>
-              <div className="space-y-3 py-2">
-                <Input type="number" value={budgetInput} onChange={e => setBudgetInput(e.target.value)} className="mb-4" />
+            <DialogContent className="glass-card">
+              <DialogHeader><DialogTitle className="font-playfair title-gradient">Edit Total Budget</DialogTitle></DialogHeader>
+              <div className="space-y-2 py-3">
+                <label htmlFor="total-budget-input" className="block text-sm font-medium text-wedding-brown">Set New Budget Amount</label>
+                <Input
+                  id="total-budget-input"
+                  type="number"
+                  value={budgetInput}
+                  onChange={e => setBudgetInput(e.target.value)}
+                  className="mb-4 glass-card border-wedding-gold/30"
+                  placeholder="e.g., 500000"
+                />
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowBudgetEdit(false)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setShowBudgetEdit(false)} className="nav-link">Cancel</Button>
                 <Button onClick={handleBudgetSave}>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
           {/* Add/Edit Expense Dialog */}
           <Dialog open={showExpenseDialog} onOpenChange={open => { setShowExpenseDialog(open); if (!open) setEditingExpense(null); }}>
-            <DialogContent>
-              <DialogHeader><DialogTitle>{editingExpense ? 'Edit Expense' : 'Add Expense'}</DialogTitle></DialogHeader>
-              <div className="space-y-3 py-2">
-                <Input placeholder="Name" value={expenseForm.item_name} onChange={e => setExpenseForm(f => ({ ...f, item_name: e.target.value }))} />
-                <Input placeholder="Category" value={expenseForm.category} onChange={e => setExpenseForm(f => ({ ...f, category: e.target.value }))} />
-                <Input placeholder="Amount" type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))} />
-                <Input placeholder="Vendor" value={expenseForm.vendor_name} onChange={e => setExpenseForm(f => ({ ...f, vendor_name: e.target.value }))} />
-                <label className="flex items-center gap-2">
+            <DialogContent className="glass-card">
+              <DialogHeader><DialogTitle className="font-playfair title-gradient">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle></DialogHeader>
+              <div className="space-y-4 py-3"> {/* Increased space-y for better separation */}
+                <div>
+                  <label htmlFor="expense-name" className="block text-sm font-medium text-wedding-brown mb-1">Expense Name</label>
+                  <Input id="expense-name" placeholder="E.g., Catering Deposit" value={expenseForm.item_name} onChange={e => setExpenseForm(f => ({ ...f, item_name: e.target.value }))} className="glass-card border-wedding-gold/30" />
+                </div>
+                <div>
+                  <label htmlFor="expense-category" className="block text-sm font-medium text-wedding-brown mb-1">Category</label>
+                  <Input id="expense-category" placeholder="E.g., Venue, Decor" value={expenseForm.category} onChange={e => setExpenseForm(f => ({ ...f, category: e.target.value }))} className="glass-card border-wedding-gold/30" />
+                </div>
+                <div>
+                  <label htmlFor="expense-amount" className="block text-sm font-medium text-wedding-brown mb-1">Amount (₹)</label>
+                  <Input id="expense-amount" placeholder="0.00" type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))} className="glass-card border-wedding-gold/30" />
+                </div>
+                <div>
+                  <label htmlFor="expense-vendor" className="block text-sm font-medium text-wedding-brown mb-1">Vendor (Optional)</label>
+                  <Input id="expense-vendor" placeholder="E.g., Royal Catering" value={expenseForm.vendor_name} onChange={e => setExpenseForm(f => ({ ...f, vendor_name: e.target.value }))} className="glass-card border-wedding-gold/30" />
+                </div>
+                <div className="flex items-center pt-2">
                   <input
+                    id="expense-paid-checkbox"
                     type="checkbox"
                     checked={expenseForm.status === 'Paid'}
                     onChange={e => setExpenseForm(f => ({ ...f, status: e.target.checked ? 'Paid' : 'Pending' }))}
-                  /> Paid
-                </label>
+                    className="h-4 w-4 text-wedding-red border-wedding-gold/50 focus:ring-wedding-orange rounded"
+                  />
+                  <label htmlFor="expense-paid-checkbox" className="ml-2 block text-sm text-wedding-brown">Mark as Paid</label>
+                </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setShowExpenseDialog(false); setEditingExpense(null); }}>Cancel</Button>
-                <Button onClick={handleExpenseSave}>{editingExpense ? 'Update' : 'Add'}</Button>
+                <Button variant="ghost" onClick={() => { setShowExpenseDialog(false); setEditingExpense(null); }} className="nav-link">Cancel</Button>
+                <Button onClick={handleExpenseSave} className="cta-button">{editingExpense ? 'Update Expense' : 'Add Expense'}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

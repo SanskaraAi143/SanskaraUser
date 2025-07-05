@@ -128,8 +128,9 @@ const Pricing = () => {
 					<div className="flex items-center gap-3">
 						<HelpCircle className="h-5 w-5 text-wedding-gold" />
 						<p className="text-wedding-brown/80">Need help choosing a plan?</p>
-					</div>
-					<Button variant="ghost" className="nav-link">Talk to an Expert</Button>
+					</div>					<Button variant="ghost" className="nav-link" asChild>
+						<a href="mailto:admin@sanskaraai.com">Talk to an Expert</a>
+					</Button>
 				</div>
 			</div>
 		</section>

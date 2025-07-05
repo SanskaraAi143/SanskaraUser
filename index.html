@@ -1,12 +1,140 @@
-
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="en">  <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Remove problematic meta security headers - handled by server -->
+    
+    <!-- Preconnect for fonts - critical for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Optimized font loading for better FCP -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
     <title>Sanskara AI - Hindu Wedding Planning Assistant</title>
     <meta name="description" content="Plan your perfect Hindu wedding with personalized guidance, rituals explanation, and vendor recommendations from Sanskara AI." />
+    <link rel="canonical" href="https://sanskaraai.com/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sanskaraai.com/" />
+    <meta property="og:title" content="Sanskara AI - Hindu Wedding Planning Assistant" />
+    <meta property="og:description" content="Plan your perfect Hindu wedding with personalized guidance, rituals explanation, and vendor recommendations from Sanskara AI." />
+    <meta property="og:image" content="https://sanskaraai.com/logo.jpeg" />    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://sanskaraai.com/" />
+    <meta name="twitter:title" content="Sanskara AI - Hindu Wedding Planning Assistant" />
+    <meta name="twitter:description" content="Plan your perfect Hindu wedding with personalized guidance, rituals explanation, and vendor recommendations from Sanskara AI." />
+    <meta name="twitter:image" content="https://sanskaraai.com/logo.jpeg" /><script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://sanskaraai.com/",
+        "name": "Sanskara AI",
+        "description": "Your personal AI assistant for planning the perfect Hindu wedding. Get guidance on rituals, find top-rated vendors, and manage your budget with ease.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Sanskara AI",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://sanskaraai.com/logo.jpeg"
+          }
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://sanskaraai.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sanskara AI",
+        "url": "https://sanskaraai.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://sanskaraai.com/logo.jpeg",
+          "width": 512,
+          "height": 512
+        },
+        "description": "AI-powered Hindu wedding planning platform providing personalized guidance, ritual explanations, and vendor recommendations.",
+        "foundingDate": "2024",
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "Sanskara AI Team"
+          }
+        ],
+        "sameAs": [
+          "https://www.linkedin.com/company/sanskaraai/",
+          "https://www.instagram.com/sanskaraai/"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "admin@sanskaraai.com",
+          "contactType": "customer service"
+        }
+      }
+    </script>
+    
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "AI Hindu Wedding Planning",
+        "description": "Comprehensive AI-powered wedding planning service for Hindu marriages, including ritual guidance, vendor matching, and budget management.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Sanskara AI",
+          "url": "https://sanskaraai.com/"
+        },
+        "serviceType": "Wedding Planning",
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "Hindu couples planning marriage"
+        },
+        "serviceOutput": {
+          "@type": "Service",
+          "name": "Complete Wedding Plan"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": "https://sanskaraai.com/pricing",
+          "priceCurrency": "USD",
+          "priceRange": "$0 - $199",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    </script>
+    
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Sanskara AI Wedding Planner",
+        "url": "https://sanskaraai.com/",
+        "description": "AI-powered web application for planning Hindu weddings with personalized guidance and cultural insights.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Sanskara AI"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
