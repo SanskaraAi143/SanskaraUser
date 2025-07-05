@@ -249,9 +249,47 @@ class PerformanceAuditor {
           }).observe({ entryTypes: ['layout-shift'] });
 
           // Give time for metrics to be collected
-          setTimeout(() => {
-            resolve(metrics);
-          }, 3000);
+          const observerCompletion = { lcp: false, fid: false, cls: false };
+          
+          const checkCompletion = () => {
+            if (observerCompletion.lcp && observerCompletion.fid && observerCompletion.cls) {
+              resolve(metrics);
+            }
+          };
+          
+          // LCP (Largest Contentful Paint)
+          new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            const lastEntry = entries[entries.length - 1];
+            metrics.lcp = lastEntry.startTime;
+            observerCompletion.lcp = true;
+            checkCompletion();
+          }).observe({ entryTypes: ['largest-contentful-paint'] });
+
+          // FID (First Input Delay) - simulated
+          new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            entries.forEach((entry) => {
+              if (entry.name === 'first-input') {
+                metrics.fid = entry.processingStart - entry.startTime;
+              }
+            });
+            observerCompletion.fid = true;
+            checkCompletion();
+          }).observe({ entryTypes: ['first-input'] });
+
+          // CLS (Cumulative Layout Shift)
+          let clsValue = 0;
+          new PerformanceObserver((entryList) => {
+            for (const entry of entryList.getEntries()) {
+              if (!entry.hadRecentInput) {
+                clsValue += entry.value;
+              }
+            }
+            metrics.cls = clsValue;
+            observerCompletion.cls = true;
+            checkCompletion();
+          }).observe({ entryTypes: ['layout-shift'] });
         });
       });
 
