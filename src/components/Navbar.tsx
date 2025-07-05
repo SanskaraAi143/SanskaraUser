@@ -14,15 +14,17 @@ const Navbar = () => {
   const location = useLocation();
 
   // Hide main nav links on blog pages
+  const isLandingPage = location.pathname === '/';
   const isBlogPage = location.pathname.startsWith('/blog');
+
   const navLinks = isBlogPage
     ? [{ href: "/blog", label: "Blog", isRouterLink: true }]
     : [
         { href: "/about", label: "About", isRouterLink: true },
-        { href: "#features", label: "Features" },
-        { href: "#how-it-works", label: "How It Works" },
-        { href: "#pricing", label: "Pricing" },
-        { href: "#testimonials", label: "Testimonials" },
+        { href: "/features", label: "Features", isRouterLink: true },
+        { href: isLandingPage ? "#how-it-works" : "/#how-it-works", label: "How It Works" },
+        { href: isLandingPage ? "#pricing" : "/#pricing", label: "Pricing" },
+        { href: isLandingPage ? "#testimonials" : "/#testimonials", label: "Testimonials" },
         { href: "/blog", label: "Blog", isRouterLink: true },
       ];
 

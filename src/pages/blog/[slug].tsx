@@ -200,42 +200,48 @@ const BlogDetailPage: React.FC = () => {
           {/* <meta name="twitter:site" content="@SanskaraAI" /> Assuming a Twitter handle */}
 
           {post && slug && (
-            <script type="application/ld+json">
-              {JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "BlogPosting",
-                "mainEntityOfPage": {
-                  "@type": "WebPage",
-                  "@id": `https://sanskaraai.com/blog/${slug}`
-                },
-                "headline": post.title,
-                "description": post.excerpt || "", // Ensure description is not undefined
-                "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",                "author": {
-                  "@type": "Person",
-                  "name": post.author || "Sanskara AI Team",
-                  "url": "https://sanskaraai.com/about",
-                  "sameAs": [
-                    "https://www.linkedin.com/company/sanskaraai/",
-                    "https://www.instagram.com/sanskaraai/"
-                  ]
-                },                "publisher": {
-                  "@type": "Organization",
-                  "name": "Sanskara AI",
-                  "url": "https://sanskaraai.com",
-                  "logo": {
-                    "@type": "ImageObject",
-                    "url": "https://sanskaraai.com/logo.jpeg",
-                    "width": 512,
-                    "height": 512
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "BlogPosting",
+                  "mainEntityOfPage": {
+                    "@type": "WebPage",
+                    "@id": `https://sanskaraai.com/blog/${slug}`
                   },
-                  "sameAs": [
-                    "https://www.linkedin.com/company/sanskaraai/",
-                    "https://www.instagram.com/sanskaraai/"
-                  ]
-                },
-                "datePublished": new Date(post.date).toISOString(),
-                "dateModified": new Date(post.date).toISOString() // Assuming date is also modified date, update if a separate modified_date is available
-              })}            </script>
+                  "headline": post.title,
+                  "description": post.excerpt || "",
+                  "image": post.image ? (post.image.startsWith('http') ? post.image : `https://sanskaraai.com${post.image}`) : "https://sanskaraai.com/logo.jpeg",
+                  "author": {
+                    "@type": "Person",
+                    "name": post.author || "Sanskara AI Team",
+                    "url": "https://sanskaraai.com/about",
+                    "sameAs": [
+                      "https://www.linkedin.com/company/sanskaraai/",
+                      "https://www.instagram.com/sanskaraai/"
+                    ]
+                  },
+                  "publisher": {
+                    "@type": "Organization",
+                    "name": "Sanskara AI",
+                    "url": "https://sanskaraai.com",
+                    "logo": {
+                      "@type": "ImageObject",
+                      "url": "https://sanskaraai.com/logo.jpeg",
+                      "width": 512,
+                      "height": 512
+                    },
+                    "sameAs": [
+                      "https://www.linkedin.com/company/sanskaraai/",
+                      "https://www.instagram.com/sanskaraai/"
+                    ]
+                  },
+                  "datePublished": new Date(post.date).toISOString(),
+                  "dateModified": new Date(post.date).toISOString()
+                })
+              }}
+            />
           )}
         </Helmet>
         
