@@ -16,10 +16,12 @@ import {
   Mail, 
   Star, 
   Plus, 
-  Search 
+  Search,
+  MessageCircle // Icon for Chat
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { getUserVendors } from "@/services/api/vendorApi";
@@ -49,6 +51,7 @@ const VendorsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     if (!user?.id) return;
@@ -288,13 +291,33 @@ const VendorsPage = () => {
                   </Button>
                 </CardFooter>
               ) : (
-                <CardFooter className="flex justify-between pt-2">
-                  <Button variant="outline" size="sm">
-                    Contact
-                  </Button>
+                <CardFooter className="flex justify-between items-center pt-2">
+                  {vendor.linkedVendor && vendor.linkedVendor.vendor_id ? (
+                    <Button
+                      variant="goo"
+                      size="sm"
+                      className="bg-wedding-gold hover:bg-wedding-gold/90 text-wedding-darkbrown"
+                      onClick={() => {
+                        navigate('/dashboard/chat', {
+                          state: {
+                            initialTab: 'vendor',
+                            vendorIdToChat: vendor.linkedVendor.vendor_id,
+                            vendorName: vendor.linkedVendor.vendor_name || vendor.name,
+                          }
+                        });
+                      }}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" /> Chat
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" disabled>
+                      Chat (Not Linked)
+                    </Button>
+                  )}
 
                   <Button
                     variant="destructive"
+                    title="Remove vendor from your shortlist"
                     size="sm"
                     onClick={async () => {
                       try {
