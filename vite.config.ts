@@ -7,8 +7,7 @@ export default defineConfig({
   
   server: {
     port: 8030,
-    host: true,
-    strictPort: false
+    allowedHosts: ["sanskaraai.com","localhost"],
   },
   
   preview: {
@@ -16,7 +15,6 @@ export default defineConfig({
     host: true,
     strictPort: false,
     cors: true,
-    middlewareMode: false
   },
   
   resolve: {
