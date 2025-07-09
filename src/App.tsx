@@ -20,6 +20,7 @@ const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
 const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
+const ChatInterfacePage = lazy(() => import('./pages/ChatInterfacePage')); // New import
 const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
 const TimelinePage = lazy(() => import('./pages/dashboard/TimelinePage'));
 const MoodBoardPage = lazy(() => import('./pages/dashboard/MoodBoardPage'));
@@ -74,6 +75,7 @@ function App() {
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="chat" element={<ChatPage />} />
+                  <Route path="new-chat" element={<ChatInterfacePage />} /> {/* New route for testing */}
                   <Route path="tasks" element={<TasksPage />} />
                   <Route path="timeline" element={<TimelinePage />} />
                   <Route path="moodboard" element={<MoodBoardPage />} />

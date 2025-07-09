@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ChatWithAI from '@/components/chat/ChatWithAI';
+
 import RitualChat from '@/components/chat/RitualChat';
+import ChatInterfacePage from '@/pages/ChatInterfacePage';
 import VendorChat from '@/components/chat/VendorChat';
 import { useLocation } from 'react-router-dom';
 
@@ -103,7 +104,7 @@ const ChatPage: React.FC = () => {
 
             <div className="h-[560px]">
               <TabsContent value="general" className="h-full mt-0">
-                <ChatWithAI selectedTopic={selectedTopic} />
+                <ChatInterfacePage />
               </TabsContent>
               <TabsContent value="ritual" className="h-full mt-0">
                 <RitualChat initialRitual={location.state?.ritualName} selectedTopic={selectedTopic} />
