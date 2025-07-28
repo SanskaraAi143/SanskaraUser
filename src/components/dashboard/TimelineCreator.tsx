@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit2, Trash2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -18,6 +19,8 @@ interface UITimelineEvent {
   time: string;
   location: string;
   description: string;
+  visibility?: string;
+  relevant_party?: string;
 }
 
 // Supabase TimelineEvent type (imported from API)
@@ -50,7 +53,7 @@ const TimelineCreator = () => {
   }
 
   // Utility: map Supabase event to UI event
-  function mapSupabaseEventToUI(event: any): UITimelineEvent {
+  function mapSupabaseEventToUI(event: { event_id: string; event_name: string; event_date_time: string; location: string; description: string; visibility?: string; relevant_party?: string; }): UITimelineEvent {
     const dateObj = event.event_date_time ? new Date(event.event_date_time) : new Date();
     const timeStr = event.event_date_time ? dateObj.toISOString().substring(11,16) : '';
     return {
@@ -59,8 +62,9 @@ const TimelineCreator = () => {
       date: dateObj,
       time: timeStr,
       location: event.location,
-      
       description: event.description || '',
+      visibility: event.visibility,
+      relevant_party: event.relevant_party,
     };
   }
   
@@ -72,8 +76,9 @@ const TimelineCreator = () => {
     date: new Date(),
     time: '',
     location: '',
-    
-    description: ''
+    description: '',
+    visibility: 'shared',
+    relevant_party: 'couple',
   });
   
   const { toast } = useToast();
@@ -89,9 +94,11 @@ const TimelineCreator = () => {
         event_date_time: combineDateAndTime(formData.date, formData.time),
         location: formData.location,
         description: formData.description,
+        visibility: formData.visibility,
+        relevant_party: formData.relevant_party,
       };
-      if (!user?.id) throw new Error('User not authenticated');
-      await addTimelineEvent(user.id, eventToAdd);
+      if (!user?.wedding_id) throw new Error('Wedding ID not available');
+      await addTimelineEvent(user.wedding_id, eventToAdd);
       await fetchAndSetEvents();
       resetForm();
       setShowAddDialog(false);
@@ -120,6 +127,8 @@ const TimelineCreator = () => {
         event_date_time: combineDateAndTime(formData.date, formData.time),
         location: formData.location,
         description: formData.description,
+        visibility: formData.visibility,
+        relevant_party: formData.relevant_party,
       });
       await fetchAndSetEvents();
       resetForm();
@@ -159,7 +168,9 @@ const TimelineCreator = () => {
       date: event.date,
       time: event.time,
       location: event.location,
-      description: event.description
+      description: event.description,
+      visibility: event.visibility || 'shared',
+      relevant_party: event.relevant_party || 'couple',
     });
     setEditingEvent(event);
     setShowAddDialog(true); // Open dialog on edit
@@ -171,8 +182,9 @@ const TimelineCreator = () => {
       date: new Date(),
       time: '',
       location: '',
-      
-      description: ''
+      description: '',
+      visibility: 'shared',
+      relevant_party: 'couple',
     });
   };
   
@@ -183,23 +195,27 @@ const TimelineCreator = () => {
   };
 
   // Fetch events from Supabase and map to UI format
-  const fetchAndSetEvents = async () => {
+  const fetchAndSetEvents = React.useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      if (!user?.id) throw new Error('User not authenticated');
-      const data = await getUserTimelineEvents(user.id);
+      if (!user?.wedding_id) {
+        console.warn('Wedding ID not available, skipping timeline events fetch.');
+        setEvents([]);
+        return;
+      }
+      const data = await getUserTimelineEvents(user.wedding_id);
       setEvents(data.map(mapSupabaseEventToUI));
-    } catch (e: any) {
-      setFetchError('Failed to load timeline events.');
+    } catch (e: unknown) {
+      setFetchError((e as Error).message || 'Failed to load timeline events.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.wedding_id]);
 
   useEffect(() => {
     fetchAndSetEvents();
-  }, []);
+  }, [fetchAndSetEvents]);
 
   // Sort events by date and time
   const sortedEvents = [...events].sort((a, b) => {
@@ -319,6 +335,31 @@ const TimelineCreator = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Visibility</label>
+              <Select value={formData.visibility} onValueChange={(value) => setFormData({...formData, visibility: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select visibility" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="shared">Shared</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Relevant Party</label>
+              <Select value={formData.relevant_party} onValueChange={(value) => setFormData({...formData, relevant_party: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relevant party" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bride_side">Bride's Side</SelectItem>
+                  <SelectItem value="groom_side">Groom's Side</SelectItem>
+                  <SelectItem value="couple">Couple</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

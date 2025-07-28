@@ -1,23 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Send, Paperclip, Calendar, Clock, Phone, Video } from 'lucide-react';
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from '@/context/AuthContext';
+import { sendChatMessage } from '@/services/api/chatApi';
 
-type Message = {
-  id: string;
-  content: string;
-  sender: 'user' | 'vendor';
-  timestamp: Date;
-};
-
-interface VendorChatProps {
-  selectedTopic?: string | null;
-}
+// ... (rest of the file)
 
 const VendorChat: React.FC<VendorChatProps> = ({ selectedTopic }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -30,9 +17,13 @@ const VendorChat: React.FC<VendorChatProps> = ({ selectedTopic }) => {
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
-    
+    if (!user?.wedding_id) {
+      toast({ variant: "destructive", title: "Error", description: "Wedding ID not available. Please log in or select a wedding." });
+      return;
+    }
+
     const newMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
@@ -43,27 +34,35 @@ const VendorChat: React.FC<VendorChatProps> = ({ selectedTopic }) => {
     setMessages(prev => [...prev, newMessage]);
     setInputMessage('');
     
-    // Simulate vendor response
-    setTimeout(() => {
-      const responses = [
-        "Yes, we can definitely accommodate that request for your wedding ceremony.",
-        "We do offer special rates for weekday events. I can send you our detailed pricing sheet.",
-        "I've made a note about your dietary requirements. Our chef specializes in Gujarati cuisine and can prepare authentic dishes for your guests.",
-        "We have several recommended decorators who are familiar with our venue. Would you like me to share their portfolios?",
-        "That date is available. I can add a temporary hold for 48 hours while you make your decision."
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      
-      const vendorMessage: Message = {
-        id: Date.now().toString(),
-        content: randomResponse,
-        sender: 'vendor',
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, vendorMessage]);
-    }, 1500);
+    try {
+      // Send message to backend with wedding_id
+      await sendChatMessage(inputMessage, user.wedding_id, undefined, 'vendor_chat');
+
+      // Simulate vendor response (replace with actual backend response handling)
+      setTimeout(() => {
+        const responses = [
+          "Yes, we can definitely accommodate that request for your wedding ceremony.",
+          "We do offer special rates for weekday events. I can send you our detailed pricing sheet.",
+          "I've made a note about your dietary requirements. Our chef specializes in Gujarati cuisine and can prepare authentic dishes for your guests.",
+          "We have several recommended decorators who are familiar with our venue. Would you like me to share their portfolios?",
+          "That date is available. I can add a temporary hold for 48 hours while you make your decision."
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        const vendorMessage: Message = {
+          id: Date.now().toString(),
+          content: randomResponse,
+          sender: 'vendor',
+          timestamp: new Date(),
+        };
+        
+        setMessages(prev => [...prev, vendorMessage]);
+      }, 1500);
+    } catch (error) {
+      console.error("Error sending message to vendor:", error);
+      toast({ variant: "destructive", title: "Error", description: "Failed to send message." });
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

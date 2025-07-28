@@ -279,7 +279,6 @@ class PerformanceAuditor {
           }).observe({ entryTypes: ['first-input'] });
 
           // CLS (Cumulative Layout Shift)
-          let clsValue = 0;
           new PerformanceObserver((entryList) => {
             for (const entry of entryList.getEntries()) {
               if (!entry.hadRecentInput) {

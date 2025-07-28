@@ -18,8 +18,8 @@ const FuturisticMessageDisplay: React.FC<FuturisticMessageDisplayProps> = ({ mes
     scrollToBottom();
   }, [messages]); // Scroll to bottom whenever messages change
 
-  const isValidMessage = (msg: any): msg is Message =>
-    msg && typeof msg === 'object' && typeof msg.role === 'string' && typeof msg.content === 'string';
+  const isValidMessage = (msg: unknown): msg is Message =>
+    typeof msg === 'object' && msg !== null && 'role' in msg && typeof msg.role === 'string' && 'content' in msg && typeof msg.content === 'string';
 
   return (
     <div className="futuristic-message-display-container">

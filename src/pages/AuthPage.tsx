@@ -27,7 +27,7 @@ const AuthPage: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true }); // Use replace to prevent going back to auth page
     }
   }, [user, navigate]);
 

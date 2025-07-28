@@ -101,7 +101,7 @@ const RitualChat = ({ initialRitual, selectedTopic }: RitualChatProps) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // Sample responses for ritual-specific questions
-    let aiResponse = "I understand you're asking about a ritual. Could you provide more details about which specific ritual you'd like to learn about?";
+    const aiResponse: string = "I understand you're asking about a ritual. Could you provide more details about which specific ritual you'd like to learn about?";
     
     const lowerCaseMessage = userMessage.toLowerCase();
     

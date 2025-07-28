@@ -7,6 +7,8 @@ export interface MoodBoardItem {
   image_url: string;
   note: string;
   category: string;
+  visibility?: string;
+  owner_party?: string;
   created_at: string;
 }
 
@@ -23,10 +25,20 @@ export const getMoodBoardItems = async (mood_board_id: string, category?: string
   return data || [];
 };
 
-export const addMoodBoardItem = async (mood_board_id: string, image_url: string, note: string, category: string) => {
+export interface AddMoodBoardItemOptions {
+  mood_board_id: string;
+  image_url: string;
+  note: string;
+  category: string;
+  visibility?: string;
+  owner_party?: string;
+}
+
+export const addMoodBoardItem = async (options: AddMoodBoardItemOptions) => {
+  const { mood_board_id, image_url, note, category, visibility, owner_party } = options;
   const { error } = await supabase
     .from('mood_board_items')
-    .insert([{ item_id: uuidv4(), mood_board_id, image_url, note, category }]);
+    .insert([{ item_id: uuidv4(), mood_board_id, image_url, note, category, visibility, owner_party }]);
   if (error) throw error;
 };
 

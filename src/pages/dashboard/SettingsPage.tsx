@@ -29,38 +29,38 @@ const SettingsPage = () => {
     async function fetchSettings() {
       setSettingsLoading(true);
       try {
-        if (!user?.id) return;
-        const data = await getCurrentUserProfile(user.id);
+        if (!user?.internal_user_id) return;
+        const data = await getCurrentUserProfile(user.internal_user_id);
         if (data && data.preferences) {
           setSettings({ ...defaultPreferences, ...data.preferences });
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         toast({
           variant: "destructive",
           title: "Failed to load settings",
-          description: e?.message || "Could not fetch user settings.",
+          description: (e as Error)?.message || "Could not fetch user settings.",
         });
       }
       setSettingsLoading(false);
     }
     fetchSettings();
-    // eslint-disable-next-line
-  }, [user?.id]);
+    
+  }, [user?.internal_user_id]);
 
   const handleSaveChanges = async () => {
     setSettingsLoading(true);
     try {
-      if (!user?.id) return;
-      await updateCurrentUserProfile(user.id, { preferences: settings });
+      if (!user?.internal_user_id) return;
+      await updateCurrentUserProfile(user.internal_user_id, { preferences: settings });
       toast({
         title: "Settings saved",
         description: "Your preferences have been updated successfully.",
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         variant: "destructive",
         title: "Save Failed",
-        description: e?.message || "Could not save settings.",
+        description: (e as Error)?.message || "Could not save settings.",
       });
     }
     setSettingsLoading(false);
@@ -70,11 +70,11 @@ const SettingsPage = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (e: any) {
+     } catch (e: unknown) {
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: "Could not update password.",
+        description: (e as Error)?.message || "Could not update password.",
       });
     }
   };

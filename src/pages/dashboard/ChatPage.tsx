@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ChatInterfacePage from '@/pages/ChatInterfacePage';
 import VendorChat from '@/components/chat/VendorChat'; // Re-add VendorChat import
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 
 const ChatPage: React.FC = () => {
   const location = useLocation();
@@ -17,6 +18,16 @@ const ChatPage: React.FC = () => {
       }
     }
   }, [location]);
+
+  const { user, loading: authLoading } = useAuth(); // Get user and authLoading from AuthContext
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    if (!authLoading && user && (!user.wedding_id || user.wedding_status === 'onboarding_in_progress')) {
+      console.log("ChatPage: User not fully onboarded. Redirecting to onboarding page.");
+      navigate('/onboarding');
+    }
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     console.log("Active Tab:", activeTab);

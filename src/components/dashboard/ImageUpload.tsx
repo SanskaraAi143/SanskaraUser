@@ -12,7 +12,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newPreviews: { file: File; preview: string; tag: string }[] = [];
-    let loaded = 0;
+    const loaded = 0;
     if (!files.length) return;
     let completed = 0;
     files.forEach(file => {

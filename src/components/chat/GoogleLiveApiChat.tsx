@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useAuth } from '../../context/AuthContext';
 import { useMultimodalClient } from '../../hooks/useMultimodalClient.ts';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
@@ -10,6 +11,7 @@ import VoiceIndicator from './VoiceIndicator';
 
 const GoogleLiveApiChat = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState('');
 
@@ -28,7 +30,7 @@ const GoogleLiveApiChat = () => {
     isSpeaking,
     isAssistantSpeaking,
     interruptAssistant,
-  } = useMultimodalClient();
+  } = useMultimodalClient(user?.internal_user_id);
 
   useEffect(() => {
     if (isVideoActive && videoRef.current) {
@@ -120,7 +122,7 @@ const GoogleLiveApiChat = () => {
       )}
 
       {/* Chat Messages Area */}
-      <div className="flex-grow p-4 overflow-y-auto">
+      <div className="flex-grow p-4 overflow-y-auto min-h-[calc(100vh-200px)]">
         <div className="space-y-4">
           {transcript.map((msg, index) => (
             <div

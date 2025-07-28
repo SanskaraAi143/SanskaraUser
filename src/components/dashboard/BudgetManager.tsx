@@ -17,16 +17,16 @@ const BudgetManager = () => {
   const [showBudgetEdit, setShowBudgetEdit] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
-  const [expenseForm, setExpenseForm] = useState<Omit<Expense, 'item_id'|'user_id'|'created_at'>>({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending' });
+  const [expenseForm, setExpenseForm] = useState<Omit<Expense, 'item_id' | 'created_at' | 'updated_at'>>({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending', contribution_by: 'shared', wedding_id: user?.wedding_id || '' });
   const [editingExpense, setEditingExpense] = useState<Expense|null>(null);
   const [error, setError] = useState<string|null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.wedding_id) return;
     setLoading(true);
     Promise.all([
-      getUserBudgetMax(user.id),
-      getExpenses(user.id)
+      getUserBudgetMax(user.internal_user_id),
+      getExpenses(user.wedding_id)
     ]).then(([budgetMax, e]) => {
       setBudget(budgetMax || 0);
       setBudgetInput(budgetMax?.toString() || '');
@@ -40,9 +40,9 @@ const BudgetManager = () => {
 
   // Budget update
   const handleBudgetSave = async () => {
-    if (!user?.id) return;
+    if (!user?.internal_user_id) return;
     try {
-      await updateUserBudgetMax(user.id, parseFloat(budgetInput));
+      await updateUserBudgetMax(user.internal_user_id, parseFloat(budgetInput));
       setBudget(parseFloat(budgetInput));
       setShowBudgetEdit(false);
     } catch (e) { setError('Failed to update budget.'); }
@@ -50,35 +50,51 @@ const BudgetManager = () => {
 
   // Expense add/edit
   const handleExpenseSave = async () => {
-    if (!user?.id) return;
+    if (!user?.internal_user_id) return;
     try {
       if (editingExpense) {
-        await updateExpense({ ...expenseForm, item_id: editingExpense.item_id, user_id: user.id });
+        await updateExpense({ ...expenseForm, item_id: editingExpense.item_id, wedding_id: user.wedding_id });
       } else {
-        await addExpense({ ...expenseForm, user_id: user.id });
+        await addExpense({ ...expenseForm, wedding_id: user.wedding_id });
       }
-      setExpenses(await getExpenses(user.id));
+      setExpenses(await getExpenses(user.wedding_id));
       setShowExpenseDialog(false);
       setEditingExpense(null);
-      setExpenseForm({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending' });
-    } catch (e: any) {
+      setExpenseForm({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending', contribution_by: 'shared', wedding_id: user?.wedding_id || '' });
+    } catch (e: unknown) {
       console.error('Failed to save expense:', e, expenseForm, editingExpense);
-      setError(e?.message || (typeof e === 'string' ? e : 'Failed to save expense.'));
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 
   const handleExpenseDelete = async (item_id: string) => {
-    if (!user?.id) return;
+    if (!user?.internal_user_id) return;
     try {
       await deleteExpense(item_id);
-      setExpenses(await getExpenses(user.id));
-    } catch (e) { setError('Failed to delete expense.'); }
+      setExpenses(await getExpenses(user.wedding_id));
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); }
   };
+
+  const filteredExpenses = expenses.filter(exp => {
+    if (!user?.role) return true; // If no role, show all (or implement default visibility)
+
+    const userRole = user.role.toLowerCase();
+    const contributionBy = (exp.contribution_by || '').toLowerCase();
+
+    if (contributionBy === 'shared' || contributionBy === 'couple') {
+      return true; // Shared expenses are visible to all members of the couple
+    } else if (userRole.includes('bride') && contributionBy.includes('bride')) {
+      return true;
+    } else if (userRole.includes('groom') && contributionBy.includes('groom')) {
+      return true;
+    }
+    return false; // Hide if not shared, not matching role
+  });
 
   // UI
   return (
     <div>
-      {!user?.id ? (
+      {!user?.wedding_id ? (
         <div className="p-8 text-center text-red-500 font-semibold">Please log in to view your budget.</div>
       ) : loading ? (
         <div className="p-8 text-center">Loading...</div>
@@ -102,11 +118,11 @@ const BudgetManager = () => {
               <div className="relative w-full h-5 mt-2 mb-1 rounded-full bg-gradient-to-r from-rose-100 via-yellow-100 to-green-100 overflow-hidden shadow-sm">
                 <div
                   className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-rose-500 via-yellow-400 to-green-500 shadow-md transition-all duration-700"
-                  style={{ width: `${Math.min(100, (expenses.reduce((sum, e) => sum + e.amount, 0) / budget) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (filteredExpenses.reduce((sum, e) => sum + e.amount, 0) / budget) * 100)}%` }}
                 />
                 <div className="flex justify-between absolute w-full px-2 text-xs top-1 text-gray-700 pointer-events-none">
-                  <span className="font-semibold flex items-center gap-1" title="Used Budget"><svg width="14" height="14" fill="currentColor" className="text-rose-500"><circle cx="7" cy="7" r="7"/></svg>₹{expenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
-                  <span className="font-semibold flex items-center gap-1" title="Remaining Budget"><svg width="14" height="14" fill="currentColor" className="text-green-500"><circle cx="7" cy="7" r="7"/></svg>₹{(budget - expenses.reduce((sum, e) => sum + e.amount, 0)).toLocaleString()}</span>
+                  <span className="font-semibold flex items-center gap-1" title="Used Budget"><svg width="14" height="14" fill="currentColor" className="text-rose-500"><circle cx="7" cy="7" r="7"/></svg>₹{filteredExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
+                  <span className="font-semibold flex items-center gap-1" title="Remaining Budget"><svg width="14" height="14" fill="currentColor" className="text-green-500"><circle cx="7" cy="7" r="7"/></svg>₹{(budget - filteredExpenses.reduce((sum, e) => sum + e.amount, 0)).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -114,7 +130,7 @@ const BudgetManager = () => {
             <div className="mt-8">
               <div className="text-md font-bold mb-2 text-gray-800 tracking-wide">Budget Breakdown</div>
               <div className="max-w-xs mx-auto bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 rounded-xl p-4 shadow hover:shadow-lg transition-shadow duration-300">
-                <PieChartComponent budget={budget} expenses={expenses} />
+                <PieChartComponent budget={budget} expenses={filteredExpenses} />
               </div>
             </div>
           </div>
@@ -122,7 +138,7 @@ const BudgetManager = () => {
           <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-xl shadow-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold tracking-wide text-gray-800">Expenses</h2>
-              <Button className="bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full px-6 py-2 shadow transition-all duration-300" onClick={() => { setShowExpenseDialog(true); setEditingExpense(null); setExpenseForm({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending' }); }}>
+              <Button className="bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full px-6 py-2 shadow transition-all duration-300" onClick={() => { setShowExpenseDialog(true); setEditingExpense(null); setExpenseForm({ item_name: '', category: '', amount: 0, vendor_name: '', status: 'Pending', contribution_by: 'shared', wedding_id: user?.wedding_id || '' }); }}>
                 <svg className="inline mr-2 -mt-1" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                 Add Expense
               </Button>
@@ -139,9 +155,9 @@ const BudgetManager = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.length === 0 ? (
+                {filteredExpenses.length === 0 ? (
                   <tr><td colSpan={6} className="text-center p-6 text-gray-400">No expenses yet.</td></tr>
-                ) : expenses.map((exp, idx) => (
+                ) : filteredExpenses.map((exp, idx) => (
                   <tr
                     key={exp.item_id}
                     className={
@@ -157,7 +173,7 @@ const BudgetManager = () => {
                       </span>
                     </td>
                     <td className="p-3 flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" className="hover:bg-blue-100" onClick={() => { setEditingExpense(exp); setExpenseForm({ item_name: exp.item_name, category: exp.category, amount: exp.amount, vendor_name: exp.vendor_name, status: exp.status }); setShowExpenseDialog(true); }} aria-label={`Edit expense ${exp.item_name}`}>
+                      <Button variant="outline" size="sm" className="hover:bg-blue-100" onClick={() => { setEditingExpense(exp); setExpenseForm({ item_name: exp.item_name, category: exp.category, amount: exp.amount, vendor_name: exp.vendor_name, status: exp.status, contribution_by: exp.contribution_by, wedding_id: exp.wedding_id }); setShowExpenseDialog(true); }} aria-label={`Edit expense ${exp.item_name}`}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16.862 5.487l1.65 1.65a2.25 2.25 0 0 1 0 3.182l-7.5 7.5a2.25 2.25 0 0 1-1.591.659H6v-3.421c0-.597.237-1.17.659-1.591l7.5-7.5a2.25 2.25 0 0 1 3.182 0z"/></svg>
                       </Button>
                       <Button variant="destructive" size="sm" className="hover:bg-rose-100" onClick={() => handleExpenseDelete(exp.item_id)} aria-label={`Delete expense ${exp.item_name}`}>
@@ -251,14 +267,14 @@ const PieChartComponent = ({ budget, expenses }: { budget: number, expenses: Exp
   ];
   const COLORS = ['#6366f1', '#f59e42', '#10b981', '#f43f5e', '#eab308', '#3b82f6', '#a21caf', '#6ee7b7', '#f472b6', '#475569'];
   // Custom label renderer for clarity
-  const renderCustomLabel = ({ name, value, percent, x, y, cx, cy, midAngle }) => {
+  const renderCustomLabel = ({ name, value, percent, x, y, cx, cy, midAngle }: { name: string, value: number, percent: number, x: number, y: number, cx: number, cy: number, midAngle: number }) => {
     if (!value || percent < 0.04) return null;
     // Place label outside the pie
     const RADIAN = Math.PI / 180;
     const radius = 110;
     const sx = cx + Math.cos(-midAngle * RADIAN) * radius;
     const sy = cy + Math.sin(-midAngle * RADIAN) * radius;
-    let displayName = name.length > 10 ? name.slice(0, 9) + '…' : name;
+    const displayName = name.length > 10 ? name.slice(0, 9) + '…' : name;
     return (
       <text x={sx} y={sy} fill="#222" fontSize={14} textAnchor={sx > cx ? 'start' : 'end'} dominantBaseline="central">
         {displayName}: ₹{value.toLocaleString()}

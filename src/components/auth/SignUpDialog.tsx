@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +48,7 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
   const { signUp } = useAuth();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(formSchema),
@@ -64,6 +66,7 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
       await signUp(values.email, values.password, values.name);
       setOpen(false);
       form.reset();
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Sign up error:", error);
     } finally {

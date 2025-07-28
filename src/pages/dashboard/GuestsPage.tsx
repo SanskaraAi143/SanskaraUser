@@ -20,26 +20,26 @@ export default function GuestsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('');
 
-  const userId = user?.id || null;
+  const weddingId = user?.wedding_id || null;
 
   const loadGuests = async () => {
     setLoading(true);
     try {
-      if (userId) {
-        const data = await fetchGuestList(userId);
+      if (weddingId) {
+        const data = await fetchGuestList(weddingId);
         setGuests(data);
       }
-    } catch (e: any) {
-      setError(e.message || 'Failed to load guests');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to load guests');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (userId) loadGuests();
+    if (weddingId) loadGuests();
     // eslint-disable-next-line
-  }, [userId]);
+  }, [weddingId]);
 
   const handleEdit = (guest: Guest) => {
     setForm(guest);
@@ -52,27 +52,27 @@ export default function GuestsPage() {
     try {
       await removeGuest(guest_id);
       setGuests((prev) => prev.filter((g) => g.guest_id !== guest_id));
-    } catch (e: any) {
-      setError(e.message || 'Failed to remove guest');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to remove guest');
     }
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.guest_name || !userId) return;
+    if (!form.guest_name || !user?.wedding_id) return;
     try {
       if (editingId) {
         const updated = await updateGuest(editingId, form);
         setGuests((prev) => prev.map((g) => (g.guest_id === editingId ? updated : g)));
       } else {
-        const newGuest = await addGuest({ ...form, user_id: userId } as any);
+        const newGuest = await addGuest({ ...form, wedding_id: user.wedding_id } as Guest);
         setGuests((prev) => [newGuest, ...prev]);
       }
       setShowForm(false);
       setForm({});
       setEditingId(null);
-    } catch (e: any) {
-      setError(e.message || 'Failed to save guest');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to save guest');
     }
   };
 

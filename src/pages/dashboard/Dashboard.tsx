@@ -1,9 +1,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Users, Clock, Plus, Heart, Bell, MessageCircle, Flower, BookOpen } from "lucide-react";
+import { CalendarDays, Users, Clock, Plus, Heart, Bell, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskTracker from "@/components/dashboard/TaskTracker";
@@ -17,7 +17,6 @@ import { getUserTasks } from "@/services/api/tasksApi";
 import { getUserBudgetMax, getExpenses } from "@/services/api/budgetApi";
 import { getUserVendors } from "@/services/api/vendorApi";
 import { getUserMoodBoards } from "@/services/api/boardApi";
-import { getSuggestedRituals } from "@/services/api/ritualApi";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Dashboard = () => {
@@ -33,49 +32,76 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [moodBoards, setMoodBoards] = useState([]);
-  const [rituals, setRituals] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        // Use user from AuthContext for user_id
-        if (!user?.id) return;
-        const profileData = await getCurrentUserProfile(user.id);
-        setProfile(profileData);
-        const userId = user.id;
-        let suggestedRituals = [];
-        try {
-          suggestedRituals = await getSuggestedRituals(profileData?.wedding_tradition || "Hindu");
-        } catch (ritualError) {
-          console.error('Error fetching suggested rituals:', ritualError);
-          suggestedRituals = [];
+        // If user is logged in but has no wedding_id, redirect to onboarding page to start first partner flow
+        if (user && !user.wedding_id) {
+          console.log("User has no wedding_id. Redirecting to onboarding page.");
+          navigate('/onboarding');
+          setLoading(false);
+          return;
         }
-        const [events, guestList, userTasks, maxBudget, userExpenses, userVendors, userMoodBoards] = await Promise.all([
-          getUserTimelineEvents(userId),
-          fetchGuestList(userId),
-          getUserTasks(userId),
-          getUserBudgetMax(userId),
-          getExpenses(userId),
-          getUserVendors(userId),
-          getUserMoodBoards(userId)
-        ]);
-        setTimelineEvents(events || []);
-        setGuests(guestList || []);
-        setTasks(userTasks || []);
-        setBudgetMax(maxBudget);
-        setExpenses(userExpenses || []);
-        setVendors(userVendors || []);
-        setMoodBoards(userMoodBoards || []);
-        setRituals(suggestedRituals || []);
-        // Debug logs:
-        console.log('profile:', profileData);
-        console.log('guests:', guestList);
-        console.log('tasks:', userTasks);
-        console.log('timelineEvents:', events);
-        console.log('budgetMax:', maxBudget);
-        console.log('expenses:', userExpenses);
+
+        // If user has a wedding_id but onboarding is still in progress, allow them to stay on dashboard
+        // but wedding-specific data might be limited or display a message
+        if (user && user.wedding_id && user.wedding_status === 'onboarding_in_progress') {
+          console.log("User's wedding onboarding is in progress. Displaying limited dashboard data.");
+          // Clear wedding-specific states as they are not fully set up yet
+          setTimelineEvents([]);
+          setGuests([]);
+          setTasks([]);
+          setBudgetMax(null);
+          setExpenses([]);
+          setVendors([]);
+          setMoodBoards([]);
+          setLoading(false);
+          return;
+        }
+
+        // Only proceed with fetching full dashboard data if user is fully onboarded (wedding_status is 'active')
+        if (user && user.wedding_id && user.wedding_status === 'active') {
+          const profileData = await getCurrentUserProfile(user.internal_user_id);
+          setProfile(profileData);
+          const weddingId = user.wedding_id;
+          const [events, guestList, userTasks, maxBudget, userExpenses, userVendors, userMoodBoards] = await Promise.all([
+            getUserTimelineEvents(weddingId),
+            fetchGuestList(weddingId),
+            getUserTasks(weddingId),
+            getUserBudgetMax(user.internal_user_id),
+            getExpenses(weddingId),
+            getUserVendors(weddingId),
+            getUserMoodBoards(weddingId)
+          ]);
+          setTimelineEvents(events || []);
+          setGuests(guestList || []);
+          setTasks(userTasks || []);
+          setBudgetMax(maxBudget);
+          setExpenses(userExpenses || []);
+          setVendors(userVendors || []);
+          setMoodBoards(userMoodBoards || []);
+          // Debug logs:
+          console.log('profile:', profileData);
+          console.log('guests:', guestList);
+          console.log('tasks:', userTasks);
+          console.log('timelineEvents:', events);
+          console.log('budgetMax:', maxBudget);
+          console.log('expenses:', userExpenses);
+        } else {
+          // Fallback for cases where user is null or not fully active
+          setTimelineEvents([]);
+          setGuests([]);
+          setTasks([]);
+          setBudgetMax(null);
+          setExpenses([]);
+          setVendors([]);
+          setMoodBoards([]);
+        }
       } catch (e) {
         console.error('Dashboard fetchData error:', e);
       } finally {
@@ -83,7 +109,7 @@ const Dashboard = () => {
       }
     }
     fetchData();
-  }, [user]);
+  }, [user, navigate]); // Add navigate to dependency array
 
   // Derived stats
   const confirmedGuests = guests.filter(g => g.status === "Confirmed").length;
@@ -107,7 +133,6 @@ const Dashboard = () => {
     return 0;
   })
   .slice(0, 3);
-  const featuredRitual = rituals[0];
 
   // Animation variants
   const cardVariants = {
@@ -140,7 +165,7 @@ const Dashboard = () => {
           <Suspense fallback={<div className="animate-pulse text-center text-gray-400">Loading dashboard...</div>}>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <AnimatePresence>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
+                <motion.div key="days-until-wedding" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
                   <Card className="glass-card">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-500">Days Until Wedding</CardTitle>
@@ -154,7 +179,7 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
+                <motion.div key="confirmed-guests" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
                   <Card className="glass-card">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-500">Confirmed Guests</CardTitle>
@@ -168,7 +193,7 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
+                <motion.div key="budget-status" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
                   <Card className="glass-card">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-500">Budget Status</CardTitle>
@@ -184,7 +209,7 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
+                <motion.div key="tasks-completed" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
                   <Card className="glass-card">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-gray-500">Tasks Completed</CardTitle>
@@ -294,26 +319,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-              <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Flower className="mr-2 h-5 w-5 text-wedding-red" /> Featured Ritual
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {featuredRitual ? (
-                      <>
-                        <h3 className="font-medium mb-2">{featuredRitual.name}</h3>
-                        <p className="text-sm text-gray-600 mb-4">{featuredRitual.description}</p>
-                        <Button variant="outline" size="sm" className="w-full">
-                          <BookOpen size={18} className="mr-2" /> Learn More
-                        </Button>
-                      </>
-                    ) : <span className="text-gray-400">No ritual info</span>}
-                  </CardContent>
-                </Card>
-              </motion.div>
+              
               <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
                 <Card className="glass-card">
                   <CardHeader>

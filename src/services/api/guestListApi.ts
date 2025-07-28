@@ -1,8 +1,8 @@
-import { supabase } from './supabaseClient';
+import { supabase } from "../supabase/config";
 
 export interface Guest {
   guest_id: string;
-  user_id: string;
+  wedding_id: string;
   guest_name: string;
   contact_info?: string;
   relation?: string;
@@ -13,11 +13,11 @@ export interface Guest {
   updated_at?: string;
 }
 
-export async function fetchGuestList(userId: string): Promise<Guest[]> {
+export async function fetchGuestList(weddingId: string): Promise<Guest[]> {
   const { data, error } = await supabase
     .from('guest_list')
     .select('*')
-    .eq('user_id', userId)
+    .eq('wedding_id', weddingId)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data || [];
@@ -50,4 +50,4 @@ export async function removeGuest(guest_id: string): Promise<void> {
     .delete()
     .eq('guest_id', guest_id);
   if (error) throw error;
-}
+};

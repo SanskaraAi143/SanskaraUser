@@ -7,20 +7,22 @@ export interface TimelineEvent {
   event_date_time: string;
   location: string;
   description: string;
-  user_id: string;
+  wedding_id: string;
+  visibility?: string;
+  relevant_party?: string;
   created_at: string;
   updated_at: string;
 }
 
 /**
- * Fetches timeline events for the current user
+ * Fetches timeline events for the current wedding
  */
-export const getUserTimelineEvents = async (user_id: string): Promise<TimelineEvent[]> => {
+export const getUserTimelineEvents = async (wedding_id: string): Promise<TimelineEvent[]> => {
   try {
     const { data, error } = await supabase
       .from('timeline_events')
       .select('*')
-      .eq('user_id', user_id)
+      .eq('wedding_id', wedding_id)
       .order('event_date_time', { ascending: true });
     if (error) throw error;
     return data;
@@ -30,11 +32,11 @@ export const getUserTimelineEvents = async (user_id: string): Promise<TimelineEv
   }
 };
 
-export const addTimelineEvent = async (user_id: string, event: Omit<TimelineEvent, 'event_id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+export const addTimelineEvent = async (wedding_id: string, event: Omit<TimelineEvent, 'event_id' | 'created_at' | 'updated_at' | 'wedding_id'>) => {
   try {
     const { data, error } = await supabase
       .from('timeline_events')
-      .insert([{ ...event, user_id }]);
+      .insert([{ ...event, wedding_id }]);
     if (error) throw error;
     return data;
   } catch (error) {

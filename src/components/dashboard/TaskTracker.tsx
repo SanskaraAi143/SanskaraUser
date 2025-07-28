@@ -59,20 +59,20 @@ const TaskTracker = () => {
 
   // Load tasks from Supabase on mount
   useEffect(() => {
-    if (!user?.id) {
+    if (!user?.wedding_id) {
       setLoading(false); // Stop loading if no user
       setTasks([]); // Clear tasks if no user
       return;
     }
     setLoading(true);
-    getUserTasks(user.id)
+    getUserTasks(user.wedding_id)
       .then(setTasks)
       .catch(err => {
         console.error("Failed to load tasks:", err);
         setError("Could not load your tasks. Please try again later.");
       })
       .finally(() => setLoading(false));
-  }, [user?.id]);
+  }, [user?.wedding_id]);
 
   // Persist user preferences
   useEffect(() => {
@@ -91,7 +91,7 @@ const TaskTracker = () => {
   // const handleEditTask = async (taskId: string, updates: Partial<Task>) => { ... };
 
   const handleModalSave = async (data: TaskFormValues, taskId?: string) => {
-    if (!user?.id) {
+    if (!user?.wedding_id) {
       setError('User not authenticated. Please log in again.');
       setModalTask(null);
       return;
@@ -113,7 +113,7 @@ const TaskTracker = () => {
         await updateUserTask(taskId, taskDataPayload);
       } else {
         await addUserTask(
-          user.id,
+          user.wedding_id,
           taskDataPayload.title!,
           taskDataPayload.description,
           taskDataPayload.due_date,
@@ -123,11 +123,11 @@ const TaskTracker = () => {
           taskDataPayload.is_complete
         );
       }
-      setTasks(await getUserTasks(user.id));
+      setTasks(await getUserTasks(user.wedding_id));
       setModalTask(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to save task:", err);
-      const errorMessage = err.message || 'Failed to save task. Please try again.';
+      const errorMessage = (err as Error).message || 'Failed to save task. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -150,26 +150,26 @@ const TaskTracker = () => {
         is_complete: newStatus === 'Done',
         status: newStatus
       });
-      setTasks(await getUserTasks(user.id));
-    } catch (err: any) {
+      setTasks(await getUserTasks(user.wedding_id));
+    } catch (err: unknown) {
       console.error("Failed to update task completion:", err);
-      setError("Failed to update task. Please try again.");
+      setError((err as Error).message || "Failed to update task. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!user?.id) return;
+    if (!user?.wedding_id) return;
     setLoading(true);
     setError(null);
     try {
       await removeUserTask(taskId);
-      setTasks(await getUserTasks(user.id));
+      setTasks(await getUserTasks(user.wedding_id));
       setModalTask(null); // Close modal if delete was initiated from there
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete task:", err);
-      setError("Failed to delete task. Please try again.");
+      setError((err as Error).message || "Failed to delete task. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -200,7 +200,7 @@ const TaskTracker = () => {
       .catch(async () => {
         setError('Failed to update task status. Reverting.');
         // Revert to previous state on error
-        setTasks(await getUserTasks(user.id));
+        setTasks(await getUserTasks(user.wedding_id));
       });
   }
 
@@ -219,13 +219,43 @@ const TaskTracker = () => {
   // Filtered and Sorted Tasks for display
   const processedTasks = tasks
     .filter(task => {
-      if (filterStatus === 'all') return true;
-      return filterStatus === 'complete' ? task.is_complete : !task.is_complete;
-    })
-    .filter(task => filterPriority === 'all' || task.priority === filterPriority)
-    .filter(task => filterCategory === 'all' || task.category === filterCategory)
-    .filter(task => search === '' || task.title.toLowerCase().includes(search.toLowerCase()) || (task.description && task.description.toLowerCase().includes(search.toLowerCase())));
-    // Sorting logic can be added here if needed for a list view, Kanban typically relies on manual order or status.
+      // Filter by completion status
+      if (filterStatus === 'complete' && !task.is_complete) return false;
+      if (filterStatus === 'incomplete' && task.is_complete) return false;
+
+      // Filter by priority
+      if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
+
+      // Filter by category
+      if (filterCategory !== 'all' && task.category !== filterCategory) return false;
+
+      // Filter by search term
+      if (search !== '' &&
+          !(task.title.toLowerCase().includes(search.toLowerCase()) ||
+            (task.description && task.description.toLowerCase().includes(search.toLowerCase()))))
+        return false;
+
+      // Filter by lead_party based on user role
+      if (user?.role) {
+        const userRole = user.role.toLowerCase();
+        const taskLeadParty = (task.lead_party || '').toLowerCase();
+
+        if (taskLeadParty === 'shared' || taskLeadParty === 'couple') {
+          return true; // Shared tasks are visible to all members of the couple
+        } else if (userRole.includes('bride') && taskLeadParty.includes('bride')) {
+          return true;
+        } else if (userRole.includes('groom') && taskLeadParty.includes('groom')) {
+          return true;
+        } else if (userRole.includes('planner')) {
+          return true; // Planners can see all tasks
+        } else if (taskLeadParty === '') {
+          return true; // Tasks with no lead party are visible to all
+        }
+        return false; // Hide if not shared, not matching role, and not a planner
+      }
+
+      return true; // If no user role, show all tasks (or implement default visibility)
+    });
 
   return (
     <div className="space-y-6 p-1"> {/* Added p-1 for slight breathing room */}

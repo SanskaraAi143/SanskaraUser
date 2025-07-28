@@ -1,5 +1,14 @@
 import { supabase } from '../supabase/config';
 
+export interface Preferences {
+  email_notifications: boolean;
+  task_reminders: boolean;
+  vendor_updates: boolean;
+  data_collection: boolean;
+  third_party_sharing: boolean;
+  dark_mode: boolean;
+}
+
 export interface UserProfile {
   user_id: string;
   supabase_auth_uid: string;
@@ -7,10 +16,11 @@ export interface UserProfile {
   display_name: string | null;
   created_at: string;
   updated_at: string;
+  wedding_id: string | null;
   wedding_date: string | null;
   wedding_location: string | null;
   wedding_tradition: string | null;
-  preferences: any;
+  preferences: Preferences;
 }
 
 // Fetch current user's profile (by internal user_id from AuthContext)

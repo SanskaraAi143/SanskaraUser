@@ -11,12 +11,13 @@ export type Budget = {
 
 export type Expense = {
   item_id: string;
-  user_id: string;
+  wedding_id: string;
   item_name: string;
   category: string;
   amount: number;
   vendor_name: string;
   status: string; // 'Pending' or 'Paid'
+  contribution_by?: string; // 'bride_side', 'groom_side', 'shared'
   created_at?: string;
   updated_at?: string;
 };
@@ -56,11 +57,11 @@ export const updateUserBudgetMax = async (userId: string, budgetMax: number) => 
   return true;
 };
 
-export const getExpenses = async (userId: string): Promise<Expense[]> => {
+export const getExpenses = async (weddingId: string): Promise<Expense[]> => {
   const { data, error } = await supabase
     .from('budget_items')
     .select('*')
-    .eq('user_id', userId);
+    .eq('wedding_id', weddingId);
   if (error) throw error;
   return data || [];
 };

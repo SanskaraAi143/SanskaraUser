@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface Task {
   task_id: string;
-  user_id: string;
+  wedding_id: string;
   title: string;
   description?: string;
   is_complete: boolean;
@@ -11,48 +11,51 @@ export interface Task {
   priority: 'low' | 'medium' | 'high';
   category?: string;
   status: 'No Status' | 'To Do' | 'Doing' | 'Done';
+  lead_party?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface BulkTaskUpdate {
   ids: string[];
-  updates: Partial<Omit<Task, 'id' | 'user_id'>>;
+  updates: Partial<Omit<Task, 'task_id' | 'wedding_id'>>;
 }
 
-export const getUserTasks = async (user_id: string): Promise<Task[]> => {
+export const getUserTasks = async (wedding_id: string): Promise<Task[]> => {
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', user_id);
+    .eq('wedding_id', wedding_id);
   if (error) throw error;
   return data || [];
 };
 
 /**
  * Adds a new user task to the database.
- * @param user_id - The user ID
+ * @param wedding_id - The wedding ID
  * @param title - Task title
  * @param description - Task description
  * @param due_date - Due date
  * @param priority - Task priority
  * @param category - Task category
  * @param status - Kanban status ('No Status', 'To Do', 'Doing', 'Done')
+ * @param lead_party - The party responsible for the task
  */
 export const addUserTask = async (
-  user_id: string,
+  wedding_id: string,
   title: string,
   description: string,
   due_date: string,
   priority: 'low' | 'medium' | 'high',
   category?: string,
-  status: 'No Status' | 'To Do' | 'Doing' | 'Done' = 'No Status'
+  status: 'No Status' | 'To Do' | 'Doing' | 'Done' = 'No Status',
+  lead_party?: string
 ) => {
   const { error } = await supabase
     .from('tasks')
     .insert([
       {
-        user_id,
+        wedding_id,
         title,
         description,
         is_complete: false,
@@ -60,6 +63,7 @@ export const addUserTask = async (
         priority,
         category,
         status,
+        lead_party,
       },
     ]);
   if (error) throw error;
@@ -67,7 +71,7 @@ export const addUserTask = async (
 
 export const updateUserTask = async (
   task_id: string,
-  updates: Partial<Omit<Task, 'task_id' | 'user_id'>>
+  updates: Partial<Omit<Task, 'task_id' | 'wedding_id'>>
 ) => {
   const { error } = await supabase
     .from('tasks')

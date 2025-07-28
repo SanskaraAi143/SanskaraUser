@@ -8,7 +8,7 @@ interface Message {
   isMarkdown?: boolean;
 }
 
-export const useMultimodalClient = (serverUrl?: string) => {
+export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
@@ -35,7 +35,7 @@ export const useMultimodalClient = (serverUrl?: string) => {
       clientRef.current.close();
     }
     
-    clientRef.current = new MultimodalClient(serverUrl);
+    clientRef.current = new MultimodalClient(userId, serverUrl);
     const client = clientRef.current;
 
     const handleReady = () => setIsConnected(true);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGuestList, addGuest, updateGuest, removeGuest, Guest } from '../../services/api/guestListApi';
-import { getCurrentUserProfile } from '../../services/api/userApi';
+import { useAuth } from '@/context/AuthContext';
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'bg-gray-400',
@@ -10,7 +10,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function GuestList() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user } = useAuth();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -21,28 +21,21 @@ export default function GuestList() {
   const loadGuests = async () => {
     setLoading(true);
     try {
-      if (userId) {
-        const data = await fetchGuestList(userId);
+      if (user?.wedding_id) {
+        const data = await fetchGuestList(user.wedding_id);
         setGuests(data);
       }
-    } catch (e: any) {
-      setError(e.message || 'Failed to load guests');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to load guests');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Fetch user id on mount
-    getCurrentUserProfile().then(profile => {
-      setUserId(profile?.user_id || null);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (userId) loadGuests();
+    if (user?.wedding_id) loadGuests();
     // eslint-disable-next-line
-  }, [userId]);
+  }, [user?.wedding_id]);
 
   const handleEdit = (guest: Guest) => {
     setForm(guest);
@@ -55,27 +48,27 @@ export default function GuestList() {
     try {
       await removeGuest(guest_id);
       setGuests((prev) => prev.filter((g) => g.guest_id !== guest_id));
-    } catch (e: any) {
-      setError(e.message || 'Failed to remove guest');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to remove guest');
     }
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.guest_name || !userId) return;
+    if (!form.guest_name || !user?.wedding_id) return;
     try {
       if (editingId) {
         const updated = await updateGuest(editingId, form);
         setGuests((prev) => prev.map((g) => (g.guest_id === editingId ? updated : g)));
       } else {
-        const newGuest = await addGuest({ ...form, user_id: userId } as any);
+        const newGuest = await addGuest({ ...form, wedding_id: user.wedding_id } as Guest);
         setGuests((prev) => [newGuest, ...prev]);
       }
       setShowForm(false);
       setForm({});
       setEditingId(null);
-    } catch (e: any) {
-      setError(e.message || 'Failed to save guest');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to load guests');
     }
   };
 
@@ -275,43 +268,87 @@ export default function GuestList() {
           </div>
         </div>
       )}
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border-separate border-spacing-y-2">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 rounded-l-lg text-left font-semibold text-gray-700">Name</th>
-              <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
-              <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
-              <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
-              <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
-              <th className="px-4 py-2 rounded-r-lg text-center font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
-            ) : guests.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">No guests added yet.</td></tr>
-            ) : guests.map(guest => (
-              <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
-                <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
-                <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
-                <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
-                <td className="px-4 py-2 text-gray-700">{guest.side}</td>
-                <td className="px-4 py-2">
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${STATUS_COLORS[guest.status || 'Pending'] || 'bg-gray-400'}`}>{guest.status || 'Pending'}</span>
-                </td>
-                <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
-                <td className="px-4 py-2 flex gap-2 justify-center">
-                  <button className="text-blue-600 hover:text-blue-900 font-semibold" onClick={() => handleEdit(guest)}>Edit</button>
-                  <button className="text-red-500 hover:text-red-800 font-semibold" onClick={() => handleDelete(guest.guest_id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  {/* Filtering logic moved outside JSX */}
+  {/* Add search and filter state if needed */}
+  {/* Example: const [search, setSearch] = useState(''); const [filter, setFilter] = useState(''); */}
+  {/*
+    Uncomment and implement search/filter UI as needed:
+    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search guests..." />
+    <select value={filter} onChange={e => setFilter(e.target.value)}>...</select>
+  */}
+  {/*
+    Filtering logic:
+  */}
+  {/*
+    const filteredGuests = guests.filter(g => {
+      const match =
+        g.guest_name.toLowerCase().includes(search.toLowerCase()) ||
+        (g.contact_info || '').toLowerCase().includes(search.toLowerCase()) ||
+        (g.relation || '').toLowerCase().includes(search.toLowerCase());
+      if (filter) return match && (g.status === filter || g.side === filter);
+
+      // Collaboration logic: Filter guests based on user role and guest side
+      if (user?.role) {
+        const userRole = user.role.toLowerCase();
+        const guestSide = (g.side || '').toLowerCase();
+
+        // Planners can see all guests
+        if (userRole === 'planner') {
+          return match;
+        }
+
+        // Bride/Groom can see their own side and 'Both'
+        if (userRole.includes('bride') && (guestSide.includes('bride') || guestSide === 'both')) {
+          return match;
+        }
+        if (userRole.includes('groom') && (guestSide.includes('groom') || guestSide === 'both')) {
+          return match;
+        }
+
+        return false; // Hide if not matching role or not a planner
+      }
+
+      return match; // If no user role, show all guests (or implement default visibility)
+    });
+  */}
+  {/* For now, just use guests directly, or implement filteredGuests as above */}
+  <div className="overflow-x-auto">
+    <table className="min-w-full table-auto border-separate border-spacing-y-2">
+      <thead>
+        <tr className="bg-gray-50">
+          <th className="px-4 py-2 rounded-l-lg text-left font-semibold text-gray-700">Name</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
+          <th className="px-4 py-2 rounded-r-lg text-center font-semibold text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {loading ? (
+          <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+        ) : guests.length === 0 ? (
+          <tr><td colSpan={7} className="text-center py-8 text-gray-400">No guests added yet.</td></tr>
+        ) : guests.map(guest => (
+          <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
+            <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
+            <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
+            <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
+            <td className="px-4 py-2 text-gray-700">{guest.side}</td>
+            <td className="px-4 py-2">
+              <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${STATUS_COLORS[guest.status || 'Pending'] || 'bg-gray-400'}`}>{guest.status || 'Pending'}</span>
+            </td>
+            <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
+            <td className="px-4 py-2 flex gap-2 justify-center">
+              <button className="text-blue-600 hover:text-blue-900 font-semibold" onClick={() => handleEdit(guest)}>Edit</button>
+              <button className="text-red-500 hover:text-red-800 font-semibold" onClick={() => handleDelete(guest.guest_id)}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
     </div>
   );
 }

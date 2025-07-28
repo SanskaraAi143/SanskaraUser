@@ -23,11 +23,11 @@ export default function ChangePasswordSection() {
         });
         setNewPassword("");
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         variant: "destructive",
         title: "Change Failed",
-        description: e?.message || "Could not update password.",
+        description: (e as Error)?.message || "Could not update password.",
       });
     }
     setLoading(false);

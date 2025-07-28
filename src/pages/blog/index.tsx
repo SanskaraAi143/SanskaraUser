@@ -36,7 +36,7 @@ const BlogListPage: React.FC = () => {
 
   useEffect(() => {
     // Apply filtering (currently placeholder) and pagination
-    let postsToDisplay = allPosts;
+    const postsToDisplay = allPosts;
     if (activeFilter === "Wedding Traditions") {
       // postsToDisplay = allPosts.filter(p => p.category === "Wedding Traditions" || p.tags?.includes("Wedding Traditions"));
     } else if (activeFilter === "Planning Insights") {

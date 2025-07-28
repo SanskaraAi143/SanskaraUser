@@ -48,19 +48,9 @@ const BlogDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Attach scroll listener to article content or window
-    const contentElement = articleContentRef.current;
-    let scrollableElement: HTMLElement | Window = window;
-
-    if (contentElement && contentElement.scrollHeight > contentElement.clientHeight) {
-        // If article content itself is scrollable (e.g., due to max-height and overflow-y: auto)
-        // This is not the case with current full page scroll, but good for robustness
-        // scrollableElement = contentElement;
-        // For now, we assume full page scroll, so window is the scrollable element.
-    }
-
-    scrollableElement.addEventListener('scroll', handleScroll);
-    return () => scrollableElement.removeEventListener('scroll', handleScroll);
+    // Attach scroll listener to window (full page scroll)
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [post]); // Re-attach if post causes layout change affecting scroll heights
 
   // Fade-in-up animation on scroll

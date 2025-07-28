@@ -10,17 +10,17 @@ const TasksPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user?.id) {
+    if (!user?.wedding_id) {
       setTasks([]);
       setLoading(false);
       return;
     }
     setLoading(true);
-    getUserTasks(user.id)
+    getUserTasks(user.wedding_id)
       .then(setTasks)
       .catch(() => setError('Failed to load tasks'))
       .finally(() => setLoading(false));
-  }, [user?.id]);
+  }, [user?.wedding_id]);
 
   return (
     <div className="space-y-6">

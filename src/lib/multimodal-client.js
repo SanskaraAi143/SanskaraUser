@@ -5,8 +5,12 @@
 import AudioClient from './audio-client.js';
 
 export default class MultimodalClient extends AudioClient {
-    constructor(serverUrl = 'wss://8765-icnc96ex44hkh6botox23-f04d3650.manusvm.computer') {
-        super(serverUrl);
+    constructor(userId, serverUrl = 'ws://localhost:8765/ws') {
+        const url = new URL(serverUrl);
+        if (userId) {
+            url.searchParams.set('user_id', userId);
+        }
+        super(url.toString());
 
         // Video streaming properties
         this.videoStream = null;

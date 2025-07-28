@@ -11,7 +11,7 @@ export interface PostData {
   excerpt?: string;
   image?: string;
   contentHtml?: string;
-  [key: string]: any; // Allow other front matter fields
+  [key: string]: unknown; // Allow other front matter fields
 }
 
 // Use Vite's import.meta.glob to import all markdown files from the content/blog directory

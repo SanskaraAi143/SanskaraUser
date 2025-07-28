@@ -3,25 +3,57 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface MoodBoard {
   mood_board_id: string;
-  user_id: string;
+  wedding_id: string;
   name: string;
+  visibility?: string;
+  owner_party?: string;
   created_at: string;
   updated_at: string;
 }
 
-export const getUserMoodBoards = async (user_id: string): Promise<MoodBoard[]> => {
+export interface MoodBoardItem {
+  item_id: string;
+  mood_board_id: string;
+  image_url: string;
+  note: string;
+  category: string;
+  created_at: string;
+  visibility?: string; // Add visibility to MoodBoardItem
+  owner_party?: string; // Add owner_party to MoodBoardItem
+}
+
+export const getUserMoodBoards = async (wedding_id: string): Promise<MoodBoard[]> => {
   const { data, error } = await supabase
     .from('mood_boards')
     .select('*')
-    .eq('user_id', user_id);
+    .eq('wedding_id', wedding_id);
   if (error) throw error;
   return data || [];
 };
 
-export const createMoodBoard = async (user_id: string, name: string) => {
+export const updateMoodBoard = async (mood_board_id: string, updates: Partial<MoodBoard>) => {
   const { data, error } = await supabase
     .from('mood_boards')
-    .insert([{ mood_board_id: uuidv4(), user_id, name }])
+    .update(updates)
+    .eq('mood_board_id', mood_board_id)
+    .select();
+  if (error) throw error;
+  return data ? data[0] : null;
+};
+
+export const deleteMoodBoard = async (mood_board_id: string) => {
+  const { error } = await supabase
+    .from('mood_boards')
+    .delete()
+    .eq('mood_board_id', mood_board_id);
+  if (error) throw error;
+  return true;
+};
+
+export const createMoodBoard = async (wedding_id: string, name: string, visibility?: string, owner_party?: string) => {
+  const { data, error } = await supabase
+    .from('mood_boards')
+    .insert([{ wedding_id, name, visibility, owner_party }])
     .select();
   if (error) throw error;
   return data ? data[0] : null;

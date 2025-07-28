@@ -11,16 +11,26 @@ export interface ChatMessage {
   content: {
     type: string;
     text?: string;
-    data?: any;
+    data?: unknown;
   };
   timestamp: Date;
 }
 
 export interface ChatSession {
   id: string;
-  summary: string | null;
+  wedding_id: string;
+  summary: ChatSessionSummary; // Use a specific type for summary
   created_at: Date;
   last_updated_at: Date;
+}
+
+// Define the expected structure for summary
+export interface ChatSessionSummary {
+  // Add fields as per your summary JSONB structure, for example:
+  topic?: string;
+  participants?: string[];
+  lastMessagePreview?: string;
+  [key: string]: any; // Remove or refine as needed for stricter typing
 }
 
 // Get user ID from current auth
@@ -42,6 +52,7 @@ const getCurrentUserId = async () => {
 // API functions
 export const sendChatMessage = async (
   message: string,
+  weddingId: string,
   sessionId?: string,
   category?: string
 ): Promise<{ messages: ChatMessage[], session_id: string }> => {
@@ -65,6 +76,7 @@ export const sendChatMessage = async (
       },
       body: JSON.stringify({
         message,
+        wedding_id: weddingId,
         session_id: sessionId,
         category
       }),
@@ -104,20 +116,19 @@ export const sendChatMessage = async (
   }
 };
 
-export const getChatSessions = async (): Promise<ChatSession[]> => {
+export const getChatSessions = async (weddingId: string): Promise<ChatSession[]> => {
   try {
-    const userId = await getCurrentUserId();
-    
     const { data, error } = await supabase
       .from('chat_sessions')
       .select('session_id, summary, created_at, last_updated_at')
-      .eq('user_id', userId)
+      .eq('wedding_id', weddingId)
       .order('last_updated_at', { ascending: false });
       
     if (error) throw error;
     
     return data.map(session => ({
       id: session.session_id,
+      wedding_id: session.wedding_id,
       summary: session.summary,
       created_at: new Date(session.created_at),
       last_updated_at: new Date(session.last_updated_at),

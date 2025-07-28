@@ -5,16 +5,54 @@ export interface Vendor {
   id: string;
   name: string;
   category: string;
-  contactEmail: string;
-  phoneNumber: string;
-  websiteUrl: string;
+  location: string;
+  rating: number;
+  contact: string;
+  email: string;
+  price: string;
+  bookingDate?: string;
+  status: 'recommended' | 'contacted' | 'booked' | 'pending' | 'completed';
+  notes?: string;
+  linkedVendor?: SupabaseVendorRaw | null; // Use specific type for better type checking
+  // Add properties from SupabaseVendorRaw that are returned by getVendorRecommendations
+  vendor_id?: string;
+  vendor_name?: string;
+  vendor_category?: string;
+  contact_email?: string;
+  phone_number?: string;
+  website_url?: string;
+  address?: {
+    fullAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  pricing_range?: {
+    min: number;
+    max: number;
+    currency: string;
+    unit: string;
+    details: string;
+  };
+  description?: string;
+  portfolio_image_urls?: string[];
+  is_active?: boolean;
+}
+
+export interface SupabaseVendorRaw {
+  vendor_id: string;
+  vendor_name: string;
+  vendor_category: string;
+  contact_email: string;
+  phone_number: string;
+  website_url: string;
   address: {
     fullAddress: string;
     city: string;
     state: string;
     zipCode: string;
   };
-  pricingRange: {
+  pricing_range: {
     min: number;
     max: number;
     currency: string;
@@ -23,7 +61,38 @@ export interface Vendor {
   };
   rating: number;
   description: string;
-  portfolioImageUrls: string[];
+  portfolio_image_urls: string[];
+  is_active: boolean;
+  status: string; // This is the status from the vendors table, not user_shortlisted_vendors
+}
+
+export type UserShortlistedVendorStatus = 'recommended' | 'contacted' | 'booked' | 'pending' | 'completed' | 'user_added';
+
+export interface UserShortlistedVendorRaw {
+  user_vendor_id: string;
+  vendor_name: string;
+  vendor_category: string;
+  contact_info: string;
+  status: string;
+  booked_date: string;
+  notes: string;
+  linked_vendor_id: string | null;
+  estimated_cost: number | null;
+  vendors: SupabaseVendorRaw | null; // This is the joined vendor data
+}
+
+export interface UserShortlistedVendorItem {
+  id: string;
+  wedding_id: string;
+  name: string;
+  category: string;
+  contactInfo: string;
+  status: UserShortlistedVendorStatus;
+  bookedDate?: string;
+  notes?: string;
+  linkedVendor: SupabaseVendorRaw | null;
+  estimatedCost?: number | null;
+  owner_party?: string; // Add owner_party
 }
 
 // NOTE: Always pass the internal user_id (from AuthContext/global state),
@@ -91,14 +160,15 @@ export const getVendorRecommendations = async (
       id: vendor.vendor_id,
       name: vendor.vendor_name,
       category: vendor.vendor_category,
-      contactEmail: vendor.contact_email,
-      phoneNumber: vendor.phone_number,
-      websiteUrl: vendor.website_url,
-      address: vendor.address,
-      pricingRange: vendor.pricing_range,
-      rating: vendor.rating,
-      description: vendor.description,
-      portfolioImageUrls: vendor.portfolio_image_urls,
+      location: vendor.address?.city && vendor.address?.state ? `${vendor.address.city}, ${vendor.address.state}` : vendor.address?.fullAddress || '',
+      rating: vendor.rating || 0,
+      contact: vendor.phone_number || '',
+      email: vendor.contact_email || '',
+      price: vendor.pricing_range ? `${vendor.pricing_range.min ? '₹' + vendor.pricing_range.min.toLocaleString() : ''}${vendor.pricing_range.max ? '-₹' + vendor.pricing_range.max.toLocaleString() : ''} ${vendor.pricing_range.unit || ''}` : '',
+      status: vendor.status as any, // Cast to any for now, will refine if needed
+      bookingDate: undefined,
+      notes: vendor.description || '',
+      linkedVendor: undefined,
     }));
   } catch (error) {
     console.error('Error fetching vendor recommendations:', error);
@@ -146,14 +216,14 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
       id: data.vendor_id,
       name: data.vendor_name,
       category: data.vendor_category,
-      contactEmail: data.contact_email,
-      phoneNumber: data.phone_number,
-      websiteUrl: data.website_url,
-      address: data.address,
-      pricingRange: data.pricing_range,
-      rating: data.rating,
-      description: data.description,
-      portfolioImageUrls: data.portfolio_image_urls,
+      location: data.address?.city && data.address?.state ? `${data.address.city}, ${data.address.state}` : data.address?.fullAddress || '',
+      rating: data.rating || 0,
+      contact: data.phone_number || '',
+      email: data.contact_email || '',
+      price: data.pricing_range ? `${data.pricing_range.min ? '₹' + data.pricing_range.min.toLocaleString() : ''}${data.pricing_range.max ? '-₹' + data.pricing_range.max.toLocaleString() : ''} ${data.pricing_range.unit || ''}` : '',
+      status: data.status as any, // Cast to any for now, will refine if needed
+      notes: data.description || '',
+      portfolio_image_urls: data.portfolio_image_urls,
     };
   } catch (error) {
     console.error('Error fetching vendor details:', error);
@@ -161,19 +231,32 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
   }
 };
 
-export const addVendorToUser = async (user_id: string, vendor: any) => {
+export interface VendorToAdd {
+  id?: string;
+  vendor_id?: string;
+  name?: string;
+  vendor_name?: string;
+  category?: string;
+  vendor_category?: string;
+  contact?: string;
+  phoneNumber?: string;
+  phone_number?: string;
+}
+
+export const addVendorToUser = async (wedding_id: string, vendor: VendorToAdd, owner_party: string) => {
   // Prefer vendor.vendor_id for global vendors, fallback to vendor.id
   const linked_vendor_id = vendor.vendor_id || vendor.id;
   const { data, error } = await supabase
     .from('user_shortlisted_vendors')
     .insert([
       {
-        user_id,
+        wedding_id,
         vendor_name: vendor.name || vendor.vendor_name || '',
         vendor_category: vendor.category || vendor.vendor_category || '',
         contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
         status: 'user_added',
         linked_vendor_id,
+        owner_party,
       },
     ])
     .select();
@@ -191,8 +274,8 @@ export const removeVendorFromUser = async (userVendorId: string) => {
   return true;
 };
 
-export const getUserVendors = async (user_id: string): Promise<any[]> => {
-  const { data, error } = await supabase
+export const getUserVendors = async (wedding_id: string, userId?: string, role?: string): Promise<UserShortlistedVendorItem[]> => {
+  let query = supabase
     .from('user_shortlisted_vendors')
     .select(`
       user_vendor_id,
@@ -204,9 +287,18 @@ export const getUserVendors = async (user_id: string): Promise<any[]> => {
       notes,
       linked_vendor_id,
       estimated_cost,
+      wedding_id,
+      owner_party,
       vendors(*)
     `)
-    .eq('user_id', user_id);
+    .eq('wedding_id', wedding_id);
+
+  if (role) {
+    // If a role is provided, filter by owner_party or shared/couple
+    query = query.or(`owner_party.eq.${role},owner_party.eq.shared,owner_party.eq.couple`);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return data.map(item => ({
     id: item.user_vendor_id,
@@ -216,7 +308,9 @@ export const getUserVendors = async (user_id: string): Promise<any[]> => {
     status: item.status,
     bookedDate: item.booked_date,
     notes: item.notes,
-    linkedVendor: item.vendors,
+    linkedVendor: item.vendors as unknown as SupabaseVendorRaw | null,
     estimatedCost: item.estimated_cost,
+    wedding_id: item.wedding_id,
+    owner_party: item.owner_party,
   }));
 };

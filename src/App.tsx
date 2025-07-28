@@ -46,6 +46,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
                 <Route path="/signup" element={<AuthPage />} />
                 <Route path="/signin" element={<AuthPage />} />
                 <Route path="/ritual-guide" element={<RitualGuidePage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/dashboard" element={<MobileDashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />

@@ -6,19 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import ImageUpload from './ImageUpload';
 import { uploadMoodboardImage } from '@/services/api/storageApi';
-import { Plus, Download, Share2, Heart, X, Upload } from 'lucide-react';
+import { Plus, Download, Share2, Heart, X, Upload, Edit } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
 import { useAuth } from '@/context/AuthContext';
-import { getMoodBoardItems, addMoodBoardItem, removeMoodBoardItem, deleteMoodBoard } from '@/services/api/moodboardApi';
+import { getMoodBoardItems, addMoodBoardItem, removeMoodBoardItem } from '@/services/api/moodboardApi';
 
-import { getUserMoodBoards, createMoodBoard } from '@/services/api/boardApi';
+import { getUserMoodBoards, createMoodBoard, deleteMoodBoard, MoodBoard as MoodBoardType, MoodBoardItem, updateMoodBoard } from '@/services/api/boardApi';
 
 const MoodBoard = () => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [modalImage, setModalImage] = useState<any>(null);
+  const [modalImage, setModalImage] = useState<MoodBoardItem | null>(null);
 
-  const handleOpenImageModal = (image: any) => {
+  const handleOpenImageModal = (image: MoodBoardItem) => {
     setModalImage(image);
     setImageModalOpen(true);
   };
@@ -38,7 +38,10 @@ const MoodBoard = () => {
           const blob = await response.blob();
           const ext = item.image_url.split('.').pop()?.split('?')[0] || 'jpg';
           folder?.file(`${item.note || 'image'}-${item.item_id}.${ext}`, blob);
-        } catch {}
+        } catch (e: unknown) {
+          // Log the error for debugging purposes
+          console.error('Failed to fetch or add image to zip:', e);
+        }
       })
     );
     const content = await zip.generateAsync({ type: 'blob' });
@@ -49,9 +52,9 @@ const MoodBoard = () => {
     URL.revokeObjectURL(a.href);
   };
 
-
-  const [moodBoards, setMoodBoards] = useState([]);
+  const [moodBoards, setMoodBoards] = useState<MoodBoardType[]>([]);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const [newBoardVisibility, setNewBoardVisibility] = useState<string>('shared'); // Default to 'shared'
 
   // Helper: Delete mood board
   const handleDeleteMoodBoard = async (mood_board_id: string) => {
@@ -70,29 +73,33 @@ const MoodBoard = () => {
   const [newBoardName, setNewBoardName] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
-  const [moodBoardItems, setMoodBoardItems] = useState([]);
+  const [moodBoardItems, setMoodBoardItems] = useState<MoodBoardItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+
   useEffect(() => {
-    if (!user?.id) return;
-    (async () => {
-      setLoading(true);
-      try {
-        if (!user?.id) return;
-        getUserMoodBoards(user.id)
-          .then(boards => {
-            // Add default boards (Collections, Bride, Groom) if not present
-            const allBoards = [...boards];
-            setMoodBoards(allBoards);
-            if (allBoards.length > 0) setSelectedBoardId(allBoards[0].mood_board_id);
-          })
-          .catch(() => toast({ variant: 'destructive', title: 'Error', description: 'Failed to load mood boards.' }));
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [user?.id, toast]);
+    if (!user?.wedding_id) {
+      setMoodBoards([]); // Clear boards if no wedding_id
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    getUserMoodBoards(user.wedding_id)
+      .then(boards => {
+        setMoodBoards(boards);
+        if (boards.length > 0) {
+          // Ensure selectedBoardId is valid or set to the first board
+          if (!selectedBoardId || !boards.some(board => board.mood_board_id === selectedBoardId)) {
+            setSelectedBoardId(boards[0].mood_board_id);
+          }
+        } else {
+          setSelectedBoardId(null);
+        }
+      })
+      .catch(() => toast({ variant: 'destructive', title: 'Error', description: 'Failed to load mood boards.' }))
+      .finally(() => setLoading(false));
+  }, [user?.wedding_id, toast, selectedBoardId]);
 
   useEffect(() => {
     if (!selectedBoardId) {
@@ -124,10 +131,10 @@ const MoodBoard = () => {
   };
   
   const handleCreateMoodBoard = async () => {
-    if (!user?.id || !newBoardName.trim()) return;
+    if (!user?.wedding_id || !newBoardName.trim()) return;
     setCreatingBoard(true);
     try {
-      const board = await createMoodBoard(user.id, newBoardName.trim());
+      const board = await createMoodBoard(user.wedding_id, newBoardName.trim(), newBoardVisibility, user.role);
       setMoodBoards(prev => [...prev, board]);
       setSelectedBoardId(board.mood_board_id);
       setNewBoardName('');
@@ -145,7 +152,12 @@ const MoodBoard = () => {
     const note = 'New inspiration image';
     const category = '';
     try {
-      await addMoodBoardItem(selectedBoardId, demoUrl, note, category);
+      await addMoodBoardItem({
+        mood_board_id: selectedBoardId,
+        image_url: demoUrl,
+        note,
+        category
+      });
       const items = await getMoodBoardItems(selectedBoardId);
       setMoodBoardItems(items);
       toast({ title: 'Image added', description: 'New image added to your mood board.' });
@@ -154,11 +166,65 @@ const MoodBoard = () => {
     }
   };
 
+  const filteredItems = moodBoardItems.filter(item => {
+    // If no user or role, or if RLS is not enabled, return true to show all items (for development/testing)
+    if (!user?.role || !user.wedding_id) return true;
 
-  // Filter images by the selected category
-  const filteredItems = moodBoardItems; // No category filtering, show all for selected board
-  const selectedBoard = moodBoards.find(b => b.mood_board_id === selectedBoardId);
+    const userRole = user.role.toLowerCase();
+    const itemVisibility = (item.visibility || 'shared').toLowerCase();
+    const itemOwnerParty = (item.owner_party || '').toLowerCase();
 
+    // Allow access if item is shared or public
+    if (itemVisibility === 'shared' || itemVisibility === 'public') {
+      return true;
+    }
+
+    // Allow access if item is private and current user is the owner
+    if (itemVisibility === 'private' && userRole === itemOwnerParty) {
+      return true;
+    }
+
+    // Allow planners to see all private items (assuming 'planner' role has full visibility)
+    if (userRole === 'planner') {
+      return true;
+    }
+
+    return false; // Hide if private and not matching role or planner
+  });
+
+  const currentBoard = moodBoards.find(board => board.mood_board_id === selectedBoardId);
+
+  // State for editing mood board
+  const [editingBoard, setEditingBoard] = useState<MoodBoardType | null>(null);
+  const [editBoardName, setEditBoardName] = useState('');
+  const [editBoardVisibility, setEditBoardVisibility] = useState('');
+
+  const handleEditBoard = (board: MoodBoardType) => {
+    setEditingBoard(board);
+    setEditBoardName(board.name);
+    setEditBoardVisibility(board.visibility || 'shared');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingBoard || !editBoardName.trim()) return;
+    try {
+      const updatedBoard = await updateMoodBoard(editingBoard.mood_board_id, {
+        name: editBoardName.trim(),
+        visibility: editBoardVisibility,
+      });
+      setMoodBoards(prev => prev.map(b => b.mood_board_id === updatedBoard?.mood_board_id ? updatedBoard : b));
+      toast({ title: 'Mood Board Updated', description: `Mood board '${updatedBoard?.name}' updated.` });
+      setEditingBoard(null); // Close edit mode
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to update mood board.' });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBoard(null);
+    setEditBoardName('');
+    setEditBoardVisibility('');
+  };
 
   return (
     <div className="space-y-8">
@@ -179,19 +245,34 @@ const MoodBoard = () => {
                     <div key={board.mood_board_id} className="flex items-center justify-between pr-2">
                       <SelectItem value={board.mood_board_id} className="flex-1">
                         {board.name}
+                        {board.visibility && <span className="ml-2 text-xs text-gray-500">({board.visibility})</span>}
+                        {board.owner_party && <span className="ml-1 text-xs text-gray-500">({board.owner_party})</span>}
                       </SelectItem>
                       {board.mood_board_id !== 'default-collections' && board.mood_board_id !== 'default-bride' && board.mood_board_id !== 'default-groom' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="ml-2 text-red-500"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleDeleteMoodBoard(board.mood_board_id);
-                          }}
-                        >
-                          <X size={16} />
-                        </Button>
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-2 text-wedding-gold"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleEditBoard(board);
+                            }}
+                          >
+                            <Edit size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-2 text-red-500"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleDeleteMoodBoard(board.mood_board_id);
+                            }}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </>
                       )}
                     </div>
                   ))}
@@ -200,7 +281,7 @@ const MoodBoard = () => {
               <Button size="sm" className="bg-wedding-gold text-white font-semibold shadow-md hover:bg-wedding-secondaryGold transition" onClick={() => setCreatingBoard(true)}>+ New</Button>
             </div>
             {creatingBoard && (
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-col gap-2 mt-2">
                 <input
                   type="text"
                   className="border border-wedding-gold/40 rounded px-2 py-1 flex-1 bg-white/80 focus:ring-wedding-gold"
@@ -209,8 +290,19 @@ const MoodBoard = () => {
                   placeholder="Mood board name"
                   autoFocus
                 />
-                <Button size="sm" className="bg-wedding-gold text-white font-semibold" onClick={handleCreateMoodBoard} disabled={!newBoardName.trim()}>Create</Button>
-                <Button size="sm" variant="outline" onClick={() => { setCreatingBoard(false); setNewBoardName(''); }}>Cancel</Button>
+                <Select value={newBoardVisibility} onValueChange={setNewBoardVisibility}>
+                  <SelectTrigger className="w-full bg-white/80 border-wedding-gold/30 shadow-sm focus:ring-wedding-gold">
+                    <SelectValue placeholder="Visibility" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/90 border-wedding-gold/30">
+                    <SelectItem value="shared">Shared</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-wedding-gold text-white font-semibold" onClick={handleCreateMoodBoard} disabled={!newBoardName.trim()}>Create</Button>
+                  <Button size="sm" variant="outline" onClick={() => { setCreatingBoard(false); setNewBoardName(''); setNewBoardVisibility('shared'); }}>Cancel</Button>
+                </div>
               </div>
             )}
           </div>
@@ -262,23 +354,30 @@ const MoodBoard = () => {
                 <DialogTitle className="text-wedding-gold font-playfair text-2xl">Add to your mood board</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
-                <ImageUpload onUpload={async (file, previewUrl, tag) => {
-                  if (!selectedBoardId) return;
-                  setUploading(true);
-                  try {
-                    const url = await uploadMoodboardImage(user.id, file);
-                    await addMoodBoardItem(selectedBoardId, url, tag || 'New inspiration image', '');
-                    const items = await getMoodBoardItems(selectedBoardId);
-                    setMoodBoardItems(items);
-                    toast({ title: 'Image added', description: 'New image added to your mood board.' });
-                  } catch (e) {
-                    const items = await getMoodBoardItems(selectedBoardId);
-                    setMoodBoardItems(items);
-                    toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image, but we refreshed your board.' });
-                  } finally {
-                    setUploading(false);
-                  }
-                }} />
+                <ImageUpload
+                  onUpload={async (file: File, tag?: string) => {
+                    if (!selectedBoardId || !user?.wedding_id) return;
+                    setUploading(true);
+                    try {
+                      const url = await uploadMoodboardImage(user.wedding_id, file);
+                      await addMoodBoardItem({
+                        mood_board_id: selectedBoardId,
+                        image_url: url,
+                        note: tag || 'New inspiration image',
+                        category: ''
+                      });
+                      const items = await getMoodBoardItems(selectedBoardId);
+                      setMoodBoardItems(items);
+                      toast({ title: 'Image added', description: 'New image added to your mood board.' });
+                    } catch (e) {
+                      const items = await getMoodBoardItems(selectedBoardId);
+                      setMoodBoardItems(items);
+                      toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image, but we refreshed your board.' });
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                />
                 {uploading && <div className="text-center text-yellow-900/60">Uploading...</div>}
               </div>
             </DialogContent>
@@ -300,6 +399,42 @@ const MoodBoard = () => {
           </div>
         )}
       </Card>
+      {editingBoard && (
+        <Dialog open={!!editingBoard} onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setEditingBoard(null); // Close the dialog by setting editingBoard to null
+          }
+        }}>
+          <DialogContent className="bg-white/90 rounded-2xl shadow-2xl border-0">
+            <DialogHeader>
+              <DialogTitle className="text-wedding-gold font-playfair text-2xl">Edit Mood Board</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <input
+                type="text"
+                className="border border-wedding-gold/40 rounded px-2 py-1 w-full bg-white/80 focus:ring-wedding-gold"
+                value={editBoardName}
+                onChange={e => setEditBoardName(e.target.value)}
+                placeholder="Mood board name"
+                autoFocus
+              />
+              <Select value={editBoardVisibility} onValueChange={setEditBoardVisibility}>
+                <SelectTrigger className="w-full bg-white/80 border-wedding-gold/30 shadow-sm focus:ring-wedding-gold">
+                  <SelectValue placeholder="Visibility" />
+                </SelectTrigger>
+                <SelectContent className="bg-white/90 border-wedding-gold/30">
+                  <SelectItem value="shared">Shared</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={handleCancelEdit}>Cancel</Button>
+                <Button className="bg-wedding-gold text-white font-semibold" onClick={handleSaveEdit}>Save Changes</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

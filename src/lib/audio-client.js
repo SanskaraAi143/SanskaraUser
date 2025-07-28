@@ -3,7 +3,7 @@
  */
 
 export default class AudioClient {
-    constructor(serverUrl = 'wss://8765-icnc96ex44hkh6botox23-f04d3650.manusvm.computer') {
+    constructor(serverUrl) {
         this.serverUrl = serverUrl;
         this.ws = null;
         this.recorder = null;
@@ -12,7 +12,7 @@ export default class AudioClient {
         this.isRecording = false;
         this.isModelSpeaking = false;
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 3;
+        this.maxReconnectAttempts = 5;
         this.sessionId = null;
 
         // Callbacks
@@ -156,7 +156,7 @@ export default class AudioClient {
         }
 
         this.reconnectAttempts++;
-        const backoffTime = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
+        const backoffTime = 5000; // Fixed 5-second retry interval
 
         console.log(`Attempting to reconnect in ${backoffTime}ms (attempt ${this.reconnectAttempts})`);
 
