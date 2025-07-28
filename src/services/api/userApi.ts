@@ -17,9 +17,6 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   wedding_id: string | null;
-  wedding_date: string | null;
-  wedding_location: string | null;
-  wedding_tradition: string | null;
   preferences: Preferences;
 }
 
@@ -35,7 +32,7 @@ export const getCurrentUserProfile = async (user_id: string): Promise<UserProfil
 };
 
 // Update current user's profile (by internal user_id from AuthContext)
-export const updateCurrentUserProfile = async (user_id: string, updates: Partial<UserProfile>) => {
+export const updateCurrentUserProfile = async (user_id: string, updates: Partial<Omit<UserProfile, 'wedding_date' | 'wedding_location' | 'wedding_tradition'>>) => {
   const { error } = await supabase
     .from('users')
     .update(updates)

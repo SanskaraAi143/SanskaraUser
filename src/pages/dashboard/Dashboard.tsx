@@ -17,6 +17,7 @@ import { getUserTasks } from "@/services/api/tasksApi";
 import { getUserBudgetMax, getExpenses } from "@/services/api/budgetApi";
 import { getUserVendors } from "@/services/api/vendorApi";
 import { getUserMoodBoards } from "@/services/api/boardApi";
+import { getWeddingDetails } from "@/services/api/sanskaraApi"; // New Import
 import { AnimatePresence, motion } from "framer-motion";
 
 const Dashboard = () => {
@@ -25,6 +26,7 @@ const Dashboard = () => {
 
   // State for all dashboard widgets
   const [profile, setProfile] = useState(null);
+  const [weddingDetails, setWeddingDetails] = useState(null); // New state for wedding details
   const [timelineEvents, setTimelineEvents] = useState([]);
   const [guests, setGuests] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -69,15 +71,28 @@ const Dashboard = () => {
           const profileData = await getCurrentUserProfile(user.internal_user_id);
           setProfile(profileData);
           const weddingId = user.wedding_id;
-          const [events, guestList, userTasks, maxBudget, userExpenses, userVendors, userMoodBoards] = await Promise.all([
+
+          const [
+            weddingData, // Fetch wedding details
+            events,
+            guestList,
+            userTasks,
+            maxBudget,
+            userExpenses,
+            userVendors,
+            userMoodBoards,
+          ] = await Promise.all([
+            getWeddingDetails(weddingId), // New API call
             getUserTimelineEvents(weddingId),
             fetchGuestList(weddingId),
             getUserTasks(weddingId),
             getUserBudgetMax(user.internal_user_id),
             getExpenses(weddingId),
             getUserVendors(weddingId),
-            getUserMoodBoards(weddingId)
+            getUserMoodBoards(weddingId),
           ]);
+
+          setWeddingDetails(weddingData); // Set new state
           setTimelineEvents(events || []);
           setGuests(guestList || []);
           setTasks(userTasks || []);
@@ -85,8 +100,10 @@ const Dashboard = () => {
           setExpenses(userExpenses || []);
           setVendors(userVendors || []);
           setMoodBoards(userMoodBoards || []);
+
           // Debug logs:
           console.log('profile:', profileData);
+          console.log('weddingDetails:', weddingData); // Log new state
           console.log('guests:', guestList);
           console.log('tasks:', userTasks);
           console.log('timelineEvents:', events);
@@ -114,7 +131,7 @@ const Dashboard = () => {
   // Derived stats
   const confirmedGuests = guests.filter(g => g.status === "Confirmed").length;
   const invitedGuests = guests.length;
-  const weddingDate = profile?.wedding_date;
+  const weddingDate = weddingDetails?.wedding_date; // Use from new state
   const daysUntilWedding = weddingDate ? Math.max(0, Math.ceil((new Date(weddingDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : "-";
   const totalBudget = budgetMax || 0;
   const spentBudget = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);

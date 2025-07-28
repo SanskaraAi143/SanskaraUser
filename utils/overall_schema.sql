@@ -25,9 +25,6 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     -- Wedding Details
-    wedding_date DATE,
-    wedding_location TEXT,
-    wedding_tradition TEXT,
     preferences JSONB, -- { "budget_min": 5000, "budget_max": 10000, ... }
     user_type VARCHAR(50) NOT NULL DEFAULT 'customer' -- New column to differentiate user types
 );

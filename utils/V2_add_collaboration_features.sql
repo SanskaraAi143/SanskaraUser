@@ -8,6 +8,8 @@ CREATE TABLE weddings (
     wedding_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     wedding_name VARCHAR(255) NOT NULL, -- e.g., "Priya & Rohan's Wedding"
     wedding_date DATE,
+    wedding_location TEXT,
+    wedding_tradition TEXT,
     status VARCHAR(50) NOT NULL DEFAULT 'onboarding_in_progress', -- 'onboarding_in_progress', 'active', 'completed', 'archived'
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP

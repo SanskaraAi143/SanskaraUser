@@ -11,12 +11,18 @@ import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 
 interface PartnerDetailsResponse {
   wedding_id: string;
+  wedding: {
+    wedding_name: string;
+    wedding_date: string;
+    wedding_location: string;
+    wedding_tradition: string;
+    wedding_style: string;
+    details?: any; // For the JSONB details column
+  };
   first_partner_name: string;
   first_partner_details: {
     name: string;
     role: string;
-    wedding_city: string;
-    wedding_date: string;
     teamwork_plan: {
       venue_decor: string;
       catering: string;
@@ -76,7 +82,14 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       const firstPartnerDetails = initialWeddingData.partner_data?.[firstPartnerEmail] || {};
       
       setWeddingData({
-        wedding_id: user.wedding_id || '', // Use wedding_id from auth context
+        wedding_id: initialWeddingData.wedding_id || '',
+        wedding: {
+          wedding_name: initialWeddingData.wedding_name || '',
+          wedding_date: initialWeddingData.wedding_date || '',
+          wedding_location: initialWeddingData.wedding_location || '',
+          wedding_tradition: initialWeddingData.wedding_tradition || '',
+          wedding_style: initialWeddingData.wedding_style || '',
+        },
         first_partner_name: firstPartnerDetails.name || 'Partner',
         first_partner_details: firstPartnerDetails,
       } as PartnerDetailsResponse);
@@ -154,6 +167,7 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
         throw new Error(`We couldn't find a pending wedding plan for this email. Please check with your partner or contact support. (Status: ${response.status}) - ${errorText}`);
       }
       const data: PartnerDetailsResponse = await response.json();
+      // Assuming the backend now returns data in the new structure
       setWeddingData(data);
       // Pre-select role based on partner's role
       const oppositeRole = data.first_partner_details.role === 'Bride' ? 'Groom' : 'Bride';
@@ -205,10 +219,11 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
     };
 
     const payload = {
-      wedding_id: weddingData?.wedding_id || user?.wedding_id, // Ensure wedding_id is always available
+      wedding_id: weddingData.wedding_id,
       current_partner_email: second_partner_details.email,
       other_partner_email: null, // Critical for identifying this as the second partner submission
       current_partner_details: second_partner_details,
+      // No need to send wedding details here, as they were already created by the first partner
     };
 
     try {
@@ -268,9 +283,11 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
           <div>
             <h2 className="text-2xl font-bold mb-4">Your Details & Plan Confirmation</h2>
             <div className="bg-blue-50 p-4 rounded-md border-l-4 border-blue-200 mb-4">
-              <h3 className="text-lg font-semibold mb-2">Plan started by {weddingData.first_partner_details.name}</h3>
-              <p><strong>Wedding City:</strong> {weddingData.first_partner_details.wedding_city}</p>
-              <p><strong>Wedding Date:</strong> {weddingData.first_partner_details.wedding_date}</p>
+              <h3 className="text-lg font-semibold mb-2">Plan started by {weddingData.first_partner_name}</h3>
+              <p><strong>Wedding Name:</strong> {weddingData.wedding.wedding_name}</p>
+              <p><strong>Wedding Date:</strong> {weddingData.wedding.wedding_date}</p>
+              <p><strong>Wedding Location:</strong> {weddingData.wedding.wedding_location}</p>
+              <p><strong>Wedding Tradition:</strong> {weddingData.wedding.wedding_tradition}</p>
             </div>
             <div>
               <Label htmlFor="fullName">Your Full Name:</Label>

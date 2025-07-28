@@ -26,6 +26,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
     weddingCity: '',
     weddingDate: '',
     weddingStyle: '',
+    weddingTradition: '',
     otherStyle: '',
     colorTheme: '',
     attireMain: '',
@@ -129,6 +130,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
       wedding_city: formData.weddingCity,
       wedding_date: formData.weddingDate,
       wedding_style: formData.weddingStyle,
+      wedding_tradition: formData.weddingTradition,
       other_style: formData.otherStyle,
       color_theme: formData.colorTheme,
       attire_main: formData.attireMain,
@@ -149,10 +151,45 @@ const FirstPartnerOnboardingForm: React.FC = () => {
       priorities: formData.priorities,
     };
 
+    const wedding_details = {
+      name: `${formData.fullName} & ${formData.partnerName}'s Wedding`, // A default naming convention
+      wedding_date: formData.weddingDate,
+      wedding_location: formData.weddingCity,
+      wedding_tradition: formData.weddingTradition,
+      wedding_style: formData.weddingStyle, // Keep this as part of wedding details for now
+      // Add other relevant wedding-level details here
+    };
+
+    const current_user_onboarding_details = {
+      name: formData.fullName,
+      email: formData.yourEmail,
+      phone: formData.phone,
+      role: formData.role,
+      cultural_background: cultural_background,
+      ceremonies: formData.ceremonies,
+      custom_instructions: formData.customInstructions,
+      teamwork_plan: {
+        venue_decor: formData.venueDecor,
+        catering: formData.catering,
+        guest_list: formData.guestList,
+        sangeet_entertainment: formData.sangeetEntertainment,
+      },
+      guest_estimate: formData.guestEstimate,
+      guest_split: formData.guestSplit,
+      budget_range: formData.budgetRange,
+      budget_flexibility: formData.budgetFlexibility,
+      priorities: formData.priorities,
+    };
+
+    const partner_onboarding_details = {
+      name: formData.partnerName,
+      email: formData.partnerEmail,
+    };
+
     const payload = {
-      current_partner_email: formData.yourEmail,
-      other_partner_email: formData.partnerEmail,
-      current_partner_details: current_partner_details,
+      wedding_details: wedding_details,
+      current_user_onboarding_details: current_user_onboarding_details,
+      partner_onboarding_details: partner_onboarding_details,
     };
 
     try {
@@ -257,6 +294,10 @@ const FirstPartnerOnboardingForm: React.FC = () => {
                 {formData.weddingStyle === 'Other' && (
                   <Input type="text" id="otherStyle" name="otherStyle" value={formData.otherStyle} onChange={handleChange} placeholder="Describe your unique vision" className="mt-2" />
                 )}
+              </div>
+              <div>
+                <Label htmlFor="weddingTradition">Wedding Tradition/Culture:</Label>
+                <Input type="text" id="weddingTradition" name="weddingTradition" value={formData.weddingTradition} onChange={handleChange} placeholder="e.g., North Indian, South Indian, Bengali, etc." />
               </div>
               <div>
                 <Label htmlFor="colorTheme">Specific Colors or Themes:</Label>

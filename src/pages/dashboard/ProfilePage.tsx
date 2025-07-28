@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
+import { getWeddingDetails, updateWeddingDetails } from "@/services/api/sanskaraApi"; // Import new API functions
 
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
 
@@ -16,52 +16,75 @@ const ProfilePage = () => {
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Profile & wedding details state
+  // Wedding details state
+  const [weddingId, setWeddingId] = useState<string | null>(null);
   const [weddingDate, setWeddingDate] = useState("");
   const [location, setLocation] = useState("");
   const [tradition, setTradition] = useState("");
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [weddingDetailsLoading, setWeddingDetailsLoading] = useState(false);
+
 
   React.useEffect(() => {
-    async function fetchProfile() {
-      setProfileLoading(true);
+    async function fetchWeddingData() {
+      setWeddingDetailsLoading(true);
       try {
-        if (!user?.internal_user_id) return;
-        const data = await import('@/services/api/userApi').then(m => m.getCurrentUserProfile(user.internal_user_id));
+        if (!user?.wedding_id) {
+          console.log("No wedding_id found for the current user.");
+          return;
+        }
+        setWeddingId(user.wedding_id);
+        const data = await getWeddingDetails(user.wedding_id);
         if (data) {
-          setDisplayName(data.display_name || "");
           setWeddingDate(data.wedding_date || "");
           setLocation(data.wedding_location || "");
           setTradition(data.wedding_tradition || "");
         }
-      } catch (e) { /* ignore */ }
-      setProfileLoading(false);
+      } catch (e) {
+        console.error("Failed to fetch wedding details:", e);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load wedding details.",
+        });
+      } finally {
+        setWeddingDetailsLoading(false);
+      }
     }
-    fetchProfile();
-  }, [user]);
+    fetchWeddingData();
+  }, [user, toast]);
 
   const handleSaveWeddingDetails = async () => {
-    setProfileLoading(true);
+    setWeddingDetailsLoading(true);
     try {
-      if (!user?.internal_user_id) return;
-      await import('@/services/api/userApi').then(m => m.updateCurrentUserProfile(user.internal_user_id, {
-        display_name: displayName || null,
+      if (!weddingId) {
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "No active wedding to save details for.",
+        });
+        return;
+      }
+
+      await updateWeddingDetails(weddingId, {
         wedding_date: weddingDate || null,
         wedding_location: location || null,
         wedding_tradition: tradition || null,
-      }));
+      });
+
       toast({
         title: "Wedding Details Saved",
         description: "Your wedding details have been updated.",
       });
     } catch (e) {
+      console.error("Failed to save wedding details:", e);
       toast({
         variant: "destructive",
         title: "Save Failed",
         description: "Could not save wedding details.",
       });
+    } finally {
+      setWeddingDetailsLoading(false);
     }
-    setProfileLoading(false);
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -219,9 +242,9 @@ const ProfilePage = () => {
             type="button" 
             className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 ml-auto"
             onClick={handleSaveWeddingDetails}
-            disabled={profileLoading}
+            disabled={weddingDetailsLoading}
           >
-            {profileLoading ? (
+            {weddingDetailsLoading ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
             ) : (
               <><Save className="mr-2 h-4 w-4" />Save Details</>
