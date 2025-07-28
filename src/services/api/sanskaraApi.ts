@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8765';
 
 // Configure axios instance
 const api = axios.create({
@@ -13,15 +13,6 @@ const api = axios.create({
 });
 
 // API interfaces
-export interface WeddingDetails {
-  wedding_id: string;
-  wedding_name: string;
-  wedding_date: string;
-  wedding_location: string;
-  wedding_tradition: string;
-  status: string;
-  details?: any; // For the JSONB details column
-}
 
 export interface ChatMessage {
   message: string;
@@ -76,25 +67,6 @@ export const getSuggestedRituals = async (weddingType: string): Promise<RitualIn
   }
 };
 
-export const getWeddingDetails = async (weddingId: string): Promise<WeddingDetails> => {
-  try {
-    const response = await api.get(`/weddings/${weddingId}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching wedding details for ID ${weddingId}:`, error);
-    throw error;
-  }
-};
-
-export const updateWeddingDetails = async (weddingId: string, updates: Partial<WeddingDetails>): Promise<WeddingDetails> => {
-  try {
-    const response = await api.put(`/weddings/${weddingId}`, updates);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating wedding details for ID ${weddingId}:`, error);
-    throw error;
-  }
-};
 
 
 // Export default API instance for custom requests

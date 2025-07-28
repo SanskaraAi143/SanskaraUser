@@ -83,37 +83,45 @@ const TimelineCreator = () => {
   
   const { toast } = useToast();
   
-  const handleAddEvent = async () => {
-    if (!formData.title || !formData.date || !formData.time || !formData.location) {
-      toast({ title: "Validation Error", description: "All fields are required." });
-      return;
+const handleAddEvent = async () => {
+  console.log("handleAddEvent called");
+  if (!formData.title || !formData.date || !formData.time || !formData.location) {
+    console.log("Validation failed: All fields are required.");
+    toast({ title: "Validation Error", description: "All fields are required." });
+    return;
+  }
+  try {
+    const eventToAdd = {
+      event_name: formData.title,
+      event_date_time: combineDateAndTime(formData.date, formData.time),
+      location: formData.location,
+      description: formData.description,
+      visibility: formData.visibility,
+      relevant_party: formData.relevant_party,
+    };
+    if (!user?.wedding_id) {
+      console.error('Wedding ID not available');
+      throw new Error('Wedding ID not available');
     }
-    try {
-      const eventToAdd = {
-        event_name: formData.title,
-        event_date_time: combineDateAndTime(formData.date, formData.time),
-        location: formData.location,
-        description: formData.description,
-        visibility: formData.visibility,
-        relevant_party: formData.relevant_party,
-      };
-      if (!user?.wedding_id) throw new Error('Wedding ID not available');
-      await addTimelineEvent(user.wedding_id, eventToAdd);
-      await fetchAndSetEvents();
-      resetForm();
-      setShowAddDialog(false);
-      toast({
-        title: "Event added",
-        description: "Your event has been added to the timeline."
-      });
-    } catch (error) {
-      console.error('Add Event Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add event."
-      });
-    }
-  };
+    console.log("Attempting to add event with data:", eventToAdd);
+    await addTimelineEvent(user.wedding_id, eventToAdd);
+    console.log("Event added successfully, fetching and setting events...");
+    await fetchAndSetEvents();
+    resetForm();
+    setShowAddDialog(false);
+    toast({
+      title: "Event added",
+      description: "Your event has been added to the timeline."
+    });
+    console.log("Modal closed and toast shown.");
+  } catch (error) {
+    console.error('Add Event Error:', error);
+    toast({
+      title: "Error",
+      description: "Failed to add event."
+    });
+  }
+};
   
   const handleUpdateEvent = async () => {
     if (!editingEvent) return;
@@ -133,6 +141,7 @@ const TimelineCreator = () => {
       await fetchAndSetEvents();
       resetForm();
       setEditingEvent(null);
+      setShowAddDialog(false); // Close the dialog after successful update
       toast({
         title: "Event updated",
         description: "Your event has been updated successfully."

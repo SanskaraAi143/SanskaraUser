@@ -120,7 +120,7 @@ const TaskTracker = () => {
           taskDataPayload.priority!,
           taskDataPayload.category,
           taskDataPayload.status!,
-          taskDataPayload.is_complete
+          data.lead_party // Pass lead_party from TaskFormValues
         );
       }
       setTasks(await getUserTasks(user.wedding_id));
@@ -139,7 +139,7 @@ const TaskTracker = () => {
   };
 
   const handleToggleComplete = async (task: Task) => {
-    if (!user?.id) return;
+    if (!user?.internal_user_id) return;
     setLoading(true);
     setError(null);
     try {
@@ -346,10 +346,7 @@ const TaskTracker = () => {
                                     <Checkbox
                                       id={`task-checkbox-${task.task_id}`}
                                       checked={task.is_complete}
-                                      onCheckedChange={(e) => {
-                                        e.stopPropagation(); // Prevent modal from opening
-                                        handleToggleComplete(task);
-                                      }}
+                                      onCheckedChange={() => handleToggleComplete(task)}
                                       aria-label={`Mark task ${task.title} as ${task.is_complete ? 'incomplete' : 'complete'}`}
                                       className="mt-1 border-wedding-gold data-[state=checked]:bg-wedding-gold data-[state=checked]:text-white"
                                     />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, Clock, Plus, Heart, Bell, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
+import { supabase } from "@/services/supabase/config"; // Import supabase client
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskTracker from "@/components/dashboard/TaskTracker";
@@ -17,7 +18,6 @@ import { getUserTasks } from "@/services/api/tasksApi";
 import { getUserBudgetMax, getExpenses } from "@/services/api/budgetApi";
 import { getUserVendors } from "@/services/api/vendorApi";
 import { getUserMoodBoards } from "@/services/api/boardApi";
-import { getWeddingDetails } from "@/services/api/sanskaraApi"; // New Import
 import { AnimatePresence, motion } from "framer-motion";
 
 const Dashboard = () => {
@@ -73,7 +73,7 @@ const Dashboard = () => {
           const weddingId = user.wedding_id;
 
           const [
-            weddingData, // Fetch wedding details
+            weddingDataArray, // Fetch wedding details using Supabase
             events,
             guestList,
             userTasks,
@@ -82,7 +82,7 @@ const Dashboard = () => {
             userVendors,
             userMoodBoards,
           ] = await Promise.all([
-            getWeddingDetails(weddingId), // New API call
+            supabase.from('weddings').select('*').eq('wedding_id', weddingId).single(),
             getUserTimelineEvents(weddingId),
             fetchGuestList(weddingId),
             getUserTasks(weddingId),
@@ -91,6 +91,8 @@ const Dashboard = () => {
             getUserVendors(weddingId),
             getUserMoodBoards(weddingId),
           ]);
+
+          const weddingData = weddingDataArray.data; // Extract data from Supabase response
 
           setWeddingDetails(weddingData); // Set new state
           setTimelineEvents(events || []);

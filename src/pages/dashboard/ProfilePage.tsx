@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getWeddingDetails, updateWeddingDetails } from "@/services/api/sanskaraApi"; // Import new API functions
 
 import { Loader2, User as UserIcon, Mail, Calendar, Lock, Save } from "lucide-react";
+import { supabase } from "@/services/supabase/config";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -33,7 +33,16 @@ const ProfilePage = () => {
           return;
         }
         setWeddingId(user.wedding_id);
-        const data = await getWeddingDetails(user.wedding_id);
+        const { data, error } = await supabase
+          .from('weddings')
+          .select('wedding_date, wedding_location, wedding_tradition')
+          .eq('wedding_id', user.wedding_id)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
         if (data) {
           setWeddingDate(data.wedding_date || "");
           setLocation(data.wedding_location || "");
@@ -65,11 +74,18 @@ const ProfilePage = () => {
         return;
       }
 
-      await updateWeddingDetails(weddingId, {
-        wedding_date: weddingDate || null,
-        wedding_location: location || null,
-        wedding_tradition: tradition || null,
-      });
+      const { error } = await supabase
+        .from('weddings')
+        .update({
+          wedding_date: weddingDate || null,
+          wedding_location: location || null,
+          wedding_tradition: tradition || null,
+        })
+        .eq('wedding_id', weddingId);
+
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Wedding Details Saved",

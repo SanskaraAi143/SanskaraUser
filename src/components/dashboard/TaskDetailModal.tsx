@@ -19,9 +19,10 @@ const taskFormSchema = z.object({
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["No Status", "To Do", "Doing", "Done"]),
   category: z.string().max(50, { message: "Category must be 50 characters or less." }).optional().or(z.literal('')),
+  lead_party: z.enum(["bride_side", "groom_side", "couple", "shared"]).optional().or(z.literal('')), // Optional lead_party field
 });
 
-type TaskFormValues = z.infer<typeof taskFormSchema>;
+export type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface TaskDetailModalProps {
   task: Partial<Task> | null; // Allow partial task for new tasks
@@ -45,6 +46,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
       priority: 'medium',
       status: 'To Do',
       category: '',
+      lead_party: '', // Add default value for lead_party
     },
   });
 
@@ -57,6 +59,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
         priority: task.priority || 'medium',
         status: task.status || 'To Do',
         category: task.category || '',
+        lead_party: (task as any).lead_party || '', // Populate lead_party
       });
     }
   }, [task, open, form]);
@@ -64,7 +67,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
   const handleFormSubmit = async (values: TaskFormValues) => {
     setIsSubmitting(true);
     try {
-      await onSave(values, task?.task_id && task.task_id !== 'new' ? task.task_id : undefined);
+      await onSave({ ...values, lead_party: values.lead_party || undefined }, task?.task_id && task.task_id !== 'new' ? task.task_id : undefined);
       // onClose(); // Let parent handle close on successful save
     } catch (error) {
       // Error handling can be done in the parent or here with a local error state
@@ -197,6 +200,29 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormControl>
                       <Input placeholder="E.g., Venue, Catering" {...field} className="glass-card border-wedding-gold/30" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lead_party"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-wedding-brown">Lead Party (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-card border-wedding-gold/30">
+                          <SelectValue placeholder="Select lead party" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="bride_side">Bride's Side</SelectItem>
+                        <SelectItem value="groom_side">Groom's Side</SelectItem>
+                        <SelectItem value="couple">Couple</SelectItem>
+                        <SelectItem value="shared">Shared</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
