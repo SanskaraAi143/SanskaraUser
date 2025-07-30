@@ -19,7 +19,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   
   // Refs for managing state and preventing race conditions
-  const clientRef = useRef<any>(null);
+  const clientRef = useRef<MultimodalClient | null>(null);
   const currentAssistantMessageIndex = useRef<number | null>(null);
   const processingLockRef = useRef<boolean>(false);
   const transcriptRef = useRef<Message[]>([]);
@@ -50,7 +50,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       processingLockRef.current = true;
       
       // Work with the current transcript state from ref to avoid React batching issues
-      let newTranscript = [...transcriptRef.current];
+      const newTranscript = [...transcriptRef.current];
       
       if (message.type === 'user_input') {
         // Find the last user message (which should be the '...' placeholder)
@@ -94,7 +94,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       setIsAssistantSpeaking(false);
     };
     
-    const handleError = (error: any) => {
+    const handleError = (error: unknown) => {
       console.error('Client error:', error);
       currentAssistantMessageIndex.current = null;
       setIsSpeaking(false);

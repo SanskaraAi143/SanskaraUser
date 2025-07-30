@@ -1,4 +1,5 @@
 import { supabase } from "../supabase/config";
+import { useQuery } from "@tanstack/react-query";
 
 export interface Guest {
   guest_id: string;
@@ -22,6 +23,14 @@ export async function fetchGuestList(weddingId: string): Promise<Guest[]> {
   if (error) throw error;
   return data || [];
 }
+
+export const useGuestList = (weddingId: string) => {
+  return useQuery<Guest[], Error>({
+    queryKey: ['guestList', weddingId],
+    queryFn: () => fetchGuestList(weddingId),
+    enabled: !!weddingId,
+  });
+};
 
 export async function addGuest(guest: Omit<Guest, 'guest_id' | 'created_at' | 'updated_at'>): Promise<Guest> {
   const { data, error } = await supabase

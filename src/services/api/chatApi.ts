@@ -1,5 +1,7 @@
 
 import { supabase } from '../supabase/config';
+import { logError, ApiError } from '../../utils/errorLogger';
+import { toast } from '../../hooks/use-toast';
 
 
 // Define types
@@ -30,24 +32,11 @@ export interface ChatSessionSummary {
   topic?: string;
   participants?: string[];
   lastMessagePreview?: string;
-  [key: string]: any; // Remove or refine as needed for stricter typing
+  // TODO: Refine or remove the index signature for stricter typing if possible
+  [key: string]: unknown;
 }
 
 // Get user ID from current auth
-const getCurrentUserId = async () => {
-  const user = auth.currentUser;
-  if (!user) throw new Error('User not authenticated');
-  
-  // Get internal user_id from Supabase based on supabase user id
-  const { data, error } = await supabase
-    .from('users')
-    .select('user_id')
-    .eq('supabase_auth_uid', user.id)
-    .single();
-    
-  if (error) throw error;
-  return data.user_id;
-};
 
 // API functions
 export const sendChatMessage = async (
@@ -63,9 +52,9 @@ export const sendChatMessage = async (
     }
     
     // Get the Supabase access token if needed
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
-    const idToken = await user.getIdToken();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('User not authenticated');
+    const idToken = session.access_token;
     
     // Prepare request to AutoGen-powered backend
     const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -88,11 +77,16 @@ export const sendChatMessage = async (
     
     const responseData = await response.json();
     return responseData;
-  } catch (error) {
-    console.error('Error sending chat message:', error);
-    
+  } catch (error: any) {
+    logError(error, { context: 'sendChatMessage', message: message, weddingId: weddingId, sessionId: sessionId });
+    toast({
+      title: "Error sending message",
+      description: error instanceof ApiError ? error.message : "An unexpected error occurred.",
+      variant: "destructive",
+    });
+
     // For development without backend, return mock data
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && !(error instanceof ApiError)) {
       console.log('Using mock data for development');
       return {
         messages: [
@@ -112,7 +106,7 @@ export const sendChatMessage = async (
       };
     }
     
-    throw error;
+    throw new ApiError(`Failed to send chat message: ${error.message || 'Unknown error'}`, (error as { response?: { status: number } }).response?.status || 500, error);
   }
 };
 
@@ -120,22 +114,27 @@ export const getChatSessions = async (weddingId: string): Promise<ChatSession[]>
   try {
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('session_id, summary, created_at, last_updated_at')
+      .select('session_id, wedding_id, summary, created_at, last_updated_at')
       .eq('wedding_id', weddingId)
       .order('last_updated_at', { ascending: false });
       
-    if (error) throw error;
+    if (error) throw new ApiError(`Failed to fetch chat sessions: ${error.message}`, 500, error);
     
-    return data.map(session => ({
+    return data.map((session: { session_id: string; summary: ChatSessionSummary; created_at: string; last_updated_at: string; wedding_id: string; }) => ({
       id: session.session_id,
       wedding_id: session.wedding_id,
       summary: session.summary,
       created_at: new Date(session.created_at),
       last_updated_at: new Date(session.last_updated_at),
     }));
-  } catch (error) {
-    console.error('Error fetching chat sessions:', error);
-    throw error;
+  } catch (error: any) {
+    logError(error, { context: 'getChatSessions', weddingId: weddingId });
+    toast({
+      title: "Error fetching chat sessions",
+      description: error instanceof ApiError ? error.message : "Could not load chat history.",
+      variant: "destructive",
+    });
+    throw error; // Re-throw to propagate error for further handling if needed
   }
 };
 
@@ -147,7 +146,7 @@ export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]>
       .eq('session_id', sessionId)
       .order('timestamp', { ascending: true });
       
-    if (error) throw error;
+    if (error) throw new ApiError(`Failed to fetch chat messages: ${error.message}`, 500, error);
     
     return data.map(message => ({
       id: message.message_id,
@@ -157,8 +156,13 @@ export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]>
       timestamp: new Date(message.timestamp),
       message: message.content.text || '', // For backward compatibility
     }));
-  } catch (error) {
-    console.error('Error fetching chat messages:', error);
-    throw error;
+  } catch (error: any) {
+    logError(error, { context: 'getChatMessages', sessionId: sessionId });
+    toast({
+      title: "Error fetching messages",
+      description: error instanceof ApiError ? error.message : "Could not load messages.",
+      variant: "destructive",
+    });
+    throw error; // Re-throw to propagate error for further handling if needed
   }
 };

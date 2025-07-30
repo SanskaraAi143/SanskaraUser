@@ -211,12 +211,19 @@ const FirstPartnerOnboardingForm: React.FC = () => {
         description: "Your wedding plan has been initiated. Your partner will be invited to complete their part.",
       });
       navigate('/dashboard'); // Redirect to dashboard after successful submission
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Submission Error:', error);
+      let errorMessage = "An unknown error occurred.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        // Fallback for cases where error might be an object with a message property but not an instance of Error
+        errorMessage = (error as { message: string }).message;
+      }
       toast({
         variant: "destructive",
         title: "Submission Failed",
-        description: `There was an error submitting your data: ${error.message}`,
+        description: `There was an error submitting your data: ${errorMessage}`,
       });
     }
   };

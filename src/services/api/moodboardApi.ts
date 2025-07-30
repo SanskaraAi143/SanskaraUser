@@ -1,5 +1,6 @@
 import { supabase } from '../supabase/config';
 import { v4 as uuidv4 } from 'uuid';
+import { useQuery } from '@tanstack/react-query';
 
 export interface MoodBoardItem {
   item_id: string;
@@ -7,8 +8,8 @@ export interface MoodBoardItem {
   image_url: string;
   note: string;
   category: string;
-  visibility?: string;
-  owner_party?: string;
+  visibility: string;
+  owner_party: string;
   created_at: string;
 }
 
@@ -25,13 +26,21 @@ export const getMoodBoardItems = async (mood_board_id: string, category?: string
   return data || [];
 };
 
+export const useMoodBoardItems = (mood_board_id: string, category?: string) => {
+  return useQuery<MoodBoardItem[], Error>({
+    queryKey: ['moodBoardItems', mood_board_id, category],
+    queryFn: () => getMoodBoardItems(mood_board_id, category),
+    enabled: !!mood_board_id,
+  });
+};
+
 export interface AddMoodBoardItemOptions {
   mood_board_id: string;
   image_url: string;
   note: string;
   category: string;
-  visibility?: string;
-  owner_party?: string;
+  visibility: string;
+  owner_party: string;
 }
 
 export const addMoodBoardItem = async (options: AddMoodBoardItemOptions) => {

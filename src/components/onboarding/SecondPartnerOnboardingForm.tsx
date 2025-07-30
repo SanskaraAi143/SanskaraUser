@@ -17,7 +17,7 @@ interface PartnerDetailsResponse {
     wedding_location: string;
     wedding_tradition: string;
     wedding_style: string;
-    details?: any; // For the JSONB details column
+    details?: Record<string, unknown>; // For the JSONB details column
   };
   first_partner_name: string;
   first_partner_details: {
@@ -33,7 +33,7 @@ interface PartnerDetailsResponse {
 }
 
 interface SecondPartnerOnboardingFormProps {
-  initialWeddingData?: any; // Prop to receive pre-fetched wedding data
+  initialWeddingData?: Record<string, unknown>; // Prop to receive pre-fetched wedding data
 }
 
 const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = ({ initialWeddingData }) => {
@@ -72,7 +72,7 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       let firstPartnerEmail = '';
 
       // Find the first partner's email (the one that is NOT other_partner_email_expected)
-      for (const email in initialWeddingData.partner_data) {
+      for (const email in initialWeddingData.partner_data as Record<string, unknown>) {
         if (email !== otherPartnerEmailExpected) {
           firstPartnerEmail = email;
           break;
@@ -173,15 +173,20 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       const oppositeRole = data.first_partner_details.role === 'Bride' ? 'Groom' : 'Bride';
       setFormData(prev => ({ ...prev, role: oppositeRole }));
       setCurrentStep(0); // Move to the first step of the form
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setLoading(false);
+      let errorMessage = "An unknown error occurred.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        errorMessage = String((err as { message: unknown }).message);
+      }
+      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error Finding Plan",
-        description: err.message,
+        description: errorMessage,
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -244,12 +249,18 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
         description: "Your plan is now active. You will be redirected to the dashboard.",
       });
       navigate('/dashboard'); // Redirect to dashboard after successful submission
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Final Submission Error:', err);
+      let errorMessage = "An unknown error occurred.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        errorMessage = String((err as { message: unknown }).message);
+      }
       toast({
         variant: "destructive",
         title: "Submission Failed",
-        description: `There was a critical error: ${err.message}`,
+        description: `There was a critical error: ${errorMessage}`,
       });
     }
   };

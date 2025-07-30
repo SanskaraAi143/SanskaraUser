@@ -1,4 +1,7 @@
 import { supabase } from '../supabase/config';
+import { logError, ApiError } from '../../utils/errorLogger';
+import { toast } from '../../hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 
 
 export interface Vendor {
@@ -165,13 +168,18 @@ export const getVendorRecommendations = async (
       contact: vendor.phone_number || '',
       email: vendor.contact_email || '',
       price: vendor.pricing_range ? `${vendor.pricing_range.min ? '₹' + vendor.pricing_range.min.toLocaleString() : ''}${vendor.pricing_range.max ? '-₹' + vendor.pricing_range.max.toLocaleString() : ''} ${vendor.pricing_range.unit || ''}` : '',
-      status: vendor.status as any, // Cast to any for now, will refine if needed
+      status: vendor.status as "recommended" | "contacted" | "booked" | "pending" | "completed",
       bookingDate: undefined,
       notes: vendor.description || '',
       linkedVendor: undefined,
     }));
-  } catch (error) {
-    console.error('Error fetching vendor recommendations:', error);
+  } catch (error: any) {
+    logError(error, { context: 'getVendorRecommendations', category: category, location: location, budget: budget });
+    toast({
+      title: "Error fetching vendor recommendations",
+      description: error instanceof ApiError ? error.message : "Could not load vendor recommendations.",
+      variant: "destructive",
+    });
     throw error;
   }
 };
@@ -221,12 +229,17 @@ export const getVendorDetails = async (vendorId: string): Promise<Vendor> => {
       contact: data.phone_number || '',
       email: data.contact_email || '',
       price: data.pricing_range ? `${data.pricing_range.min ? '₹' + data.pricing_range.min.toLocaleString() : ''}${data.pricing_range.max ? '-₹' + data.pricing_range.max.toLocaleString() : ''} ${data.pricing_range.unit || ''}` : '',
-      status: data.status as any, // Cast to any for now, will refine if needed
+      status: data.status as "recommended" | "contacted" | "booked" | "pending" | "completed",
       notes: data.description || '',
       portfolio_image_urls: data.portfolio_image_urls,
     };
-  } catch (error) {
-    console.error('Error fetching vendor details:', error);
+  } catch (error: any) {
+    logError(error, { context: 'getVendorDetails', vendorId: vendorId });
+    toast({
+      title: "Error fetching vendor details",
+      description: error instanceof ApiError ? error.message : "Could not load vendor details.",
+      variant: "destructive",
+    });
     throw error;
   }
 };
@@ -246,32 +259,52 @@ export interface VendorToAdd {
 export const addVendorToUser = async (wedding_id: string, vendor: VendorToAdd, owner_party: string) => {
   // Prefer vendor.vendor_id for global vendors, fallback to vendor.id
   const linked_vendor_id = vendor.vendor_id || vendor.id;
-  const { data, error } = await supabase
-    .from('user_shortlisted_vendors')
-    .insert([
-      {
-        wedding_id,
-        vendor_name: vendor.name || vendor.vendor_name || '',
-        vendor_category: vendor.category || vendor.vendor_category || '',
-        contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
-        status: 'user_added',
-        linked_vendor_id,
-        owner_party,
-      },
-    ])
-    .select();
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('user_shortlisted_vendors')
+      .insert([
+        {
+          wedding_id,
+          vendor_name: vendor.name || vendor.vendor_name || '',
+          vendor_category: vendor.category || vendor.vendor_category || '',
+          contact_info: vendor.contact || vendor.phoneNumber || vendor.phone_number || '',
+          status: 'user_added',
+          linked_vendor_id,
+          owner_party,
+        },
+      ])
+      .select();
+    if (error) throw new ApiError(`Failed to add vendor to user: ${error.message}`, 500, error);
+    return data;
+  } catch (error: any) {
+    logError(error, { context: 'addVendorToUser', wedding_id: wedding_id, vendor: vendor, owner_party: owner_party });
+    toast({
+      title: "Error adding vendor",
+      description: error instanceof ApiError ? error.message : "Could not add vendor.",
+      variant: "destructive",
+    });
+    throw error;
+  }
 };
 
 export const removeVendorFromUser = async (userVendorId: string) => {
   // Always delete by user_vendor_id (UUID primary key)
-  const { error } = await supabase
-    .from('user_shortlisted_vendors')
-    .delete()
-    .eq('user_vendor_id', userVendorId);
-  if (error) throw error;
-  return true;
+  try {
+    const { error } = await supabase
+      .from('user_shortlisted_vendors')
+      .delete()
+      .eq('user_vendor_id', userVendorId);
+    if (error) throw new ApiError(`Failed to remove vendor from user: ${error.message}`, 500, error);
+    return true;
+  } catch (error: any) {
+    logError(error, { context: 'removeVendorFromUser', userVendorId: userVendorId });
+    toast({
+      title: "Error removing vendor",
+      description: error instanceof ApiError ? error.message : "Could not remove vendor.",
+      variant: "destructive",
+    });
+    throw error;
+  }
 };
 
 export const getUserVendors = async (wedding_id: string, userId?: string, role?: string): Promise<UserShortlistedVendorItem[]> => {
@@ -298,19 +331,37 @@ export const getUserVendors = async (wedding_id: string, userId?: string, role?:
     query = query.or(`owner_party.eq.${role},owner_party.eq.shared,owner_party.eq.couple`);
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data.map(item => ({
-    id: item.user_vendor_id,
-    name: item.vendor_name,
-    category: item.vendor_category,
-    contactInfo: item.contact_info,
-    status: item.status,
-    bookedDate: item.booked_date,
-    notes: item.notes,
-    linkedVendor: item.vendors as unknown as SupabaseVendorRaw | null,
-    estimatedCost: item.estimated_cost,
-    wedding_id: item.wedding_id,
-    owner_party: item.owner_party,
-  }));
+  try {
+    const { data, error } = await query;
+    if (error) throw new ApiError(`Failed to get user vendors: ${error.message}`, 500, error);
+    return data.map(item => ({
+      id: item.user_vendor_id,
+      name: item.vendor_name,
+      category: item.vendor_category,
+      contactInfo: item.contact_info,
+      status: item.status,
+      bookedDate: item.booked_date,
+      notes: item.notes,
+      linkedVendor: item.vendors as unknown as SupabaseVendorRaw | null,
+      estimatedCost: item.estimated_cost,
+      wedding_id: item.wedding_id,
+      owner_party: item.owner_party,
+    }));
+  } catch (error: any) {
+    logError(error, { context: 'getUserVendors', wedding_id: wedding_id, userId: userId, role: role });
+    toast({
+      title: "Error fetching user vendors",
+      description: error instanceof ApiError ? error.message : "Could not load your vendors.",
+      variant: "destructive",
+    });
+    throw error;
+  }
+};
+
+export const useUserVendors = (wedding_id: string, userId?: string, role?: string) => {
+  return useQuery<UserShortlistedVendorItem[], Error>({
+    queryKey: ['userVendors', wedding_id, userId, role],
+    queryFn: () => getUserVendors(wedding_id, userId, role),
+    enabled: !!wedding_id,
+  });
 };

@@ -156,7 +156,9 @@ const MoodBoard = () => {
         mood_board_id: selectedBoardId,
         image_url: demoUrl,
         note,
-        category
+        category,
+        visibility: currentBoard?.visibility || 'shared',
+        owner_party: user?.role || 'shared',
       });
       const items = await getMoodBoardItems(selectedBoardId);
       setMoodBoardItems(items);
@@ -364,7 +366,9 @@ const MoodBoard = () => {
                         mood_board_id: selectedBoardId,
                         image_url: url,
                         note: tag || 'New inspiration image',
-                        category: ''
+                        category: '',
+                        visibility: currentBoard?.visibility || 'shared',
+                        owner_party: user?.role || 'shared',
                       });
                       const items = await getMoodBoardItems(selectedBoardId);
                       setMoodBoardItems(items);

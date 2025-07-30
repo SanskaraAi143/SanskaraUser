@@ -1,11 +1,13 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import GDPRCompliance from './components/GDPRCompliance';
 import PageLoader from './components/ui/PageLoader';
 import FloatingChatButton from './components/ui/FloatingChatButton';
+import { useToast } from './hooks/use-toast';
+import { logError } from './utils/errorLogger';
+import { useAuth } from './context/AuthContext';
 
 // Layouts - Keep eager for critical path
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
@@ -49,6 +51,42 @@ const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 
 function App() {
+  const { toast } = useToast();
+  const { loading } = useAuth();
+
+  useEffect(() => {
+    const handleOffline = () => {
+      toast({
+        title: "No Internet Connection",
+        description: "It looks like you're offline. Some features may not be available.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      logError(new Error("Network offline"), { type: "network" });
+    };
+
+    const handleOnline = () => {
+      toast({
+        title: "Back Online",
+        description: "Your internet connection has been restored.",
+        variant: "default",
+        duration: 3000,
+      });
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [toast]);
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
   return (
     <BrowserRouter
       future={{
@@ -56,7 +94,6 @@ function App() {
         v7_relativeSplatPath: true
       }}
     >
-      <AuthProvider>
         <ErrorBoundary>
           <div className="app-container">
             <Suspense fallback={<PageLoader />}>
@@ -101,7 +138,6 @@ function App() {
             <GDPRCompliance />
           </div>
         </ErrorBoundary>
-      </AuthProvider>
     </BrowserRouter>
   );
 }

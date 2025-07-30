@@ -1,26 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import TaskTracker from '@/components/dashboard/TaskTracker';
 import { useAuth } from '@/context/AuthContext';
-import { getUserTasks } from '@/services/api/tasksApi';
 
 const TasksPage = () => {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!user?.wedding_id) {
-      setTasks([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    getUserTasks(user.wedding_id)
-      .then(setTasks)
-      .catch(() => setError('Failed to load tasks'))
-      .finally(() => setLoading(false));
-  }, [user?.wedding_id]);
 
   return (
     <div className="space-y-6">

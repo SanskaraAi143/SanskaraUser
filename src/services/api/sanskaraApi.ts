@@ -1,12 +1,12 @@
 
 import axios from 'axios';
-
-// Base API configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8765';
+import { BASE_API_URL } from '../../config/api';
+import { logError, ApiError } from '../../utils/errorLogger';
+import { toast } from '../../hooks/use-toast';
 
 // Configure axios instance
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,14 +33,19 @@ export interface RitualInfo {
 // API functions
 export const sendChatMessage = async (message: string, userId: string, category?: string): Promise<ChatMessage> => {
   try {
-    const response = await api.post('/chat', { 
-      message, 
+    const response = await api.post('/chat', {
+      message,
       userId,
       category: category || 'general'
     });
     return response.data;
-  } catch (error) {
-    console.error('Error sending chat message:', error);
+  } catch (error: any) {
+    logError(error, { context: 'sanskaraApi:sendChatMessage', message, userId, category });
+    toast({
+      title: "Error sending chat message",
+      description: error instanceof ApiError ? error.message : "An unexpected error occurred.",
+      variant: "destructive",
+    });
     throw error;
   }
 };
@@ -49,8 +54,13 @@ export const getRitualInformation = async (ritualName: string): Promise<RitualIn
   try {
     const response = await api.get(`/rituals/${encodeURIComponent(ritualName)}`);
     return response.data;
-  } catch (error) {
-    console.error('Error fetching ritual information:', error);
+  } catch (error: any) {
+    logError(error, { context: 'sanskaraApi:getRitualInformation', ritualName });
+    toast({
+      title: "Error fetching ritual information",
+      description: error instanceof ApiError ? error.message : "An unexpected error occurred.",
+      variant: "destructive",
+    });
     throw error;
   }
 };
@@ -61,8 +71,13 @@ export const getSuggestedRituals = async (weddingType: string): Promise<RitualIn
       params: { weddingType }
     });
     return response.data;
-  } catch (error) {
-    console.error('Error fetching suggested rituals:', error);
+  } catch (error: any) {
+    logError(error, { context: 'sanskaraApi:getSuggestedRituals', weddingType });
+    toast({
+      title: "Error fetching suggested rituals",
+      description: error instanceof ApiError ? error.message : "An unexpected error occurred.",
+      variant: "destructive",
+    });
     throw error;
   }
 };

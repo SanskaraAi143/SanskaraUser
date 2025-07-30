@@ -1,6 +1,7 @@
 // Budget and Expenses API for Supabase
 import { supabase } from '../supabase/config';
 import { v4 as uuidv4 } from 'uuid';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type Budget = {
   id: string;
@@ -38,6 +39,14 @@ export const getUserBudgetMax = async (userId: string): Promise<number | null> =
   }
 };
 
+export const useUserBudgetMax = (userId: string) => {
+  return useQuery<number | null, Error>({
+    queryKey: ['userBudgetMax', userId],
+    queryFn: () => getUserBudgetMax(userId),
+    enabled: !!userId,
+  });
+};
+
 // Update the user's budget_max in the preferences JSONB column in users table
 export const updateUserBudgetMax = async (userId: string, budgetMax: number) => {
   // Fetch current preferences
@@ -57,6 +66,16 @@ export const updateUserBudgetMax = async (userId: string, budgetMax: number) => 
   return true;
 };
 
+export const useUpdateUserBudgetMax = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, budgetMax }: { userId: string, budgetMax: number }) => updateUserBudgetMax(userId, budgetMax),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userBudgetMax'] });
+    },
+  });
+};
+
 export const getExpenses = async (weddingId: string): Promise<Expense[]> => {
   const { data, error } = await supabase
     .from('budget_items')
@@ -66,12 +85,30 @@ export const getExpenses = async (weddingId: string): Promise<Expense[]> => {
   return data || [];
 };
 
+export const useExpenses = (weddingId: string) => {
+  return useQuery<Expense[], Error>({
+    queryKey: ['expenses', weddingId],
+    queryFn: () => getExpenses(weddingId),
+    enabled: !!weddingId,
+  });
+};
+
 export const addExpense = async (expense: Omit<Expense, 'item_id'|'created_at'|'updated_at'>) => {
   const { data, error } = await supabase
     .from('budget_items')
     .insert([{ ...expense, item_id: uuidv4(), created_at: new Date().toISOString() }]);
   if (error) throw error;
   return data;
+};
+
+export const useAddExpense = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (expense: Omit<Expense, 'item_id'|'created_at'|'updated_at'>) => addExpense(expense),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    },
+  });
 };
 
 export const updateExpense = async (expense: Expense) => {
@@ -83,6 +120,16 @@ export const updateExpense = async (expense: Expense) => {
   return data;
 };
 
+export const useUpdateExpense = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (expense: Expense) => updateExpense(expense),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    },
+  });
+};
+
 export const deleteExpense = async (id: string) => {
   const { error } = await supabase
     .from('budget_items')
@@ -90,4 +137,14 @@ export const deleteExpense = async (id: string) => {
     .eq('item_id', id);
   if (error) throw error;
   return true;
+};
+
+export const useDeleteExpense = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteExpense(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    },
+  });
 };

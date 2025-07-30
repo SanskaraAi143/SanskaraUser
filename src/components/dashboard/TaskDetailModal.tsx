@@ -9,6 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Task } from '@/services/api/tasksApi'; // Assuming Task type is exported
+
+const VALID_LEAD_PARTIES = ['', 'bride_side', 'groom_side', 'couple', 'shared'] as const;
+type ValidLeadParty = typeof VALID_LEAD_PARTIES[number];
+
+function isValidLeadParty(value: string | undefined | null): value is ValidLeadParty {
+  return typeof value === 'string' && (VALID_LEAD_PARTIES as readonly string[]).includes(value);
+}
+
 import { Loader2 } from 'lucide-react';
 
 // Define Zod schema for task validation
@@ -19,7 +27,7 @@ const taskFormSchema = z.object({
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["No Status", "To Do", "Doing", "Done"]),
   category: z.string().max(50, { message: "Category must be 50 characters or less." }).optional().or(z.literal('')),
-  lead_party: z.enum(["bride_side", "groom_side", "couple", "shared"]).optional().or(z.literal('')), // Optional lead_party field
+  lead_party: z.enum(VALID_LEAD_PARTIES).optional().or(z.literal('')), // Optional lead_party field
 });
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -59,7 +67,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
         priority: task.priority || 'medium',
         status: task.status || 'To Do',
         category: task.category || '',
-        lead_party: (task as any).lead_party || '', // Populate lead_party
+        lead_party: isValidLeadParty(task.lead_party) ? task.lead_party : '',
       });
     }
   }, [task, open, form]);

@@ -8,7 +8,7 @@ export interface Message {
   content: string; // For now, simple text. Later can be structured content.
   timestamp?: string;
   // Future: richMedia?: { type: 'image' | 'video' | 'graph', url: string }
-  // Future: interactiveElements?: any;
+  // Future: interactiveElements?: Record<string, unknown>;
 }
 
 interface MessageItemProps {

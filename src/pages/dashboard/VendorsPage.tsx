@@ -253,7 +253,7 @@ const VendorsPage = () => {
      searchTerm={searchTerm}
      setSearchTerm={setSearchTerm}
      setActiveTab={setActiveTab}
-     user={user}
+     user={user as { wedding_id: string, internal_user_id: string, role: string }}
      setVendors={setVendors}
    />
    </div>
@@ -265,7 +265,7 @@ interface VendorCardProps {
   vendor: DisplayVendor;
   showAllVendors: boolean;
   vendors: DisplayVendor[];
-  user: any;
+  user: { wedding_id: string, internal_user_id: string, role: string };
   setVendors: React.Dispatch<React.SetStateAction<DisplayVendor[]>>;
 }
 
@@ -402,7 +402,7 @@ interface VendorsGridProps {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  user: any;
+  user: { wedding_id: string, internal_user_id: string, role: string };
   setVendors: React.Dispatch<React.SetStateAction<DisplayVendor[]>>;
 }
 

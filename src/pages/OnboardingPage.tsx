@@ -32,7 +32,7 @@ const OnboardingPage: React.FC = () => {
   // Case 2: Wedding ID exists, but onboarding is in progress
   if (user.wedding_id && user.wedding_status === 'onboarding_in_progress') {
     const currentPartnerEmail = user.email;
-    const firstPartnerDetails = user.wedding_details_json?.partner_data?.[user.wedding_details_json?.current_partner_email];
+    const firstPartnerDetails = user.wedding_details_json?.partner_data?.[user.wedding_details_json.current_partner_email as string];
     const invitedPartnerEmail = user.wedding_details_json?.other_partner_email_expected;
 
     // Check if the current user is the first partner who initiated
@@ -41,7 +41,7 @@ const OnboardingPage: React.FC = () => {
         <div className="onboarding-container">
           <h1>Thanks for starting!</h1>
           <p>Your wedding plan is awaiting completion by your partner.</p>
-          <p>We've sent an invitation to <strong>{invitedPartnerEmail}</strong> to complete their part.</p>
+          <p>We've sent an invitation to <strong>{invitedPartnerEmail as string}</strong> to complete their part.</p>
           <p>Once they're done, your personalized AI planner will be activated!</p>
           <Button onClick={() => navigate('/dashboard')} className="mt-4">Go to Dashboard (Waiting)</Button>
         </div>

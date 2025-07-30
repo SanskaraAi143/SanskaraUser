@@ -1,6 +1,4 @@
 // src/config/api.ts
-const BASE_API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://api.sanskaraai.com' // Replace with your production API URL
-  : 'http://localhost:8765'; // Local API backend
+const BASE_API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export { BASE_API_URL };

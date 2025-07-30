@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/config';
+import { useQuery } from '@tanstack/react-query';
 
 
 export interface TimelineEvent {
@@ -30,6 +31,14 @@ export const getUserTimelineEvents = async (wedding_id: string): Promise<Timelin
     console.error('Error fetching timeline events:', error);
     return [];
   }
+};
+
+export const useUserTimelineEvents = (wedding_id: string) => {
+  return useQuery<TimelineEvent[], Error>({
+    queryKey: ['timelineEvents', wedding_id],
+    queryFn: () => getUserTimelineEvents(wedding_id),
+    enabled: !!wedding_id,
+  });
 };
 
 export const addTimelineEvent = async (wedding_id: string, event: Omit<TimelineEvent, 'event_id' | 'created_at' | 'updated_at' | 'wedding_id'>) => {

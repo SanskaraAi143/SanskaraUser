@@ -18,8 +18,8 @@ export interface MoodBoardItem {
   note: string;
   category: string;
   created_at: string;
-  visibility?: string; // Add visibility to MoodBoardItem
-  owner_party?: string; // Add owner_party to MoodBoardItem
+  visibility: string; // Make visibility required for MoodBoardItem
+  owner_party: string; // Make owner_party required for MoodBoardItem
 }
 
 export const getUserMoodBoards = async (wedding_id: string): Promise<MoodBoard[]> => {

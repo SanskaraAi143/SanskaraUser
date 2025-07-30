@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/config';
+import { useQuery } from '@tanstack/react-query';
 
 export interface Preferences {
   email_notifications: boolean;
@@ -29,6 +30,14 @@ export const getCurrentUserProfile = async (user_id: string): Promise<UserProfil
     .single();
   if (error) throw error;
   return data || null;
+};
+
+export const useUserProfile = (user_id: string) => {
+  return useQuery<UserProfile | null, Error>({
+    queryKey: ['userProfile', user_id],
+    queryFn: () => getCurrentUserProfile(user_id),
+    enabled: !!user_id, // Only run the query if user_id is available
+  });
 };
 
 // Update current user's profile (by internal user_id from AuthContext)
