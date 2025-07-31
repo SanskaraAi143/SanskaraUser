@@ -5,7 +5,7 @@
 import AudioClient from './audio-client.js';
 
 export default class MultimodalClient extends AudioClient {
-    constructor(userId, serverUrl = 'ws://localhost:8765/ws') {
+    constructor(userId, serverUrl = 'wss://api.sanskaraai.com/ws') {
         const url = new URL(serverUrl);
         if (userId) {
             url.searchParams.set('user_id', userId);
