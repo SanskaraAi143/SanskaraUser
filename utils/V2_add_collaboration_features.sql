@@ -141,6 +141,11 @@ ALTER TABLE mood_boards
     ADD COLUMN visibility VARCHAR(50) NOT NULL DEFAULT 'shared',
     ADD COLUMN owner_party VARCHAR(50); -- 'bride_side', 'groom_side', 'couple'
 
+-- ALTER 'mood_board_items' table for collaboration
+ALTER TABLE mood_board_items
+    ADD COLUMN owner_party VARCHAR(50), -- 'bride_side', 'groom_side', 'couple'
+    ADD COLUMN visibility VARCHAR(50) NOT NULL DEFAULT 'shared';
+
 
 -- ALTER 'chat_sessions' table to upgrade the summary field for structured context
 ALTER TABLE chat_sessions
