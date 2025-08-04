@@ -11,6 +11,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 
+// Google Gemini AI configuration
+const GOOGLE_API_KEY = 'AIzaSyDbEUrYA-1YJAAjAOeBoqZOTM4mzl4YuNs'; // Replace with your actual API key
+
 const FirstPartnerOnboardingForm: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -47,6 +50,8 @@ const FirstPartnerOnboardingForm: React.FC = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false); // Loading state for form submission
+  const [suggestingCeremonies, setSuggestingCeremonies] = useState(false); // Loading state for ceremony suggestions
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -69,6 +74,88 @@ const FirstPartnerOnboardingForm: React.FC = () => {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prevData => ({ ...prevData, [name]: value }));
+  };
+
+  // Function to add ceremony to the list
+  const addCeremonyToList = (ceremonyName: string) => {
+    if (!formData.ceremonies.includes(ceremonyName)) {
+      setFormData(prev => ({
+        ...prev,
+        ceremonies: [...prev.ceremonies, ceremonyName]
+      }));
+    }
+  };
+
+  // Function to suggest ceremonies using Google Gemini AI
+  const handleSuggestCeremonies = async () => {
+    if (!formData.familyRegion) {
+      toast({
+        variant: "destructive",
+        title: "Region Required",
+        description: "Please enter your family's region first.",
+      });
+      return;
+    }
+
+    if (!GOOGLE_API_KEY || GOOGLE_API_KEY.includes('YOUR_GOOGLE_API_KEY')) {
+      toast({
+        variant: "destructive",
+        title: "API Key Missing",
+        description: "Please configure the Google API Key to use this feature.",
+      });
+      return;
+    }
+
+    setSuggestingCeremonies(true);
+
+    const prompt = `Based on a Hindu wedding for a family from ${formData.familyRegion}, suggest key pre-wedding ceremonies. Provide ONLY comma-separated names without any additional text.`;
+    
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get ceremony suggestions');
+      }
+
+      const data = await response.json();
+      const suggestedText = data.candidates[0].content.parts[0].text;
+      const ceremonies = suggestedText.split(',').map((c: string) => c.trim()).filter((c: string) => c);
+      
+      ceremonies.forEach((ceremony: string) => addCeremonyToList(ceremony));
+      
+      toast({
+        title: "Ceremonies Suggested!",
+        description: `Added ${ceremonies.length} ceremony suggestions for ${formData.familyRegion}.`,
+      });
+    } catch (error) {
+      console.error('Error generating ceremony suggestions:', error);
+      toast({
+        variant: "destructive",
+        title: "Suggestion Failed",
+        description: "Could not generate ceremony suggestions. Please try again.",
+      });
+    } finally {
+      setSuggestingCeremonies(false);
+    }
+  };
+
+  // Function to add custom ceremony
+  const handleAddCustomCeremony = (customCeremony: string) => {
+    if (customCeremony.trim()) {
+      addCeremonyToList(customCeremony.trim());
+    }
   };
 
   const validateStep = (step: number) => {
@@ -118,72 +205,51 @@ const FirstPartnerOnboardingForm: React.FC = () => {
       return;
     }
 
-    const cultural_background = formData.familyRegion + (formData.familyCaste ? ` (${formData.familyCaste})` : '');
+    setSubmitting(true); // Start loading state
 
-    const current_partner_details = {
-      name: formData.fullName,
-      email: formData.yourEmail,
-      phone: formData.phone,
-      role: formData.role,
-      partner_name: formData.partnerName,
-      partner_email: formData.partnerEmail,
-      wedding_city: formData.weddingCity,
-      wedding_date: formData.weddingDate,
-      wedding_style: formData.weddingStyle,
-      wedding_tradition: formData.weddingTradition,
-      other_style: formData.otherStyle,
-      color_theme: formData.colorTheme,
-      attire_main: formData.attireMain,
-      attire_other: formData.attireOther,
-      cultural_background: cultural_background,
-      ceremonies: formData.ceremonies,
-      custom_instructions: formData.customInstructions,
-      teamwork_plan: {
-        venue_decor: formData.venueDecor,
-        catering: formData.catering,
-        guest_list: formData.guestList,
-        sangeet_entertainment: formData.sangeetEntertainment,
-      },
-      guest_estimate: formData.guestEstimate,
-      guest_split: formData.guestSplit,
-      budget_range: formData.budgetRange,
-      budget_flexibility: formData.budgetFlexibility,
-      priorities: formData.priorities,
+    // Helper function to clean strings for JSON
+    const cleanString = (str: string) => {
+      return str.trim().replace(/[^\w\s\-&.,()]/g, ''); // Remove special chars except common ones
     };
 
+    const cultural_background = formData.familyRegion + (formData.familyCaste ? ` (${formData.familyCaste})` : '');
+
+    // Clean and validate data to avoid JSON parsing issues
+    const cleanWeddingName = `${cleanString(formData.fullName)} & ${cleanString(formData.partnerName)} Wedding`;
+    const cleanWeddingTradition = cleanString(formData.weddingTradition) || "Hindu Traditional";
+    
     const wedding_details = {
-      name: `${formData.fullName} & ${formData.partnerName}'s Wedding`, // A default naming convention
+      wedding_name: cleanWeddingName, // Remove apostrophe to avoid JSON issues
       wedding_date: formData.weddingDate,
-      wedding_location: formData.weddingCity,
-      wedding_tradition: formData.weddingTradition,
-      wedding_style: formData.weddingStyle, // Keep this as part of wedding details for now
-      // Add other relevant wedding-level details here
+      wedding_location: cleanString(formData.weddingCity), // Use wedding_location instead of wedding_city
+      wedding_tradition: cleanWeddingTradition, // Provide default if empty
+      wedding_style: formData.weddingStyle,
     };
 
     const current_user_onboarding_details = {
-      name: formData.fullName,
-      email: formData.yourEmail,
-      phone: formData.phone,
+      name: formData.fullName.trim(),
+      email: formData.yourEmail.trim(),
+      phone: formData.phone.trim() || null, // Convert empty string to null
       role: formData.role,
-      cultural_background: cultural_background,
+      cultural_background: cultural_background.trim(),
       ceremonies: formData.ceremonies,
-      custom_instructions: formData.customInstructions,
+      custom_instructions: formData.customInstructions.trim(),
       teamwork_plan: {
         venue_decor: formData.venueDecor,
         catering: formData.catering,
         guest_list: formData.guestList,
         sangeet_entertainment: formData.sangeetEntertainment,
       },
-      guest_estimate: formData.guestEstimate,
-      guest_split: formData.guestSplit,
-      budget_range: formData.budgetRange,
+      guest_estimate: formData.guestEstimate.trim(),
+      guest_split: formData.guestSplit.trim(),
+      budget_range: formData.budgetRange.trim(),
       budget_flexibility: formData.budgetFlexibility,
       priorities: formData.priorities,
     };
 
     const partner_onboarding_details = {
-      name: formData.partnerName,
-      email: formData.partnerEmail,
+      name: formData.partnerName.trim(),
+      email: formData.partnerEmail.trim(),
     };
 
     const payload = {
@@ -192,6 +258,8 @@ const FirstPartnerOnboardingForm: React.FC = () => {
       partner_onboarding_details: partner_onboarding_details,
     };
 
+    console.log('First Partner Onboarding Payload:', JSON.stringify(payload, null, 2));
+
     try {
       const response = await fetch(`${BASE_API_URL}/onboarding/submit`, {
         method: 'POST',
@@ -199,8 +267,12 @@ const FirstPartnerOnboardingForm: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
         const errorData = await response.text();
+        console.error('Server error response:', errorData);
         throw new Error(`Server responded with ${response.status}: ${errorData}`);
       }
 
@@ -225,6 +297,8 @@ const FirstPartnerOnboardingForm: React.FC = () => {
         title: "Submission Failed",
         description: `There was an error submitting your data: ${errorMessage}`,
       });
+    } finally {
+      setSubmitting(false); // End loading state
     }
   };
 
@@ -336,12 +410,41 @@ const FirstPartnerOnboardingForm: React.FC = () => {
                 <Input type="text" id="familyCaste" name="familyCaste" value={formData.familyCaste} onChange={handleChange} placeholder="e.g., Brahmin, Kshatriya, Marwari" />
               </div>
             </div>
-            <Button type="button" variant="secondary" className="mt-4">Suggest Ceremonies based on Region</Button>
-            <p className="text-sm text-gray-500 mt-2"><i>Generating suggestions... (Feature Coming Soon)</i></p>
+            <Button 
+              type="button" 
+              variant="secondary" 
+              className="mt-4" 
+              onClick={handleSuggestCeremonies}
+              disabled={suggestingCeremonies || !formData.familyRegion}
+            >
+              {suggestingCeremonies ? 'Generating Suggestions...' : 'Suggest Ceremonies based on Region'}
+            </Button>
+            <p className="text-sm text-gray-500 mt-2">
+              <i>{suggestingCeremonies ? 'AI is generating ceremony suggestions...' : 'Uses AI to suggest traditional ceremonies based on your region'}</i>
+            </p>
 
             <div className="mt-6">
               <Label className="mb-2 block">Ceremonies Your Side Will Host:</Label>
               <div className="grid grid-cols-2 gap-2">
+                {formData.ceremonies.map((ceremony, index) => (
+                  <div key={index} className="flex items-center space-x-2 bg-blue-50 p-2 rounded">
+                    <Checkbox 
+                      id={`ceremony-${index}`} 
+                      name="ceremonies" 
+                      value={ceremony} 
+                      checked={true}
+                      onCheckedChange={(checked) => {
+                        if (!checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            ceremonies: prev.ceremonies.filter(c => c !== ceremony)
+                          }));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`ceremony-${index}`}>{ceremony}</Label>
+                  </div>
+                ))}
                 <div className="flex items-center space-x-2">
                   <Checkbox id="mehendi" name="ceremonies" value="Mehendi" checked={formData.ceremonies.includes('Mehendi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Mehendi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
                   <Label htmlFor="mehendi">Mehendi</Label>
@@ -356,8 +459,31 @@ const FirstPartnerOnboardingForm: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
-                <Input type="text" id="customCeremony" placeholder="Add a custom ritual..." className="flex-grow" />
-                <Button type="button" variant="secondary">Add</Button>
+                <Input 
+                  type="text" 
+                  id="customCeremony" 
+                  placeholder="Add a custom ritual..." 
+                  className="flex-grow" 
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const input = e.target as HTMLInputElement;
+                      handleAddCustomCeremony(input.value);
+                      input.value = '';
+                    }
+                  }}
+                />
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => {
+                    const input = document.getElementById('customCeremony') as HTMLInputElement;
+                    handleAddCustomCeremony(input.value);
+                    input.value = '';
+                  }}
+                >
+                  Add
+                </Button>
               </div>
             </div>
             <div className="mt-4">
@@ -502,8 +628,8 @@ const FirstPartnerOnboardingForm: React.FC = () => {
             </Button>
           )}
           {currentStep === 4 && (
-            <Button onClick={handleSubmit} className="ml-auto">
-              Submit & View Summary
+            <Button onClick={handleSubmit} className="ml-auto" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit & View Summary'}
             </Button>
           )}
         </div>

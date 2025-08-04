@@ -85,12 +85,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role = memberWeddingData.role;
         const { data: weddingData } = await supabase
           .from('weddings')
-          .select('status, details')
+          .select('status, details, wedding_name, wedding_date, wedding_location, wedding_tradition, wedding_style')
           .eq('wedding_id', weddingId)
           .single();
         if (weddingData) {
           weddingStatus = weddingData.status;
-          weddingDetailsJson = weddingData.details;
+          weddingDetailsJson = {
+            ...weddingData.details,
+            wedding_name: weddingData.wedding_name,
+            wedding_date: weddingData.wedding_date,
+            wedding_location: weddingData.wedding_location,
+            wedding_tradition: weddingData.wedding_tradition,
+            wedding_style: weddingData.wedding_style,
+          };
         }
       }
 
@@ -98,14 +105,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!weddingId && sbUser.email) {
         const { data: invitedWeddingData } = await supabase
           .from('weddings')
-          .select('wedding_id, status, details')
+          .select('wedding_id, status, details, wedding_name, wedding_date, wedding_location, wedding_tradition, wedding_style')
           .contains('details', { other_partner_email_expected: sbUser.email })
           .limit(1)
           .single();
         if (invitedWeddingData) {
           weddingId = invitedWeddingData.wedding_id;
           weddingStatus = invitedWeddingData.status;
-          weddingDetailsJson = invitedWeddingData.details;
+          weddingDetailsJson = {
+            ...invitedWeddingData.details,
+            wedding_name: invitedWeddingData.wedding_name,
+            wedding_date: invitedWeddingData.wedding_date,
+            wedding_location: invitedWeddingData.wedding_location,
+            wedding_tradition: invitedWeddingData.wedding_tradition,
+            wedding_style: invitedWeddingData.wedding_style,
+          };
           role = "invited_partner";
         }
       }

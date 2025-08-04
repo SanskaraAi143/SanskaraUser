@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import FirstPartnerOnboardingForm from '@/components/onboarding/FirstPartnerOnboardingForm';
 import SecondPartnerOnboardingForm from '@/components/onboarding/SecondPartnerOnboardingForm';
@@ -9,13 +9,33 @@ const OnboardingPage: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (!loading && !user) {
+      console.log('User not authenticated, redirecting to landing page');
+      navigate('/');
+      return;
+    }
+
+    // Redirect if fully onboarded
+    if (!loading && user?.wedding_id && user.wedding_status === 'active') {
+      console.log('User already onboarded, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+  }, [user, loading, navigate]);
+
   if (loading) {
     return <div>Loading user data...</div>; // Or a loading spinner
   }
 
-  // Redirect if fully onboarded
+  // If user is not authenticated, don't render anything (redirect will happen)
+  if (!user) {
+    return null;
+  }
+
+  // If user is fully onboarded, don't render anything (redirect will happen)
   if (user?.wedding_id && user.wedding_status === 'active') {
-    navigate('/dashboard');
     return null;
   }
 

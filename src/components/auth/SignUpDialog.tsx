@@ -66,7 +66,10 @@ const SignUpDialog = ({ children }: SignUpDialogProps) => {
       await signUp(values.email, values.password, values.name);
       setOpen(false);
       form.reset();
-      navigate("/dashboard", { replace: true });
+      // Give auth context time to update, then navigate to onboarding for new users
+      setTimeout(() => {
+        navigate("/onboarding", { replace: true });
+      }, 100);
     } catch (error) {
       console.error("Sign up error:", error);
     } finally {

@@ -4,8 +4,15 @@
 
 import AudioClient from './audio-client.js';
 
+// Helper function to get WebSocket URL from environment
+const getWebSocketUrl = (path = '/ws') => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    const wsUrl = baseUrl.replace(/^https?:/, baseUrl.startsWith('https:') ? 'wss:' : 'ws:');
+    return `${wsUrl}${path}`;
+};
+
 export default class MultimodalClient extends AudioClient {
-    constructor(userId, serverUrl = 'wss://api.sanskaraai.com/ws') {
+    constructor(userId, serverUrl = getWebSocketUrl('/ws')) {
         const url = new URL(serverUrl);
         if (userId) {
             url.searchParams.set('user_id', userId);

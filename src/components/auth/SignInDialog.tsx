@@ -61,7 +61,7 @@ const SignInDialog = ({ children }: SignInDialogProps) => {
       await signIn(values.email, values.password);
       setOpen(false);
       form.reset();
-      navigate("/dashboard", { replace: true });
+      // Don't navigate here - let the page-level useEffect handle it after auth context updates
     } catch (error) {
       console.error("Sign in error:", error);
     } finally {

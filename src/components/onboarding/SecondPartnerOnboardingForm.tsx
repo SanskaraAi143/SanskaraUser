@@ -9,6 +9,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 
+// Google Gemini AI configuration
+const GOOGLE_API_KEY = 'AIzaSyDbEUrYA-1YJAAjAOeBoqZOTM4mzl4YuNs'; // Replace with your actual API key
+
 interface PartnerDetailsResponse {
   wedding_id: string;
   wedding: {
@@ -23,6 +26,7 @@ interface PartnerDetailsResponse {
   first_partner_details: {
     name: string;
     role: string;
+    partner_name?: string; // The second partner's name from first partner's submission
     teamwork_plan: {
       venue_decor: string;
       catering: string;
@@ -44,6 +48,8 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
   const [currentStep, setCurrentStep] = useState(0);
   const [unlockEmail, setUnlockEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // New loading state for form submission
+  const [suggestingCeremonies, setSuggestingCeremonies] = useState(false); // Loading state for ceremony suggestions
   const [error, setError] = useState('');
   const [weddingData, setWeddingData] = useState<PartnerDetailsResponse | null>(null);
 
@@ -68,6 +74,11 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
   // Use initialWeddingData if provided, skipping the unlock screen
   useEffect(() => {
     if (initialWeddingData && user?.email) {
+      console.log('=== Second Partner Auto-Fill Debug ===');
+      console.log('Full initialWeddingData:', JSON.stringify(initialWeddingData, null, 2));
+      console.log('user.email:', user.email);
+      console.log('user.wedding_id:', user?.wedding_id);
+      
       const otherPartnerEmailExpected = initialWeddingData.other_partner_email_expected;
       let firstPartnerEmail = '';
 
@@ -80,23 +91,58 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       }
 
       const firstPartnerDetails = initialWeddingData.partner_data?.[firstPartnerEmail] || {};
+      console.log('firstPartnerDetails extracted:', firstPartnerDetails);
+      console.log('Available wedding data fields:', Object.keys(initialWeddingData));
+      console.log('Wedding ID in data:', initialWeddingData.wedding_id);
+      
+      // Extract wedding details from the initialWeddingData
+      // The AuthContext now includes the actual wedding table fields
+      
+      const weddingDate = initialWeddingData.wedding_date || 'To be decided together';
+      const weddingLocation = initialWeddingData.wedding_location || 'To be decided together';
+      const weddingTradition = initialWeddingData.wedding_tradition || 'To be decided together';
+      const weddingStyle = initialWeddingData.wedding_style || 'To be decided together';
+      const weddingName = initialWeddingData.wedding_name || `${firstPartnerDetails.name || 'Partner'}'s Wedding Plan`;
+      
+      console.log('Wedding details (from AuthContext with wedding table data):', { weddingDate, weddingLocation, weddingTradition, weddingStyle, weddingName });
+      console.log('SUCCESS: Wedding table fields now available from AuthContext!');
+      
+      // Extract wedding_id - it could be directly on initialWeddingData or nested
+      const weddingId = initialWeddingData.wedding_id || user?.wedding_id || '';
+      console.log('Wedding ID extracted:', weddingId, 'from initialWeddingData.wedding_id:', initialWeddingData.wedding_id, 'user.wedding_id:', user?.wedding_id);
+      
+      if (!weddingId) {
+        console.error('WARNING: No wedding_id found! This will cause submission to fail.');
+      }
       
       setWeddingData({
-        wedding_id: initialWeddingData.wedding_id || '',
+        wedding_id: weddingId,
         wedding: {
-          wedding_name: initialWeddingData.wedding_name || '',
-          wedding_date: initialWeddingData.wedding_date || '',
-          wedding_location: initialWeddingData.wedding_location || '',
-          wedding_tradition: initialWeddingData.wedding_tradition || '',
-          wedding_style: initialWeddingData.wedding_style || '',
+          wedding_name: weddingName,
+          wedding_date: weddingDate,
+          wedding_location: weddingLocation,
+          wedding_tradition: weddingTradition,
+          wedding_style: weddingStyle,
         },
         first_partner_name: firstPartnerDetails.name || 'Partner',
-        first_partner_details: firstPartnerDetails,
+        first_partner_details: {
+          ...firstPartnerDetails,
+          partner_name: (initialWeddingData.partner_onboarding_details as any)?.name || firstPartnerDetails.partner_name
+        },
       } as PartnerDetailsResponse);
 
-      // Pre-select role based on first partner's role
+      // Pre-select role based on first partner's role and auto-fill partner name
       const oppositeRole = firstPartnerDetails.role === 'Bride' ? 'Groom' : 'Bride';
-      setFormData(prev => ({ ...prev, fullName: user.name || '', role: oppositeRole }));
+      
+      // Auto-fill the partner's name - should come from partner_onboarding_details (the second partner's details)
+      let partnerName = user.name || '';
+      if (otherPartnerEmailExpected === user.email && (initialWeddingData.partner_onboarding_details as any)?.name) {
+        // The user is the expected second partner, use their name from partner_onboarding_details
+        partnerName = (initialWeddingData.partner_onboarding_details as any).name;
+      }
+      
+      console.log('Auto-filling form with partnerName:', partnerName, 'role:', oppositeRole);
+      setFormData(prev => ({ ...prev, fullName: partnerName, role: oppositeRole }));
       setCurrentStep(0); // Directly show the first step of the form
     }
   }, [initialWeddingData, user]);
@@ -152,6 +198,88 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
     setCurrentStep(prev => prev - 1);
   };
 
+  // Function to add ceremony to the list
+  const addCeremonyToList = (ceremonyName: string) => {
+    if (!formData.ceremonies.includes(ceremonyName)) {
+      setFormData(prev => ({
+        ...prev,
+        ceremonies: [...prev.ceremonies, ceremonyName]
+      }));
+    }
+  };
+
+  // Function to suggest ceremonies using Google Gemini AI
+  const handleSuggestCeremonies = async () => {
+    if (!formData.familyRegion) {
+      toast({
+        variant: "destructive",
+        title: "Region Required",
+        description: "Please enter your family's region first.",
+      });
+      return;
+    }
+
+    if (!GOOGLE_API_KEY || GOOGLE_API_KEY.includes('YOUR_GOOGLE_API_KEY')) {
+      toast({
+        variant: "destructive",
+        title: "API Key Missing",
+        description: "Please configure the Google API Key to use this feature.",
+      });
+      return;
+    }
+
+    setSuggestingCeremonies(true);
+
+    const prompt = `Based on a Hindu wedding for a family from ${formData.familyRegion}, suggest key pre-wedding ceremonies. Provide ONLY comma-separated names without any additional text.`;
+    
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get ceremony suggestions');
+      }
+
+      const data = await response.json();
+      const suggestedText = data.candidates[0].content.parts[0].text;
+      const ceremonies = suggestedText.split(',').map((c: string) => c.trim()).filter((c: string) => c);
+      
+      ceremonies.forEach((ceremony: string) => addCeremonyToList(ceremony));
+      
+      toast({
+        title: "Ceremonies Suggested!",
+        description: `Added ${ceremonies.length} ceremony suggestions for ${formData.familyRegion}.`,
+      });
+    } catch (error) {
+      console.error('Error generating ceremony suggestions:', error);
+      toast({
+        variant: "destructive",
+        title: "Suggestion Failed",
+        description: "Could not generate ceremony suggestions. Please try again.",
+      });
+    } finally {
+      setSuggestingCeremonies(false);
+    }
+  };
+
+  // Function to add custom ceremony
+  const handleAddCustomCeremony = (customCeremony: string) => {
+    if (customCeremony.trim()) {
+      addCeremonyToList(customCeremony.trim());
+    }
+  };
+
   const handleFindPlan = async () => {
     setError('');
     if (!unlockEmail) {
@@ -167,11 +295,24 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
         throw new Error(`We couldn't find a pending wedding plan for this email. Please check with your partner or contact support. (Status: ${response.status}) - ${errorText}`);
       }
       const data: PartnerDetailsResponse = await response.json();
+      console.log('Received partner details from API:', data);
+      
       // Assuming the backend now returns data in the new structure
       setWeddingData(data);
-      // Pre-select role based on partner's role
+      
+      // Pre-select role based on partner's role and auto-fill partner name
       const oppositeRole = data.first_partner_details.role === 'Bride' ? 'Groom' : 'Bride';
-      setFormData(prev => ({ ...prev, role: oppositeRole }));
+      
+      // Extract partner name from the response - this should come from partner_onboarding_details
+      let partnerName = user?.name || '';
+      if (data.first_partner_details.partner_name) {
+        partnerName = data.first_partner_details.partner_name;
+      }
+      
+      console.log('Auto-filling via API with partnerName:', partnerName, 'role:', oppositeRole);
+      setFormData(prev => ({ ...prev, fullName: partnerName, role: oppositeRole }));
+      
+      setLoading(false);
       setCurrentStep(0); // Move to the first step of the form
     } catch (err: unknown) {
       setLoading(false);
@@ -210,9 +351,21 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       return;
     }
 
+    if (!weddingData.wedding_id) {
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "Wedding ID is missing. Please contact support.",
+      });
+      console.error('Wedding ID is missing from weddingData:', weddingData);
+      return;
+    }
+
+    setSubmitting(true); // Start loading state
+
     const cultural_background = formData.familyRegion + (formData.familyCaste ? `, ${formData.familyCaste}` : '');
 
-    const second_partner_details = {
+    const current_partner_details = {
       name: formData.fullName,
       email: unlockEmail, // Use the verified email
       role: formData.role,
@@ -225,11 +378,10 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
 
     const payload = {
       wedding_id: weddingData.wedding_id,
-      current_partner_email: second_partner_details.email,
-      other_partner_email: null, // Critical for identifying this as the second partner submission
-      current_partner_details: second_partner_details,
-      // No need to send wedding details here, as they were already created by the first partner
+      current_partner_details: current_partner_details,
     };
+
+    console.log('Second Partner Onboarding Payload:', JSON.stringify(payload, null, 2));
 
     try {
       const response = await fetch(`${BASE_API_URL}/onboarding/submit`, {
@@ -262,6 +414,8 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
         title: "Submission Failed",
         description: `There was a critical error: ${errorMessage}`,
       });
+    } finally {
+      setSubmitting(false); // End loading state
     }
   };
 
@@ -296,13 +450,29 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
             <div className="bg-blue-50 p-4 rounded-md border-l-4 border-blue-200 mb-4">
               <h3 className="text-lg font-semibold mb-2">Plan started by {weddingData.first_partner_name}</h3>
               <p><strong>Wedding Name:</strong> {weddingData.wedding.wedding_name}</p>
-              <p><strong>Wedding Date:</strong> {weddingData.wedding.wedding_date}</p>
-              <p><strong>Wedding Location:</strong> {weddingData.wedding.wedding_location}</p>
-              <p><strong>Wedding Tradition:</strong> {weddingData.wedding.wedding_tradition}</p>
+              <p><strong>Wedding Date:</strong> <span className={weddingData.wedding.wedding_date === 'To be decided together' ? 'text-orange-600 italic' : ''}>{weddingData.wedding.wedding_date}</span></p>
+              <p><strong>Wedding Location:</strong> <span className={weddingData.wedding.wedding_location === 'To be decided together' ? 'text-orange-600 italic' : ''}>{weddingData.wedding.wedding_location}</span></p>
+              <p><strong>Wedding Tradition:</strong> <span className={weddingData.wedding.wedding_tradition === 'To be decided together' ? 'text-orange-600 italic' : ''}>{weddingData.wedding.wedding_tradition}</span></p>
+              {(weddingData.wedding.wedding_date === 'To be decided together' || 
+                weddingData.wedding.wedding_location === 'To be decided together' || 
+                weddingData.wedding.wedding_tradition === 'To be decided together') && (
+                <div className="mt-3 p-2 bg-orange-50 border-l-2 border-orange-200 text-sm">
+                  <p className="text-orange-700">💡 <strong>Good news!</strong> You and your partner can finalize these details together in the dashboard after onboarding.</p>
+                </div>
+              )}
             </div>
             <div>
               <Label htmlFor="fullName">Your Full Name:</Label>
               <Input type="text" id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 rounded">
+                  <p>Debug Info:</p>
+                  <p>• formData.fullName: "{formData.fullName}"</p>
+                  <p>• user.name: "{user?.name}"</p>
+                  <p>• first_partner_details.partner_name: "{weddingData?.first_partner_details?.partner_name}"</p>
+                  <p>• initialWeddingData available: {!!initialWeddingData ? 'Yes' : 'No'}</p>
+                </div>
+              )}
             </div>
             <div className="mt-4">
               <Label>Confirm your role:</Label>
@@ -333,12 +503,41 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
                 <Input type="text" id="familyCaste" name="familyCaste" value={formData.familyCaste} onChange={handleChange} placeholder="e.g., Brahmin, Shetty" />
               </div>
             </div>
-            <Button type="button" variant="secondary" className="mt-4">Suggest Ceremonies for My Region</Button>
-            <p className="text-sm text-gray-500 mt-2"><i>Generating suggestions... (Feature Coming Soon)</i></p>
+            <Button 
+              type="button" 
+              variant="secondary" 
+              className="mt-4" 
+              onClick={handleSuggestCeremonies}
+              disabled={suggestingCeremonies || !formData.familyRegion}
+            >
+              {suggestingCeremonies ? 'Generating Suggestions...' : 'Suggest Ceremonies for My Region'}
+            </Button>
+            <p className="text-sm text-gray-500 mt-2">
+              <i>{suggestingCeremonies ? 'AI is generating ceremony suggestions...' : 'Uses AI to suggest traditional ceremonies based on your region'}</i>
+            </p>
 
             <div className="mt-6">
               <Label className="mb-2 block">Ceremonies Your Side Will Host:</Label>
               <div className="grid grid-cols-2 gap-2">
+                {formData.ceremonies.map((ceremony, index) => (
+                  <div key={index} className="flex items-center space-x-2 bg-blue-50 p-2 rounded">
+                    <Checkbox 
+                      id={`ceremony-${index}`} 
+                      name="ceremonies" 
+                      value={ceremony} 
+                      checked={true}
+                      onCheckedChange={(checked) => {
+                        if (!checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            ceremonies: prev.ceremonies.filter(c => c !== ceremony)
+                          }));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`ceremony-${index}`}>{ceremony}</Label>
+                  </div>
+                ))}
                 <div className="flex items-center space-x-2">
                   <Checkbox id="mehendi" name="ceremonies" value="Mehendi" checked={formData.ceremonies.includes('Mehendi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Mehendi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
                   <Label htmlFor="mehendi">Mehendi</Label>
@@ -353,8 +552,31 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
                 </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
-                <Input type="text" id="customCeremony" placeholder="Add a custom ritual..." className="flex-grow" />
-                <Button type="button" variant="secondary">Add</Button>
+                <Input 
+                  type="text" 
+                  id="customCeremony" 
+                  placeholder="Add a custom ritual..." 
+                  className="flex-grow" 
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const input = e.target as HTMLInputElement;
+                      handleAddCustomCeremony(input.value);
+                      input.value = '';
+                    }
+                  }}
+                />
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => {
+                    const input = document.getElementById('customCeremony') as HTMLInputElement;
+                    handleAddCustomCeremony(input.value);
+                    input.value = '';
+                  }}
+                >
+                  Add
+                </Button>
               </div>
             </div>
           </div>
@@ -447,8 +669,8 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
               </Button>
             )}
             {currentStep === 3 && (
-              <Button onClick={handleSubmit} className="ml-auto">
-                Confirm & Complete Onboarding
+              <Button onClick={handleSubmit} className="ml-auto" disabled={submitting}>
+                {submitting ? 'Submitting...' : 'Confirm & Complete Onboarding'}
               </Button>
             )}
           </div>

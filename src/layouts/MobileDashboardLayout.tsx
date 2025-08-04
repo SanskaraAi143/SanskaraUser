@@ -44,6 +44,11 @@ const MobileDashboardLayout = () => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
+  // If user hasn't completed onboarding, redirect to onboarding page
+  if (!user.wedding_id || user.wedding_status !== 'active') {
+    return <Navigate to="/onboarding" state={{ from: location }} replace />;
+  }
+
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },

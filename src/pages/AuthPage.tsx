@@ -24,10 +24,17 @@ const AuthPage: React.FC = () => {
     }
   }, [location.search]);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated - check onboarding status
   useEffect(() => {
     if (user) {
-      navigate('/dashboard', { replace: true }); // Use replace to prevent going back to auth page
+      // Check if user has completed onboarding
+      if (user.wedding_id && user.wedding_status === 'active') {
+        console.log('User authenticated and onboarded, redirecting to dashboard');
+        navigate('/dashboard', { replace: true });
+      } else {
+        console.log('User authenticated but onboarding incomplete, redirecting to onboarding');
+        navigate('/onboarding', { replace: true });
+      }
     }
   }, [user, navigate]);
 
