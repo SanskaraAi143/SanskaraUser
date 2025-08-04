@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 
 // Google Gemini AI configuration
-const GOOGLE_API_KEY = 'AIzaSyDbEUrYA-1YJAAjAOeBoqZOTM4mzl4YuNs'; // Replace with your actual API key
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || ''; // Load from environment variable
 
 interface PartnerDetailsResponse {
   wedding_id: string;
