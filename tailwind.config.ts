@@ -64,9 +64,9 @@ const config: Config = {
         'xs': '475px',
       },
       fontFamily: {
-        playfair: ['"Playfair Display"', 'serif'],
-        poppins: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'], // Set Poppins as default for font-sans
+        lato: ['Lato', 'sans-serif'],
+        lora: ['Lora', 'serif'],
+        sans: ['Lato', 'sans-serif'], // Set Lato as the default sans-serif font
       },
       borderRadius: {
         lg: 'var(--radius)',

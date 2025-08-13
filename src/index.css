@@ -1,4 +1,4 @@
-/* Fonts loaded via HTML for better performance */
+/* Fonts are loaded via index.html */
 
 @tailwind base;
 @tailwind components;
@@ -6,585 +6,67 @@
 
 @layer base {
   :root {
-    --background: 45 100% 95%;
-    --foreground: 25 26% 47%;
-    
-    --primary: 43 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 36 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    
-    --muted: 45 30% 96%;
-    --muted-foreground: 25 5% 45%;
-    
-    --accent: 43 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 25 26% 47%;
+    --background: 255 17% 98%; /* Light Lavender-Gray */
+    --foreground: 270 3% 24%; /* Deep Charcoal-Plum */
 
-    --border: 43 30% 90%;
-    --input: 45 30% 96%;
-    --ring: 43 100% 50%;
-
-    --radius: 0.5rem;
-  }
-
-  * {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  body {
-    @apply font-sans bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80 text-gray-900 min-h-screen;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-}
-
-@layer components {
-  .gradient-bg {
-    @apply fixed inset-0 -z-10;
-    background: linear-gradient(135deg, 
-      rgba(255, 215, 0, 0.15) 0%, 
-      rgba(255, 193, 7, 0.12) 25%,
-      rgba(255, 235, 59, 0.1) 50%,
-      rgba(255, 152, 0, 0.08) 75%,
-      rgba(255, 215, 0, 0.1) 100%);
-    animation: gradientShift 20s ease-in-out infinite;
-  }
-
-  .glass-card {
-    @apply bg-gradient-glass backdrop-blur-lg border border-wedding-gold/20 shadow-lg rounded-2xl;
-  }
-
-  .glass-nav {
-    @apply fixed top-0 w-full px-6 py-4 flex justify-between items-center bg-gradient-glass backdrop-blur-lg border-b border-wedding-gold/30 z-50 transition-all duration-300;
-  }
-  .nav-link {
-    @apply font-medium transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-gradient-primary after:transition-all after:duration-300 hover:after:w-full;
-    color: #1a202c !important; /* Very dark text for maximum contrast */
-  }
-  
-  .nav-link:hover {
-    color: #744210 !important; /* Dark gold on hover */
-  }
-
-  .cta-button {
-    @apply bg-gradient-primary text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-wedding-gold/40 hover:shadow-xl hover:shadow-wedding-gold/60 transform hover:-translate-y-0.5 transition-all duration-300;
-  }
-
-  .title-gradient {
-    @apply bg-gradient-primary bg-clip-text text-transparent;
-  }
-}
-
-@layer base {
-  :root {
-    --background: 45 100% 95%;
-    --foreground: 25 26% 47%;
-    
-    --primary: 43 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 36 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    
-    --muted: 45 30% 96%;
-    --muted-foreground: 25 5% 45%;
-    
-    --accent: 43 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 25 26% 47%;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, hsl(45 100% 95%), hsl(60 100% 98%), hsl(45 100% 92%));
-  }
-
-  .gradient-bg {
-    @apply fixed inset-0 -z-10;
-    background: linear-gradient(135deg, 
-      rgba(255, 215, 0, 0.15) 0%, 
-      rgba(255, 193, 7, 0.12) 25%,
-      rgba(255, 235, 59, 0.1) 50%,
-      rgba(255, 152, 0, 0.08) 75%,
-      rgba(255, 215, 0, 0.1) 100%);
-    animation: gradientShift 20s ease-in-out infinite;
-  }
-
-  @keyframes gradientShift {
-    0%, 100% { opacity: 0.8; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-  }
-
-  .floating-particles {
-    @apply fixed inset-0 -z-10;
-  }
-
-  .particle {
-    @apply absolute;
-    background: linear-gradient(45deg, hsl(43 100% 50%), hsl(36 100% 50%));
-    border-radius: 50%;
-    animation: float 15s infinite linear;
-    opacity: 0.7;
-  }
-
-  @keyframes float {
-    0% {
-      transform: translateY(100vh) rotate(0deg);
-      opacity: 0;
-    }
-    10% { opacity: 0.7; }
-    90% { opacity: 0.7; }
-    100% {
-      transform: translateY(-100px) rotate(360deg);
-      opacity: 0;
-    }
-  }
-}
-
-@layer base {
-  :root {
-    --background: 30 33% 98%;
-    --foreground: 350 25% 15%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 350 25% 15%;
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 270 3% 24%; /* Deep Charcoal-Plum */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 350 25% 15%;
+    --popover-foreground: 270 3% 24%;
 
-    --primary: 350 80% 40%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 334 31% 67%; /* Dusty Rose */
+    --primary-foreground: 255 17% 98%; /* Light Lavender-Gray */
 
-    --secondary: 45 100% 60%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 145 23% 71%; /* Muted Sage Green */
+    --secondary-foreground: 270 3% 24%; /* Deep Charcoal-Plum */
 
-    --accent: 32 100% 50%;
-    --accent-foreground: 0 0% 10%;
+    --muted: 255 13% 92%; /* Lighter shade of background for muted elements */
+    --muted-foreground: 270 3% 45%; /* A slightly lighter foreground color */
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 50%;
+    --accent: 336 43% 65%; /* Brighter Dusty Rose */
+    --accent-foreground: 270 3% 24%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Keeping a standard destructive color */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 350 10% 85%;
-    --input: 350 10% 85%;
-    --ring: 350 70% 40%;
+    --border: 255 13% 92%; /* Light Gray-Lavender */
+    --input: 255 13% 92%;
+    --ring: 336 43% 65%; /* Brighter Dusty Rose for focus rings */
 
     --radius: 0.5rem;
+  }
+
+  /* Dark mode theme can be defined here if needed */
+  .dark {
+    /* Define dark mode colors here in the future */
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    /* font-family: 'Inter', sans-serif; /* Default font from new blog style */
   }
   body {
-    @apply bg-background text-foreground font-poppins; /* Existing body font */
-     /* background: #faf7f2; /* From new blog article style */
-     /* color: #3a3a3a; /* From new blog article style */
+    @apply bg-background text-foreground;
+    font-family: 'Lato', sans-serif; /* Default body font */
   }
-  /* Consider if Playfair should be overridden by Inter/Nunito for blog pages specifically or globally */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair;
+    @apply font-lora; /* Headings font */
   }
 }
 
-/* Styles from new blog design */
-.gradient-bg {
-  background: linear-gradient(135deg, #FEF3E2 0%, #FDE68A 50%, #F59E0B 100%);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #F59E0B, #DC2626);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text; /* Standard property */
-}
-
-.card-hover {
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px); /* May need to check browser support or Tailwind equivalent */
-}
-
-.card-hover:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.btn-gradient {
-  background: linear-gradient(135deg, #F59E0B, #DC2626);
-  transition: all 0.3s ease;
-}
-
-.btn-gradient:hover {
-  background: linear-gradient(135deg, #DC2626, #F59E0B);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
-}
-
-.tag-gradient {
-  background: linear-gradient(135deg, #FEF3E2, #FDE68A);
-  border: 1px solid #F59E0B;
-}
-
-.active-tag {
-  background: linear-gradient(135deg, #F59E0B, #DC2626);
-  color: white;
-}
-
-.floating-animation {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-/* .fade-in animation already exists as .animate-fade-in, will use that or consolidate */
-/* Original .fade-in from new styles:
-.fade-in {
-  animation: fadeIn 0.8s ease-in-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-} */
-
-.logo-pulse {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse { /* This might conflict with another pulse if defined elsewhere */
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* Styles from new article design */
-/* body styles from article.html are commented out in @layer base body for now */
-
-.progress-bar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #F59E0B, #DC2626);
-  z-index: 40; /* Lowered to be below Navbar (z-50) */
-  width: 0;
-  transition: width 0.2s;
-  border-radius: 2px;
-}
-
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.7s;
-}
-.fade-in-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.tag-pill {
-  display: inline-block;
-  background: #fbeee0;
-  color: #b97a2b;
-  border-radius: 9999px; /* rounded-full */
-  padding: 0.25rem 0.9rem;
-  font-size: 0.95rem;
-  font-weight: 600; /* font-semibold or font-bold */
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.callout-box {
-  background: linear-gradient(135deg, #fbeee0 60%, #f9d6c1 100%);
-  border: 2px solid #f7c9a7;
-  border-radius: 2rem; /* rounded-3xl or custom */
-  box-shadow: 0 4px 32px 0 rgba(245, 158, 11, 0.07);
-  padding: 2.5rem 2rem 2rem 2rem; /* p-8 or custom */
-  margin: 3rem 0 2rem 0; /* my-8 or custom */
-  text-align: center;
-  max-width: 700px; /* max-w-3xl or similar */
-  margin-left: auto;
-  margin-right: auto;
-}
-.callout-box h4 {
-  font-size: 2rem; /* text-3xl or text-4xl */
-  font-weight: 700; /* font-bold */
-  color: #b97a2b; /* custom text color */
-  margin-bottom: 1rem; /* mb-4 */
-}
-.callout-btn {
-  background: linear-gradient(90deg, #F59E0B, #DC2626);
-  color: #fff; /* text-white */
-  font-weight: 700; /* font-bold */
-  font-size: 1.1rem; /* text-lg */
-  border-radius: 9999px; /* rounded-full */
-  padding: 0.9rem 2.5rem; /* py-3 px-10 or custom */
-  margin-top: 1.5rem; /* mt-6 */
-  box-shadow: 0 2px 12px 0 rgba(245, 158, 11, 0.13);
-  border: none;
-  transition: background 0.2s, transform 0.2s;
-}
-.callout-btn:hover {
-  background: linear-gradient(90deg, #DC2626, #F59E0B);
-  transform: translateY(-2px) scale(1.03);
-}
-
-/* Article content typography - to be applied via a wrapper class e.g., .prose-sanskara */
-.prose-sanskara h1, .prose-sanskara h2, .prose-sanskara h3, .prose-sanskara h4 {
-  color: #2d2d2d; /* custom text color */
-  font-family: 'Nunito', 'Inter', sans-serif;
-  font-weight: 700; /* font-bold */
-}
-.prose-sanskara h2 {
-  font-size: 2rem; /* text-3xl */
-  margin-top: 2.5rem; /* mt-10 */
-  margin-bottom: 1.2rem; /* mb-5 */
-  border-bottom: 2px solid #e6e2d8; /* custom border */
-  padding-bottom: 0.3rem; /* pb-1 */
-}
-.prose-sanskara h3 {
-  font-size: 1.3rem; /* text-xl */
-  margin-top: 2rem; /* mt-8 */
-  margin-bottom: 0.7rem; /* mb-3 */
-}
-.prose-sanskara p, .prose-sanskara ul, .prose-sanskara ol {
-  font-size: 1.13rem; /* text-lg (approx) */
-  line-height: 2.1; /* leading-loose or custom */
-  margin-bottom: 1.2rem; /* mb-5 */
-}
-.prose-sanskara ul, .prose-sanskara ol {
-  margin-left: 1.5rem; /* ml-6 */
-}
-.prose-sanskara strong {
-  color: #b97a2b; /* custom text color */
-  font-weight: bold; /* Tailwind's default strong is bold */
-}
-.prose-sanskara a {
-  color: #DC2626; /* custom text color */
-  text-decoration: underline;
-}
-.prose-sanskara a:hover {
-  color: #F59E0B; /* custom hover color */
-}
-.prose-sanskara hr {
-  border: none;
-  border-top: 1.5px solid #f7c9a7;
-  margin: 2.5rem 0; /* my-10 */
-}
-
-/* Ensure Inter font is applied to blog specific sections if not globally */
-.font-inter {
-  font-family: 'Inter', sans-serif;
-}
-.font-nunito {
-  font-family: 'Nunito', sans-serif;
-}
-
-/* Specific body style for blog pages if needed, can be applied via a wrapper in React */
-.blog-body {
-  background: #faf7f2 !important;
-  color: #3a3a3a !important;
-}
-
-/* Update existing logo-pulse if different from new one, or choose one */
-/* Existing .logo-pulse from Navbar might conflict if styles are different */
-/* New .logo-pulse from article.html:
-.logo-pulse {
-  animation: pulse 2.5s infinite;
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.08); filter: brightness(1.15); }
-}
-*/
-
-.pattern-bg {
-  background-color: #fff9f5;
-  background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f9b384' fill-opacity='0.1'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-
-.mandala-bg {
-  background-color: #fff9f5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23f9b384' fill-opacity='0.1'%3E%3Cpath fill-rule='evenodd' d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2V0zm0 4l4-4h2l-6 6V4zm0 4l8-8h2L40 10V8zm0 4L52 0h2L40 14v-2zm0 4L56 0h2L40 18v-2zm0 4L60 0h2L40 22v-2zm0 4L64 0h2L40 26v-2zm0 4L68 0h2L40 30v-2zm0 4L72 0h2L40 34v-2zm0 4L76 0h2L40 38v-2zm0 4L80 0v2L42 40h-2zm4 0L80 4v2L46 40h-2zm4 0L80 8v2L50 40h-2zm4 0l28-28v2L54 40h-2zm4 0l24-24v2L58 40h-2zm4 0l20-20v2L62 40h-2zm4 0l16-16v2L66 40h-2zm4 0l12-12v2L70 40h-2zm4 0l8-8v2l-6 6h-2zm4 0l4-4v2l-2 2h-2z'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.chat-message {
-  @apply px-4 py-3 rounded-lg mb-3 max-w-[85%];
-}
-
-.user-message {
-  @apply bg-primary text-white self-end rounded-tr-none;
-}
-
-.ai-message {
-  @apply bg-muted self-start rounded-tl-none;
-}
-
-/* Animation classes */
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@layer components {
+  /* Re-usable component styles can be defined here */
+  .chat-message {
+    @apply px-4 py-3 rounded-lg mb-3 max-w-[85%];
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animate-slide-up {
-  animation: slideUp 0.8s ease-out;
-}
+  .user-message {
+    @apply bg-primary text-primary-foreground self-end rounded-tr-none;
+  }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.5s ease-out;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Utility for fade-in on scroll or mount */
-.fade-in-on-mount {
-  opacity: 0;
-  animation: fadeIn 1.2s ease-out forwards;
-}
-
-@keyframes waveform {
-  0%, 100% { transform: scaleY(0.5); }
-  50% { transform: scaleY(1.5); }
-}
-
-.animate-waveform {
-  animation: waveform 1.5s ease-in-out infinite;
-}
-
-@layer utilities {
-  .my-gradient-bg {
-    @apply from-wedding-cream to-wedding-gold;
-  }
-}
-
-@layer base {
-  :root {
-    --background: 45 100% 95%;
-    --foreground: 25 26% 47%;
-    
-    --primary: 43 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 36 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    
-    --muted: 45 30% 96%;
-    --muted-foreground: 25 5% 45%;
-    
-    --accent: 43 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 25 26% 47%;
-
-    --border: 43 30% 90%;
-    --input: 45 30% 96%;
-    --ring: 43 100% 50%;
-
-    --radius: 0.5rem;
-  }
-  /* Improved color contrast for accessibility - WCAG 2 AA compliant */
-  body {
-    @apply font-sans bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80 min-h-screen;
-    color: #1a202c !important; /* Very dark text for maximum contrast */
-  }
-  
-  /* Force high contrast text colors site-wide */
-  .text-wedding-brown {
-    color: #2d3748 !important; /* Very dark brown for 7:1 contrast ratio */
-  }
-  
-  .text-wedding-gold {
-    color: #744210 !important; /* Much darker gold for 7:1 contrast ratio */
-  }
-  
-  .text-gray-500 {
-    color: #374151 !important; /* Darker gray for 4.5:1 contrast */
-  }
-  
-  .text-gray-600 {
-    color: #1f2937 !important; /* Very dark for 7:1 contrast */
-  }
-  
-  .text-gray-700 {
-    color: #111827 !important; /* Extremely dark for maximum contrast */
-  }
-  
-  .text-muted-foreground {
-    color: #374151 !important; /* Darker muted text */
-  }
-  
-  /* Force high contrast for all text elements */
-  h1, h2, h3, h4, h5, h6 {
-    color: #1a202c !important;
-  }
-  
-  p, span, div, a, li {
-    color: #1a202c !important;
-  }
-  
-  /* Override specific low contrast classes */
-  .text-yellow-800 {
-    color: #744210 !important; /* Dark gold */
-  }
-  
-  .text-wedding-gold\/80 {
-    color: #744210 !important; /* Dark gold instead of transparent */
-  }
-  
-  .text-gray-700 {
-    color: #111827 !important;
-  }
-  
-  /* High contrast buttons and interactive elements */
-  .btn-primary {
-    background-color: #2d3748 !important;
-    color: #ffffff !important;
-  }
-  
-  .btn-secondary {
-    background-color: #744210 !important;
-    color: #ffffff !important;
+  .ai-message {
+    @apply bg-muted text-foreground self-start rounded-tl-none;
   }
 }

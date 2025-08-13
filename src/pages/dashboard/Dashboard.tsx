@@ -15,9 +15,10 @@ import DashboardUpcomingEvents from "@/components/dashboard/dashboard-sections/D
 import DashboardNotifications from "@/components/dashboard/dashboard-sections/DashboardNotifications";
 import DashboardAIAssistant from "@/components/dashboard/dashboard-sections/DashboardAIAssistant";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 const Dashboard = () => {
   const { user } = useAuth();
-  // const [activeTab, setActiveTab] = useState("overview"); // No longer needed
 
   const {
     profile,
@@ -36,15 +37,16 @@ const Dashboard = () => {
   } = useDashboardData();
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-400">Loading dashboard...</div>;
+    // You can replace this with a more sophisticated skeleton loader
+    return <div className="text-center py-10">Loading your dashboard...</div>;
   }
 
   if (error) {
-    return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+    return <div className="text-center py-10 text-destructive">Error: {error}</div>;
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4 md:p-6">
       <DashboardWelcome
         profile={profile}
         userName={user?.name}
@@ -52,55 +54,98 @@ const Dashboard = () => {
         daysUntilWedding={daysUntilWedding}
       />
 
-      {/* All content is now in a single, scrollable view */}
-      <Suspense fallback={<div className="animate-pulse text-center text-gray-400">Loading dashboard sections...</div>}>
+      <Suspense fallback={<div>Loading sections...</div>}>
         <AnimatePresence>
-          {/* Overview Cards */}
-          <DashboardOverviewCards
-            key="dashboard-overview-cards"
-            daysUntilWedding={daysUntilWedding}
-            weddingDate={weddingDetails?.wedding_date}
-            confirmedGuests={confirmedGuests}
-            invitedGuests={invitedGuests}
-            spentBudget={spentBudget}
-            totalBudget={totalBudget}
-            completedTasks={completedTasks}
-            totalTasks={totalTasks}
-          />
+          <div className="space-y-8">
+            {/* Overview Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-lora">At a Glance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DashboardOverviewCards
+                  daysUntilWedding={daysUntilWedding}
+                  weddingDate={weddingDetails?.wedding_date}
+                  confirmedGuests={confirmedGuests}
+                  invitedGuests={invitedGuests}
+                  spentBudget={spentBudget}
+                  totalBudget={totalBudget}
+                  completedTasks={completedTasks}
+                  totalTasks={totalTasks}
+                />
+              </CardContent>
+            </Card>
 
-          {/* Upcoming Tasks and Events */}
-          <div key="dashboard-upcoming-section" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <DashboardUpcomingTasks nextTasks={nextTasks} />
-            <DashboardUpcomingEvents nextEvents={nextEvents} />
+            {/* Upcoming Section */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl font-lora">Upcoming Tasks</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DashboardUpcomingTasks nextTasks={nextTasks} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl font-lora">Upcoming Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DashboardUpcomingEvents nextEvents={nextEvents} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Full Width Sections, previously tabs */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-lora">Task Tracker</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TaskTracker />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-lora">Wedding Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TimelineCreator />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-lora">Budget Manager</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BudgetManager />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-lora">Mood Board</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MoodBoard />
+              </CardContent>
+            </Card>
+
+            {/* AI and Notifications */}
+             <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+                <Card className="lg:col-span-3">
+                    <CardHeader><CardTitle className="text-xl font-lora">Notifications</CardTitle></CardHeader>
+                    <CardContent><DashboardNotifications /></CardContent>
+                </Card>
+                <Card className="lg:col-span-2">
+                    <CardHeader><CardTitle className="text-xl font-lora">AI Assistant</CardTitle></CardHeader>
+                    <CardContent><DashboardAIAssistant /></CardContent>
+                </Card>
+            </div>
+
           </div>
-
-          {/* Notifications and AI Assistant */}
-          <div key="dashboard-utility-section" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <DashboardNotifications />
-            <DashboardAIAssistant />
-          </div>
-
-          {/* Formerly Tabbed Content, now as sections */}
-          <div key="task-tracker-section" className="pt-6">
-             <h2 className="text-2xl font-semibold mb-4">Task Tracker</h2>
-             <TaskTracker />
-          </div>
-
-          <div key="timeline-section" className="pt-6">
-            <h2 className="text-2xl font-semibold mb-4">Wedding Timeline</h2>
-            <TimelineCreator />
-          </div>
-
-          <div key="budget-section" className="pt-6">
-            <h2 className="text-2xl font-semibold mb-4">Budget Manager</h2>
-            <BudgetManager />
-          </div>
-
-          <div key="moodboard-section" className="pt-6">
-            <h2 className="text-2xl font-semibold mb-4">Mood Board</h2>
-            <MoodBoard />
-          </div>
-
         </AnimatePresence>
       </Suspense>
     </div>
