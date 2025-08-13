@@ -1,8 +1,8 @@
 import React from 'react';
-import GoogleLiveApiChat from '@/components/chat/GoogleLiveApiChat';
+import GeneralAssistantChat from '@/components/chat/GeneralAssistantChat';
 
 const ChatInterfacePage: React.FC = () => {
-  return <GoogleLiveApiChat />;
+  return <GeneralAssistantChat />;
 };
 
 export default ChatInterfacePage;

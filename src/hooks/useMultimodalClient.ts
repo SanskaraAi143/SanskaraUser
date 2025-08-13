@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import MultimodalClient from '../lib/multimodal-client.js';
 
 interface Message {
@@ -7,6 +6,8 @@ interface Message {
   text: string;
   isMarkdown?: boolean;
 }
+
+type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
 export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -17,211 +18,237 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
-  
-  // Refs for managing state and preventing race conditions
+  const [isAssistantTyping, setIsAssistantTyping] = useState(false);
+  const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
+
   const clientRef = useRef<MultimodalClient | null>(null);
   const currentAssistantMessageIndex = useRef<number | null>(null);
-  const processingLockRef = useRef<boolean>(false);
   const transcriptRef = useRef<Message[]>([]);
+  const processingLockRef = useRef<boolean>(false);
+  const reconnectAttemptsRef = useRef(0);
+  const manualReconnectRequestedRef = useRef(false);
+  const disconnectHandlersRef = useRef<(() => void)[]>([]);
+  const reconnectSuccessHandlersRef = useRef<(() => void)[]>([]);
+  const connectionStateRef = useRef<ConnectionState>('idle');
+  const initiatedRef = useRef(false);
 
-  // Keep transcript ref in sync with state
-  useEffect(() => {
-    transcriptRef.current = transcript;
-  }, [transcript]);
+  const registerOnDisconnect = (fn: () => void) => { disconnectHandlersRef.current.push(fn); };
+  const registerOnReconnectSuccess = (fn: () => void) => { reconnectSuccessHandlersRef.current.push(fn); };
 
-  useEffect(() => {
-    // Clean up existing client if any
-    if (clientRef.current) {
-      clientRef.current.close();
+  // keep transcript ref synced
+  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+  useEffect(() => { connectionStateRef.current = connectionState; }, [connectionState]);
+
+  const handleTextReceived = useCallback((message: { type: string; data: string }) => {
+    if (processingLockRef.current) return;
+    processingLockRef.current = true;
+    const newTranscript = [...transcriptRef.current];
+    if (message.type === 'user_input') {
+      const lastIdx = newTranscript.length - 1;
+      if (lastIdx >= 0 && newTranscript[lastIdx].sender === 'user' && newTranscript[lastIdx].text === '...') {
+        newTranscript[lastIdx].text = message.data;
+      } else {
+        newTranscript.push({ sender: 'user', text: message.data });
+      }
+    } else if (message.type === 'text') {
+      if (currentAssistantMessageIndex.current !== null && newTranscript[currentAssistantMessageIndex.current]) {
+        newTranscript[currentAssistantMessageIndex.current].text += message.data;
+      } else {
+        newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
+        currentAssistantMessageIndex.current = newTranscript.length - 1;
+      }
     }
-    
-    clientRef.current = new MultimodalClient(userId, serverUrl);
-    const client = clientRef.current;
+    transcriptRef.current = newTranscript;
+    setTranscript(newTranscript);
+    processingLockRef.current = false;
+  }, []);
 
-    const handleReady = () => setIsConnected(true);
-    const handleSessionIdReceived = (id: string) => setSessionId(id);
-    
-    const handleTextReceived = (message: { type: string, data: string }) => {
-      // Prevent concurrent processing to avoid duplicate text chunks
-      if (processingLockRef.current) {
+  const handleTurnComplete = useCallback(() => {
+    currentAssistantMessageIndex.current = null;
+    setIsSpeaking(false);
+    setIsAssistantSpeaking(false);
+    setIsAssistantTyping(false);
+  }, []);
+
+  const handleInterrupted = useCallback(() => {
+    currentAssistantMessageIndex.current = null;
+    setIsSpeaking(false);
+    setIsAssistantSpeaking(false);
+    if (clientRef.current && (clientRef.current as any).interrupt) {
+      (clientRef.current as any).interrupt();
+    }
+  }, []);
+
+  const handleAudioReceived = useCallback(() => {
+    setIsSpeaking(true);
+    setIsAssistantSpeaking(true);
+  }, []);
+
+  const setTypingHeuristic = useCallback(() => {
+    if (currentAssistantMessageIndex.current !== null) {
+      const msg = transcriptRef.current[currentAssistantMessageIndex.current];
+      if (msg && msg.sender === 'assistant') {
+        setIsAssistantTyping(true);
         return;
       }
-      
-      processingLockRef.current = true;
-      
-      // Work with the current transcript state from ref to avoid React batching issues
-      const newTranscript = [...transcriptRef.current];
-      
-      if (message.type === 'user_input') {
-        // Find the last user message (which should be the '...' placeholder)
-        const lastUserMessageIndex = newTranscript.length - 1;
-        if (lastUserMessageIndex >= 0 && 
-            newTranscript[lastUserMessageIndex].sender === 'user' && 
-            newTranscript[lastUserMessageIndex].text === '...') {
-          newTranscript[lastUserMessageIndex].text = message.data;
-        } else {
-          // If no placeholder, add a new user message
-          newTranscript.push({ sender: 'user', text: message.data });
-        }
-      } else if (message.type === 'text') {
-        // Handle assistant text (incremental updates with markdown support)
-        if (currentAssistantMessageIndex.current !== null && 
-            newTranscript[currentAssistantMessageIndex.current]) {
-          // Append to existing message
-          newTranscript[currentAssistantMessageIndex.current].text += message.data;
-        } else {
-          // Create new assistant message with markdown support
-          newTranscript.push({ 
-            sender: 'assistant', 
-            text: message.data,
-            isMarkdown: true 
-          });
-          currentAssistantMessageIndex.current = newTranscript.length - 1;
-        }
-      }
-      
-      // Update both ref and state
-      transcriptRef.current = newTranscript;
-      setTranscript(newTranscript);
-      
-      // Release the lock
-      processingLockRef.current = false;
-    };
-    
-    const handleTurnComplete = () => {
-      currentAssistantMessageIndex.current = null;
-      setIsSpeaking(false);
-      setIsAssistantSpeaking(false);
-    };
-    
-    const handleError = (error: unknown) => {
-      console.error('Client error:', error);
-      currentAssistantMessageIndex.current = null;
-      setIsSpeaking(false);
-      setIsAssistantSpeaking(false);
-    };
-    
-    const handleInterrupted = () => {
-      console.log('Voice interruption detected - stopping assistant audio');
-      currentAssistantMessageIndex.current = null;
-      setIsSpeaking(false);
-      setIsAssistantSpeaking(false);
-      
-      // Call the client's interrupt method to stop audio playback
-      if (client && client.interrupt) {
-        client.interrupt();
-      }
-    };
-    
-    const handleAudioReceived = () => {
-      setIsSpeaking(true);
-      setIsAssistantSpeaking(true);
-    };
+    }
+    setIsAssistantTyping(false);
+  }, []);
 
-    // Set up event handlers
-    client.onReady = handleReady;
-    client.onSessionIdReceived = handleSessionIdReceived;
+  useEffect(() => {
+    const id = setInterval(setTypingHeuristic, 800);
+    return () => clearInterval(id);
+  }, [setTypingHeuristic]);
+
+  const scheduleReconnect = useCallback(() => {
+    // rely on external state refs to avoid dependency churn
+    if (manualReconnectRequestedRef.current) return;
+    if (!userId) return;
+    if (connectionStateRef.current === 'failed') return;
+    reconnectAttemptsRef.current += 1;
+    const attempt = reconnectAttemptsRef.current;
+    if (attempt > 8) {
+      setConnectionState('failed');
+      disconnectHandlersRef.current.forEach(h => h());
+      return;
+    }
+    setConnectionState('reconnecting');
+    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 15000);
+    setTimeout(() => { attemptConnect(); }, delay);
+  }, [userId]);
+
+  const tearDownClient = useCallback(() => {
+    if (clientRef.current) {
+      try { clientRef.current.close(); } catch {}
+      clientRef.current = null;
+    }
+  }, []);
+
+  const attemptConnect = useCallback(() => {
+    if (!userId) return;
+    // Avoid creating a new client if current is open/connecting
+    const existing = clientRef.current as any;
+    if (existing && existing.ws && [WebSocket.OPEN, WebSocket.CONNECTING].includes(existing.ws.readyState)) {
+      return; // already trying/connected
+    }
+    tearDownClient();
+    setConnectionState(reconnectAttemptsRef.current > 0 ? 'reconnecting' : 'connecting');
+    const client = new MultimodalClient(userId, serverUrl);
+    clientRef.current = client;
+    client.onReady = () => {
+      setIsConnected(true);
+      setConnectionState('connected');
+      reconnectAttemptsRef.current = 0;
+      manualReconnectRequestedRef.current = false;
+      reconnectSuccessHandlersRef.current.forEach(h => h());
+    };
+    client.onSessionIdReceived = (id: string) => setSessionId(id);
     client.onTextReceived = handleTextReceived;
     client.onTurnComplete = handleTurnComplete;
-    client.onError = handleError;
     client.onInterrupted = handleInterrupted;
     client.onAudioReceived = handleAudioReceived;
-
-    client.connect().catch(handleError);
-
-    return () => {
-      if (clientRef.current) {
-        clientRef.current.close();
-        clientRef.current = null;
-      }
+    client.onError = (err: any) => {
+      console.error('Multimodal client error', err);
+      setIsConnected(false);
+      scheduleReconnect();
     };
-  }, [serverUrl]);
+    client.onClose = () => {
+      setIsConnected(false);
+      disconnectHandlersRef.current.forEach(h => h());
+      scheduleReconnect();
+    };
+    client.connect().catch(err => {
+      console.error('Connect failed', err);
+      setIsConnected(false);
+      scheduleReconnect();
+    });
+  }, [userId, serverUrl, handleTextReceived, handleTurnComplete, handleInterrupted, handleAudioReceived, scheduleReconnect, tearDownClient]);
+
+  // Initial connect (once) – avoids dependency on attemptConnect to stop loop
+  useEffect(() => {
+    if (!userId) return;
+    if (initiatedRef.current) return;
+    initiatedRef.current = true;
+    attemptConnect();
+  }, [userId]);
+
+  // Cleanup on unmount
+  useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
+
+  const reconnectNow = useCallback(() => {
+    manualReconnectRequestedRef.current = true;
+    reconnectAttemptsRef.current = 0;
+    attemptConnect();
+  }, [attemptConnect]);
 
   const startRecording = async () => {
     const client = clientRef.current;
     if (!client) return;
-    
     try {
-      // If assistant is speaking, interrupt it first
-      if (isAssistantSpeaking && client.interrupt) {
-        client.interrupt();
+      if (isAssistantSpeaking && (client as any).interrupt) {
+        (client as any).interrupt();
         setIsAssistantSpeaking(false);
       }
-      
-      await client.startRecording();
+      await (client as any).startRecording();
       setIsRecording(true);
       setIsSpeaking(true);
-      
       const newTranscript = [...transcriptRef.current, { sender: 'user', text: '...' }];
       transcriptRef.current = newTranscript;
       setTranscript(newTranscript);
       currentAssistantMessageIndex.current = null;
-    } catch (error) {
-      console.error('Error starting recording:', error);
+    } catch (e) {
+      console.error('Error starting recording', e);
     }
   };
 
   const stopRecording = () => {
     const client = clientRef.current;
     if (!client) return;
-    
-    client.stopRecording();
+    (client as any).stopRecording();
     setIsRecording(false);
     setIsSpeaking(false);
-    
     const newTranscript = [...transcriptRef.current];
-    // Remove the '...' placeholder if it hasn't been replaced
-    if (newTranscript.length > 0 && 
-        newTranscript[newTranscript.length - 1].text === '...' && 
-        newTranscript[newTranscript.length - 1].sender === 'user') {
+    if (newTranscript.length > 0 && newTranscript[newTranscript.length - 1].sender === 'user' && newTranscript[newTranscript.length - 1].text === '...') {
       newTranscript.pop();
+      transcriptRef.current = newTranscript;
+      setTranscript(newTranscript);
     }
-    
-    transcriptRef.current = newTranscript;
-    setTranscript(newTranscript);
   };
 
-  const initializeWebcam = async (videoElement: HTMLVideoElement) => {
+  const initializeWebcam = async (videoEl: HTMLVideoElement) => {
     const client = clientRef.current;
     if (!client) return;
-    
     try {
-      const success = await client.initializeWebcam(videoElement);
-      if (success) {
+      const ok = await (client as any).initializeWebcam(videoEl);
+      if (ok) {
         setIsVideoActive(true);
         setActiveVideoMode('webcam');
-        if (client.isConnected) {
-          client.startVideoStream(1);
-        }
+        if ((client as any).isConnected) (client as any).startVideoStream(1);
       }
-    } catch (error) {
-      console.error('Error initializing webcam:', error);
+    } catch (e) {
+      console.error('Error initializing webcam', e);
     }
   };
 
-  const initializeScreenShare = async (videoElement: HTMLVideoElement) => {
+  const initializeScreenShare = async (videoEl: HTMLVideoElement) => {
     const client = clientRef.current;
     if (!client) return;
-    
     try {
-      const success = await client.initializeScreenShare(videoElement);
-      if (success) {
+      const ok = await (client as any).initializeScreenShare(videoEl);
+      if (ok) {
         setIsVideoActive(true);
         setActiveVideoMode('screen');
-        if (client.isConnected) {
-          client.startVideoStream(1);
-        }
+        if ((client as any).isConnected) (client as any).startVideoStream(1);
       }
-    } catch (error) {
-      console.error('Error initializing screen share:', error);
+    } catch (e) {
+      console.error('Error initializing screen share', e);
     }
   };
 
   const stopVideo = () => {
     const client = clientRef.current;
     if (!client) return;
-    
-    client.stopVideo();
+    (client as any).stopVideo();
     setIsVideoActive(false);
     setActiveVideoMode(null);
   };
@@ -229,14 +256,11 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const sendTextMessage = (text: string) => {
     const client = clientRef.current;
     if (!client) return;
-    
-    // If assistant is speaking, interrupt it first
-    if (isAssistantSpeaking && client.interrupt) {
-      client.interrupt();
+    if (isAssistantSpeaking && (client as any).interrupt) {
+      (client as any).interrupt();
       setIsAssistantSpeaking(false);
     }
-    
-    client.sendText(text);
+    (client as any).sendText(text);
     const newTranscript = [...transcriptRef.current, { sender: 'user', text }];
     transcriptRef.current = newTranscript;
     setTranscript(newTranscript);
@@ -245,9 +269,8 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const interruptAssistant = () => {
     const client = clientRef.current;
     if (!client || !isAssistantSpeaking) return;
-    
-    if (client.interrupt) {
-      client.interrupt();
+    if ((client as any).interrupt) {
+      (client as any).interrupt();
       setIsAssistantSpeaking(false);
       setIsSpeaking(false);
     }
@@ -255,6 +278,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
 
   return {
     isConnected,
+    connectionState,
     isRecording,
     isVideoActive,
     activeVideoMode,
@@ -262,6 +286,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     sessionId,
     isSpeaking,
     isAssistantSpeaking,
+    isAssistantTyping,
     startRecording,
     stopRecording,
     initializeWebcam,
@@ -269,5 +294,8 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     stopVideo,
     sendTextMessage,
     interruptAssistant,
+    reconnectNow,
+    registerOnDisconnect,
+    registerOnReconnectSuccess,
   };
 };

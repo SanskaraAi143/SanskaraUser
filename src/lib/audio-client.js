@@ -29,6 +29,9 @@ export default class AudioClient {
         this.isPlaying = false;
         this.currentSource = null;
 
+        // Prevent duplicate ready
+        this._readyEmitted = false;
+
         // Clean up any existing audioContexts
         if (window.existingAudioContexts) {
             window.existingAudioContexts.forEach(ctx => {
@@ -67,7 +70,7 @@ export default class AudioClient {
                 const connectionTimeout = setTimeout(() => {
                     if (!this.isConnected) {
                         console.error('WebSocket connection timed out');
-                        this.tryReconnect();
+                        // Removed internal tryReconnect call (external hook manages reconnect)
                         reject(new Error('Connection timeout'));
                     }
                 }, 5000);
@@ -76,23 +79,25 @@ export default class AudioClient {
                     console.log('WebSocket connection established');
                     clearTimeout(connectionTimeout);
                     this.reconnectAttempts = 0; // Reset on successful connection
+                    this.isConnected = true;
+                    if (!this._readyEmitted) {
+                        this._readyEmitted = true;
+                        try { this.onReady(); } catch(e) { console.error('onReady error', e); }
+                    }
+                    resolve();
                 };
 
                 this.ws.onclose = (event) => {
                     console.log('WebSocket connection closed:', event.code, event.reason);
                     this.isConnected = false;
-
-                    // Try to reconnect if it wasn't a normal closure
-                    if (event.code !== 1000 && event.code !== 1001) {
-                        this.tryReconnect();
-                    }
+                    // Removed internal reconnect invocation to avoid loop; outer logic decides.
                 };
 
                 this.ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
                     clearTimeout(connectionTimeout);
                     this.onError(error);
-                    reject(error);
+                    if (!this.isConnected) reject(error);
                 };
 
                 this.ws.onmessage = async (event) => {
@@ -103,9 +108,12 @@ export default class AudioClient {
                         const message = JSON.parse(event.data);
 
                         if (message.type === 'ready') {
-                            this.isConnected = true;
-                            this.onReady();
-                            resolve();
+                            // Legacy ready message – already handled on open, but keep for backward compat
+                            if (!this._readyEmitted) {
+                                this._readyEmitted = true;
+                                this.isConnected = true;
+                                this.onReady();
+                            }
                         }
                         else if (message.type === 'audio') {
                             // Handle receiving audio data from server
@@ -132,10 +140,17 @@ export default class AudioClient {
                             this.onError(message.data);
                         }
                         else if (message.type === 'session_id') {
-                            // Handle session ID
+                            // Handle session ID (legacy format)
                             console.log('Received session ID message:', message);
                             this.sessionId = message.data;
                             this.onSessionIdReceived(message.data);
+                        }
+                        else if (message.type === 'session' && (message.session_id || (message.data && message.data.session_id))) {
+                            // New format: { type: 'session', session_id: '...' }
+                            const sid = message.session_id || message.data.session_id;
+                            console.log('Received session (new format):', sid);
+                            this.sessionId = sid;
+                            this.onSessionIdReceived(sid);
                         }
                     } catch (error) {
                         console.error('Error processing message:', error);
@@ -148,7 +163,7 @@ export default class AudioClient {
         });
     }
 
-    // Try to reconnect with exponential backoff
+    // Try to reconnect with exponential backoff (kept for compatibility; not automatically invoked now)
     async tryReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.error('Max reconnection attempts reached');

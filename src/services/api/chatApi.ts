@@ -1,4 +1,3 @@
-
 import { supabase } from '../supabase/config';
 import { logError, ApiError } from '../../utils/errorLogger';
 import { toast } from '../../hooks/use-toast';
@@ -43,7 +42,8 @@ export const sendChatMessage = async (
   message: string,
   weddingId: string,
   sessionId?: string,
-  category?: string
+  category?: string,
+  attachments?: string[]
 ): Promise<{ messages: ChatMessage[], session_id: string }> => {
   try {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -67,7 +67,8 @@ export const sendChatMessage = async (
         message,
         wedding_id: weddingId,
         session_id: sessionId,
-        category
+        category,
+        attachments, // optional array of artifact_ids (backend may ignore)
       }),
     });
     
