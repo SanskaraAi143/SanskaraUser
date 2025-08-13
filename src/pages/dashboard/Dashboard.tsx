@@ -1,6 +1,5 @@
-import React, { useState, Suspense } from "react";
+import React, { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskTracker from "@/components/dashboard/TaskTracker";
 import TimelineCreator from "@/components/dashboard/TimelineCreator";
 import MoodBoard from "@/components/dashboard/MoodBoard";
@@ -18,7 +17,7 @@ import DashboardAIAssistant from "@/components/dashboard/dashboard-sections/Dash
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  // const [activeTab, setActiveTab] = useState("overview"); // No longer needed
 
   const {
     profile,
@@ -45,7 +44,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <DashboardWelcome
         profile={profile}
         userName={user?.name}
@@ -53,54 +52,57 @@ const Dashboard = () => {
         daysUntilWedding={daysUntilWedding}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="moodboard">Mood Board</TabsTrigger>
-          <TabsTrigger value="budget">Budget</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-6 pt-4">
-          <Suspense fallback={<div className="animate-pulse text-center text-gray-400">Loading dashboard...</div>}>
-            <AnimatePresence>
-              <DashboardOverviewCards
-                key="dashboard-overview-cards"
-                daysUntilWedding={daysUntilWedding}
-                weddingDate={weddingDetails?.wedding_date}
-                confirmedGuests={confirmedGuests}
-                invitedGuests={invitedGuests}
-                spentBudget={spentBudget}
-                totalBudget={totalBudget}
-                completedTasks={completedTasks}
-                totalTasks={totalTasks}
-              />
+      {/* All content is now in a single, scrollable view */}
+      <Suspense fallback={<div className="animate-pulse text-center text-gray-400">Loading dashboard sections...</div>}>
+        <AnimatePresence>
+          {/* Overview Cards */}
+          <DashboardOverviewCards
+            key="dashboard-overview-cards"
+            daysUntilWedding={daysUntilWedding}
+            weddingDate={weddingDetails?.wedding_date}
+            confirmedGuests={confirmedGuests}
+            invitedGuests={invitedGuests}
+            spentBudget={spentBudget}
+            totalBudget={totalBudget}
+            completedTasks={completedTasks}
+            totalTasks={totalTasks}
+          />
 
-              <div key="dashboard-upcoming-section" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <DashboardUpcomingTasks nextTasks={nextTasks} />
-                <DashboardUpcomingEvents nextEvents={nextEvents} />
-              </div>
+          {/* Upcoming Tasks and Events */}
+          <div key="dashboard-upcoming-section" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <DashboardUpcomingTasks nextTasks={nextTasks} />
+            <DashboardUpcomingEvents nextEvents={nextEvents} />
+          </div>
 
-              <div key="dashboard-utility-section" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <DashboardNotifications />
-                <DashboardAIAssistant />
-              </div>
-            </AnimatePresence>
-          </Suspense>
-        </TabsContent>
-        <TabsContent value="tasks" className="pt-4">
-          <TaskTracker />
-        </TabsContent>
-        <TabsContent value="timeline" className="pt-4">
-          <TimelineCreator />
-        </TabsContent>
-        <TabsContent value="moodboard" className="pt-4">
-          <MoodBoard />
-        </TabsContent>
-        <TabsContent value="budget" className="pt-4">
-          <BudgetManager />
-        </TabsContent>
-      </Tabs>
+          {/* Notifications and AI Assistant */}
+          <div key="dashboard-utility-section" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <DashboardNotifications />
+            <DashboardAIAssistant />
+          </div>
+
+          {/* Formerly Tabbed Content, now as sections */}
+          <div key="task-tracker-section" className="pt-6">
+             <h2 className="text-2xl font-semibold mb-4">Task Tracker</h2>
+             <TaskTracker />
+          </div>
+
+          <div key="timeline-section" className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Wedding Timeline</h2>
+            <TimelineCreator />
+          </div>
+
+          <div key="budget-section" className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Budget Manager</h2>
+            <BudgetManager />
+          </div>
+
+          <div key="moodboard-section" className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Mood Board</h2>
+            <MoodBoard />
+          </div>
+
+        </AnimatePresence>
+      </Suspense>
     </div>
   );
 };
