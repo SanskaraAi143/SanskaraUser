@@ -9,9 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { BASE_API_URL } from '@/config/api';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 
 // Google Gemini AI configuration
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string; // Use environment variable for security
@@ -52,16 +50,8 @@ const FirstPartnerOnboardingForm: React.FC = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [suggestingCeremonies, setSuggestingCeremonies] = useState(false);
-
-  const steps = [
-    "Core Foundation",
-    "Vision & Vibe",
-    "Cultural Heartbeat",
-    "Teamwork Plan",
-    "Budget & Priorities"
-  ];
+  const [submitting, setSubmitting] = useState(false); // Loading state for form submission
+  const [suggestingCeremonies, setSuggestingCeremonies] = useState(false); // Loading state for ceremony suggestions
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -623,40 +613,28 @@ const FirstPartnerOnboardingForm: React.FC = () => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-2xl">Tell Us About Your Wedding</CardTitle>
-        <CardDescription>
-          Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
-        </CardDescription>
-        <div className="w-full bg-muted rounded-full h-2.5 mt-4">
-          <div className="bg-primary h-2.5 rounded-full transition-all duration-500" style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} />
+    <div className="container mx-auto p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md">
+        {renderStep()}
+        <div className="flex justify-between mt-8">
+          {currentStep > 0 && (
+            <Button onClick={prevStep} variant="outline">
+              ← Previous
+            </Button>
+          )}
+          {currentStep < 4 && (
+            <Button onClick={nextStep} className="ml-auto">
+              Next →
+            </Button>
+          )}
+          {currentStep === 4 && (
+            <Button onClick={handleSubmit} className="ml-auto" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit & View Summary'}
+            </Button>
+          )}
         </div>
-      </CardHeader>
-      <CardContent>
-        <form>
-          {renderStep()}
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        {currentStep > 0 ? (
-          <Button onClick={prevStep} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-          </Button>
-        ) : <div />}
-
-        {currentStep < steps.length - 1 && (
-          <Button onClick={nextStep} type="button">
-            Next <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-        {currentStep === steps.length - 1 && (
-          <Button onClick={handleSubmit} type="submit" disabled={submitting}>
-            {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : 'Submit & Create Plan'}
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -65,11 +65,11 @@ const Features: React.FC = () => {
 		<section id="features" className="relative py-20 md:py-32 overflow-hidden">
 			<div className="gradient-bg opacity-50" />
 			<div className="container mx-auto px-4 relative z-10">
-				<div className="glass-card p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-6">
+				<div className=" p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
+					<h2 className="text-3xl md:text-4xl lg:text-5xl  font-bold mb-6">
 						Everything You Need for Your
 						<br />
-						<span className="title-gradient">Dream Wedding</span>
+						<span className="">Dream Wedding</span>
 					</h2>
 					<p className="text-lg md:text-xl text-wedding-gold/90">
 						From planning to execution, our AI-powered platform helps you create the perfect Hindu wedding celebration.

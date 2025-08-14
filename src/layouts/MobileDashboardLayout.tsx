@@ -86,7 +86,7 @@ const MobileDashboardLayout = () => {
                       src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
                       alt="Sanskara AI Logo" 
                       className="h-8 w-8 object-contain"
-                    />            <h1 className="text-lg font-playfair font-semibold text-wedding-maroon">
+                    />            <h1 className="text-lg  font-semibold text-wedding-maroon">
               Sanskara<span className="text-wedding-red">AI</span>
             </h1>
                   </Link>
@@ -131,7 +131,7 @@ const MobileDashboardLayout = () => {
                 src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" 
                 alt="Sanskara AI Logo" 
                 className="h-8 w-8 object-contain"
-              />              <h2 className="ml-2 text-lg font-playfair font-semibold text-wedding-maroon">
+              />              <h2 className="ml-2 text-lg  font-semibold text-wedding-maroon">
                 Sanskara<span className="text-wedding-red">AI</span>
               </h2>
             </Link>
@@ -162,7 +162,7 @@ const MobileDashboardLayout = () => {
               src="/logo.jpeg" 
               alt="SanskaraAI Logo" 
               className="h-10 w-10 object-contain"
-            />            <h2 className="text-lg font-playfair font-semibold" style={{color:'#ff8f00'}}>
+            />            <h2 className="text-lg  font-semibold" style={{color:'#ff8f00'}}>
               Sanskara<span style={{color:'#8d6e63'}}>AI</span>
             </h2>
           </Link>

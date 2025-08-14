@@ -78,7 +78,7 @@ const FAQPage: React.FC = () => {
 			</header>
 			<main role="main" aria-label="FAQ content" className="flex-grow container mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
 				<div className="max-w-3xl mx-auto">
-					<h1 className="text-4xl md:text-5xl font-bold text-center mb-12 title-gradient">
+					<h1 className="text-4xl md:text-5xl font-bold text-center mb-12 ">
 						Frequently Asked Questions
 					</h1>
 					<Accordion type="single" collapsible className="w-full">
@@ -86,7 +86,7 @@ const FAQPage: React.FC = () => {
 							<AccordionItem
 								value={`item-${index}`}
 								key={index}
-								className="mb-4 border border-wedding-gold/20 rounded-lg shadow-sm glass-card p-2"
+								className="mb-4 border border-wedding-gold/20 rounded-lg shadow-sm  p-2"
 							>
 								<AccordionTrigger
 									as="h2"

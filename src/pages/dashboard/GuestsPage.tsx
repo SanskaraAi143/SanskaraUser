@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGuestList, addGuest, updateGuest, removeGuest, Guest } from '../../services/api/guestListApi';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 
-// Updated status colors to match the new theme
-const STATUS_STYLES: Record<string, string> = {
-  Pending: "secondary",
-  Invited: "default",
-  Confirmed: "default", // Using primary color for confirmed
-  Declined: "destructive",
+const STATUS_COLORS: Record<string, string> = {
+  Pending: 'bg-gray-400',
+  Invited: 'bg-blue-400',
+  Confirmed: 'bg-green-500',
+  Declined: 'bg-red-400',
 };
 
 export default function GuestsPage() {
@@ -45,6 +38,7 @@ export default function GuestsPage() {
 
   useEffect(() => {
     if (weddingId) loadGuests();
+    // eslint-disable-next-line
   }, [weddingId]);
 
   const handleEdit = (guest: Guest) => {
@@ -54,7 +48,7 @@ export default function GuestsPage() {
   };
 
   const handleDelete = async (guest_id: string) => {
-    if (!window.confirm('Are you sure you want to remove this guest?')) return;
+    if (!window.confirm('Remove this guest?')) return;
     try {
       await removeGuest(guest_id);
       setGuests((prev) => prev.filter((g) => g.guest_id !== guest_id));
@@ -82,6 +76,7 @@ export default function GuestsPage() {
     }
   };
 
+  // Filtered guests
   const filteredGuests = guests.filter(g => {
     const match =
       g.guest_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -92,88 +87,85 @@ export default function GuestsPage() {
   });
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8 animate-fadein">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <CardTitle className="text-3xl">Guest List</CardTitle>
-          <CardDescription>Manage your wedding guests and track RSVPs.</CardDescription>
+          <h2 className="text-2xl font-bold text-gray-800">Guest List</h2>
+          <p className="text-gray-500">Manage your wedding guests and track RSVPs.</p>
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Search guests..." value={search} onChange={e => setSearch(e.target.value)} className="max-w-xs" />
-          <Button onClick={() => { setShowForm(true); setForm({}); setEditingId(null); }}>
+          <input className="input" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow"
+            onClick={() => { setShowForm(true); setForm({}); setEditingId(null); }}
+          >
             + Add Guest
-          </Button>
+          </button>
         </div>
-      </CardHeader>
-      <CardContent>
-        {error && <div className="text-destructive mb-4">{error}</div>}
-        {showForm && (
-          <form className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-background/50" onSubmit={handleFormSubmit}>
-            <Input placeholder="Name" value={form.guest_name || ''} onChange={e => setForm(f => ({ ...f, guest_name: e.target.value }))} required />
-            <Input placeholder="Contact Info (Email/Phone)" value={form.contact_info || ''} onChange={e => setForm(f => ({ ...f, contact_info: e.target.value }))} />
-            <Input placeholder="Relation" value={form.relation || ''} onChange={e => setForm(f => ({ ...f, relation: e.target.value }))} />
-            <Select value={form.side || ''} onValueChange={value => setForm(f => ({ ...f, side: value }))}>
-              <SelectTrigger><SelectValue placeholder="Side" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Groom">Groom</SelectItem>
-                <SelectItem value="Bride">Bride</SelectItem>
-                <SelectItem value="Both">Both</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={form.status || ''} onValueChange={value => setForm(f => ({ ...f, status: value }))}>
-              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Invited">Invited</SelectItem>
-                <SelectItem value="Confirmed">Confirmed</SelectItem>
-                <SelectItem value="Declined">Declined</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input className="md:col-span-2" placeholder="Dietary Requirements" value={form.dietary_requirements || ''} onChange={e => setForm(f => ({ ...f, dietary_requirements: e.target.value }))} />
-            <div className="md:col-span-2 flex gap-2 mt-2">
-              <Button type="submit">{editingId ? 'Update Guest' : 'Add Guest'}</Button>
-              <Button variant="outline" type="button" onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }}>Cancel</Button>
-            </div>
-          </form>
-        )}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Relation</TableHead>
-                <TableHead>Side</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Dietary</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8">Loading guests...</TableCell></TableRow>
-              ) : filteredGuests.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8">No guests found.</TableCell></TableRow>
-              ) : filteredGuests.map(guest => (
-                <TableRow key={guest.guest_id}>
-                  <TableCell className="font-medium">{guest.guest_name}</TableCell>
-                  <TableCell>{guest.contact_info}</TableCell>
-                  <TableCell>{guest.relation}</TableCell>
-                  <TableCell>{guest.side}</TableCell>
-                  <TableCell>
-                    <Badge variant={STATUS_STYLES[guest.status || 'Pending'] || 'secondary'}>{guest.status || 'Pending'}</Badge>
-                  </TableCell>
-                  <TableCell>{guest.dietary_requirements}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(guest)}>Edit</Button>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleDelete(guest.guest_id)}>Delete</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      {error && <div className="text-red-500 mb-2">{error}</div>}
+      {showForm && (
+        <form className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleFormSubmit}>
+          <input className="input" placeholder="Name" value={form.guest_name || ''} onChange={e => setForm(f => ({ ...f, guest_name: e.target.value }))} required />
+          <input className="input" placeholder="Contact Info" value={form.contact_info || ''} onChange={e => setForm(f => ({ ...f, contact_info: e.target.value }))} />
+          <input className="input" placeholder="Relation" value={form.relation || ''} onChange={e => setForm(f => ({ ...f, relation: e.target.value }))} />
+          <select className="input" value={form.side || ''} onChange={e => setForm(f => ({ ...f, side: e.target.value }))}>
+            <option value="">Side</option>
+            <option value="Groom">Groom</option>
+            <option value="Bride">Bride</option>
+            <option value="Both">Both</option>
+          </select>
+          <select className="input" value={form.status || ''} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+            <option value="">Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Invited">Invited</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Declined">Declined</option>
+          </select>
+          <input className="input md:col-span-2" placeholder="Dietary Requirements" value={form.dietary_requirements || ''} onChange={e => setForm(f => ({ ...f, dietary_requirements: e.target.value }))} />
+          <div className="md:col-span-2 flex gap-2 mt-2">
+            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow">{editingId ? 'Update' : 'Add'}</button>
+            <button type="button" className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold" onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }}>Cancel</button>
+          </div>
+        </form>
+      )}
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border-separate border-spacing-y-2">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 rounded-l-lg text-left font-semibold text-gray-700">Name</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
+              <th className="px-4 py-2 rounded-r-lg text-center font-semibold text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+            ) : filteredGuests.length === 0 ? (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-400">No guests added yet.</td></tr>
+            ) : filteredGuests.map(guest => (
+              <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
+                <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
+                <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
+                <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
+                <td className="px-4 py-2 text-gray-700">{guest.side}</td>
+                <td className="px-4 py-2">
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${STATUS_COLORS[guest.status || 'Pending'] || 'bg-gray-400'}`}>{guest.status || 'Pending'}</span>
+                </td>
+                <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
+                <td className="px-4 py-2 flex gap-2 justify-center">
+                  <button className="text-blue-600 hover:text-blue-900 font-semibold" onClick={() => handleEdit(guest)}>Edit</button>
+                  <button className="text-red-500 hover:text-red-800 font-semibold" onClick={() => handleDelete(guest.guest_id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

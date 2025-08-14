@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Button, ButtonProps } from '@/components/ui/button';
+import SignInDialog from '@/components/auth/SignInDialog';
+import { Button, ButtonProps } from '@/components/ui/button'; // Assuming ButtonProps can be imported
 
 interface AuthActionButtonProps extends Omit<ButtonProps, 'onClick'> {
-  loggedInAction?: () => void;
-  navigateTo?: string;
+  loggedInAction?: () => void; // Action to perform if the user is logged in
+  navigateTo?: string; // Optional: path to navigate to if logged in (alternative to loggedInAction)
   children: React.ReactNode;
+  // We can add specific props for SignInDialog if needed, or assume SignInDialog takes its trigger as children
 }
 
 const AuthActionButton: React.FC<AuthActionButtonProps> = ({
@@ -20,23 +22,31 @@ const AuthActionButton: React.FC<AuthActionButtonProps> = ({
 
   const handleClick = () => {
     if (user) {
-      // User is logged in, perform the intended action
       if (loggedInAction) {
         loggedInAction();
       } else if (navigateTo) {
         navigate(navigateTo);
       }
-    } else {
-      // User is not logged in, navigate to the unified auth page
-      // We'll default to signup mode as this is usually for new users
-      navigate('/auth?mode=signup');
     }
+    // If not logged in, the SignInDialog will be triggered by its parent structure
   };
 
+  if (user) {
+    return (
+      <Button {...buttonProps} onClick={handleClick}>
+        {children}
+      </Button>
+    );
+  }
+
+  // If not logged in, wrap the button content with SignInDialog
+  // The actual button rendering will be handled by SignInDialog's trigger
   return (
-    <Button {...buttonProps} onClick={handleClick}>
-      {children}
-    </Button>
+    <SignInDialog>
+      <Button {...buttonProps}>
+        {children}
+      </Button>
+    </SignInDialog>
   );
 };
 

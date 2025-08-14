@@ -137,7 +137,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <h1 className="text-3xl font-playfair font-semibold text-wedding-gold mb-6">My Profile</h1>
+      <h1 className="text-3xl  font-semibold text-wedding-gold mb-6">My Profile</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Card */}
         <Card className="md:col-span-1 border-wedding-gold/30 shadow-lg">

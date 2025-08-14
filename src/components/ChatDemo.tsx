@@ -23,10 +23,10 @@ const ChatDemo = () => {
       <div className="gradient-bg opacity-50"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="glass-card p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-6">
+        <div className=" p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl  font-bold mb-6">
             Your Personal<br/>
-            <span className="title-gradient">Wedding Guide</span>
+            <span className="">Wedding Guide</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-700">
             Sanskara AI understands Hindu wedding traditions, answering your questions and
@@ -35,13 +35,13 @@ const ChatDemo = () => {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          <div className="glass-card overflow-hidden shadow-2xl">
+          <div className=" overflow-hidden shadow-2xl">
             <div className="bg-gradient-primary bg-opacity-10 p-6 border-b border-wedding-gold/20">
               <div className="flex items-center justify-center gap-3">
                 <div className="h-10 w-10 flex items-center justify-center bg-gradient-primary rounded-full shadow-lg">
                   <img src="/lovable-uploads/82e13d9f-7faf-4d65-8c82-2be524f85cf7.webp" alt="Sanskara Logo" className="h-8 w-8" />
                 </div>
-                <h3 className="font-playfair text-2xl font-semibold title-gradient">
+                <h3 className=" text-2xl font-semibold ">
                   Chat with Sanskara AI
                 </h3>
               </div>
@@ -61,8 +61,8 @@ const ChatDemo = () => {
 
                 {/* Message with venue cards */}
                 <div className="chat-message animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                  <p className="font-medium title-gradient mb-1 text-sm">Sanskara AI</p>
-                  <div className="glass-card p-3 md:p-4 rounded-2xl shadow-md">
+                  <p className="font-medium  mb-1 text-sm">Sanskara AI</p>
+                  <div className=" p-3 md:p-4 rounded-2xl shadow-md">
                     <p className="text-wedding-brown/90 mb-3 text-sm">Thank you for sharing those details! For a Gujarati wedding in Mumbai in March 2026, here are some recommended venues:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <VenueSuggestionCard venue={venue1} />
@@ -74,8 +74,8 @@ const ChatDemo = () => {
                 <ChatMessageBubble sender="User" message="I'm interested in The Grand Pavilion. Do they specialize in Gujarati weddings?" isUserMessage={true} animationDelay="0.6s" />
                 
                 <div className="chat-message animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                  <p className="font-medium title-gradient mb-1 text-sm">Sanskara AI</p>
-                  <div className="glass-card p-3 md:p-4 rounded-2xl shadow-md">
+                  <p className="font-medium  mb-1 text-sm">Sanskara AI</p>
+                  <div className=" p-3 md:p-4 rounded-2xl shadow-md">
                     <p className="text-wedding-brown/90 text-sm">Yes, The Grand Pavilion has extensive experience hosting traditional Gujarati weddings. They offer:</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1 text-wedding-brown/90 text-xs">
                       <li>Dedicated spaces for Garba and Sangeet</li>
@@ -85,7 +85,7 @@ const ChatDemo = () => {
                     </ul>
                     <p className="mt-2 text-wedding-brown/90 text-xs">Available on your preferred date: March 15, 2026</p>
                     <div className="flex justify-between items-center mt-3">
-                      <span className="font-semibold title-gradient text-xs">₹3,75,000 for full package</span>
+                      <span className="font-semibold  text-xs">₹3,75,000 for full package</span>
                       <Button size="sm" className="bg-wedding-red hover:bg-wedding-deepred text-white text-xs px-2 py-1 h-auto">
                         View Complete Details
                       </Button>
@@ -94,8 +94,8 @@ const ChatDemo = () => {
                 </div>
 
                  <div className="chat-message animate-fade-in" style={{ animationDelay: '1.0s' }}>
-                  <p className="font-medium title-gradient mb-1 text-sm">Sanskara AI</p>
-                  <div className="glass-card p-3 md:p-4 rounded-2xl shadow-md">
+                  <p className="font-medium  mb-1 text-sm">Sanskara AI</p>
+                  <div className=" p-3 md:p-4 rounded-2xl shadow-md">
                     <p className="text-wedding-brown/90 mb-3 text-sm">Here are two similar venues that might also interest you:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <VenueSuggestionCard venue={venue3} />
@@ -108,7 +108,7 @@ const ChatDemo = () => {
                 <ChatMessageBubble sender="User" message="Yes, please check if The Grand Pavilion is available on March 15, 2026 and what deposit is required to book." isUserMessage={true} animationDelay="1.2s" />
 
                 <div className="chat-message animate-fade-in" style={{ animationDelay: '1.4s' }}>
-                  <p className="font-medium title-gradient mb-1 text-sm">Sanskara AI</p>
+                  <p className="font-medium  mb-1 text-sm">Sanskara AI</p>
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 mb-3 shadow-sm">
                     <div className="flex items-center">
                       <div className="bg-green-100 p-1.5 rounded-full">
@@ -122,7 +122,7 @@ const ChatDemo = () => {
                       <p><span className="font-medium">Cancellation policy:</span> Full refund (minus deposit) if cancelled 90+ days before event</p>
                     </div>
                   </div>
-                  <div className="glass-card p-3 md:p-4 rounded-2xl shadow-md">
+                  <div className=" p-3 md:p-4 rounded-2xl shadow-md">
                     <p className="text-wedding-brown/90 text-sm">To secure this venue for your wedding date, you can make the booking with the required deposit. Would you like to proceed with the payment?</p>
                     <div className="mt-3 flex flex-col sm:flex-row gap-2">
                       <Button className="bg-wedding-red hover:bg-wedding-deepred text-white text-xs px-3 py-1.5 h-auto">
@@ -146,7 +146,7 @@ const ChatDemo = () => {
                   <Button variant="ghost" className="nav-link p-2" aria-label="Upload image">
                     <Image className="h-5 w-5" />
                   </Button>
-                  <div className="flex-grow glass-card flex items-center px-4">
+                  <div className="flex-grow  flex items-center px-4">
                     <input
                       type="text"
                       placeholder="Type your message..."

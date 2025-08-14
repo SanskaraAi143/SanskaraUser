@@ -6,16 +6,21 @@ def verify_auth_page_design():
         page = browser.new_page()
 
         try:
-            # Navigate directly to the signup mode to be explicit
+            # 1. Arrange: Go to the application's homepage.
             page.goto("http://localhost:8030/auth?mode=signup", timeout=60000)
 
-            # Wait for the card title to be visible
-            card_title = page.get_by_role("heading", name="Create an Account")
-            expect(card_title).to_be_visible(timeout=30000)
+            # 2. Act: Accept the cookie banner
+            accept_button = page.get_by_role("button", name="Accept All")
+            expect(accept_button).to_be_visible(timeout=10000)
+            accept_button.click()
 
-            # Take a screenshot of the auth page
+            # 3. Assert: Wait for the main heading to be visible.
+            card_title = page.get_by_role("heading", name="Create an Account")
+            expect(card_title).to_be_visible(timeout=10000)
+
+            # 4. Screenshot: Capture the final result for visual verification.
             page.screenshot(path="jules-scratch/verification/auth_page_verification.png")
-            print("Auth page screenshot taken successfully.")
+            print("Screenshot taken successfully.")
 
         except Exception as e:
             print(f"An error occurred: {e}")

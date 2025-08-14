@@ -60,10 +60,10 @@ const Pricing = () => {
 			<div className="gradient-bg opacity-50"></div>
 			
 			<div className="container mx-auto px-4 relative z-10">
-				<div className="glass-card p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-6">
+				<div className=" p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
+					<h2 className="text-3xl md:text-4xl lg:text-5xl  font-bold mb-6">
 						Choose Your Perfect<br/>
-						<span className="title-gradient">Wedding Plan</span>
+						<span className="">Wedding Plan</span>
 					</h2>
 					<p className="text-lg md:text-xl text-gray-700">
 						Select the plan that best suits your needs and start planning your dream Hindu wedding today.
@@ -74,7 +74,7 @@ const Pricing = () => {
 					{tiers.map((tier) => (
 						<div
 							key={tier.name}
-							className={`glass-card p-8 relative flex flex-col ${
+							className={` p-8 relative flex flex-col ${
 								tier.mostPopular ? 'ring-2 ring-wedding-gold shadow-2xl' : ''
 							}`}
 						>
@@ -88,7 +88,7 @@ const Pricing = () => {
 							)}
 
 							<div className="mb-8">
-								<h3 className="text-2xl font-playfair font-bold title-gradient mb-2">
+								<h3 className="text-2xl  font-bold  mb-2">
 									{tier.name}
 								</h3>
 								<div className="flex items-baseline gap-1 mb-4">
@@ -124,7 +124,7 @@ const Pricing = () => {
 					))}
 				</div>
 
-				<div className="mt-16 glass-card p-6 flex items-center justify-between max-w-2xl mx-auto">
+				<div className="mt-16  p-6 flex items-center justify-between max-w-2xl mx-auto">
 					<div className="flex items-center gap-3">
 						<HelpCircle className="h-5 w-5 text-wedding-gold" />
 						<p className="text-wedding-brown/80">Need help choosing a plan?</p>

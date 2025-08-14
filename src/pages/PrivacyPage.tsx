@@ -16,13 +16,13 @@ const PrivacyPage: React.FC = () => {
       
       <main className="flex-grow container mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-12 title-gradient">
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-12 ">
             Privacy Policy
           </h1>
           
           <div className="prose prose-lg max-w-none space-y-8">
-            <div className="glass-card p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-4 title-gradient">Information We Collect</h2>
+            <div className=" p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold mb-4 ">Information We Collect</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 At Sanskara AI, we collect information you provide directly to us, such as when you create an account, 
                 plan your wedding, or contact us for support. This includes your name, email address, phone number, 
@@ -34,8 +34,8 @@ const PrivacyPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="glass-card p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-4 title-gradient">How We Use Your Information</h2>
+            <div className=" p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold mb-4 ">How We Use Your Information</h2>
               <ul className="text-gray-700 leading-relaxed space-y-2">
                 <li>• Provide personalized wedding planning recommendations</li>
                 <li>• Connect you with relevant vendors and services</li>
@@ -45,8 +45,8 @@ const PrivacyPage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="glass-card p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-4 title-gradient">Data Security</h2>
+            <div className=" p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold mb-4 ">Data Security</h2>
               <p className="text-gray-700 leading-relaxed">
                 We implement appropriate technical and organizational measures to protect your personal information 
                 against unauthorized access, alteration, disclosure, or destruction. Your data is encrypted in transit 
@@ -54,8 +54,8 @@ const PrivacyPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="glass-card p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-4 title-gradient">Your Rights</h2>
+            <div className=" p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold mb-4 ">Your Rights</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 You have the right to access, update, or delete your personal information. You can also opt out of 
                 marketing communications at any time.
@@ -71,8 +71,8 @@ const PrivacyPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="glass-card p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-4 title-gradient">Updates to This Policy</h2>
+            <div className=" p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold mb-4 ">Updates to This Policy</h2>
               <p className="text-gray-700 leading-relaxed">
                 We may update this Privacy Policy from time to time. We will notify you of any material changes 
                 by posting the new policy on this page and updating the "Last Updated" date.

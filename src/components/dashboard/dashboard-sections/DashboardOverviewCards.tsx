@@ -45,7 +45,7 @@ const DashboardOverviewCards: React.FC<DashboardOverviewCardsProps> = ({
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <AnimatePresence>
         <motion.div key="days-until-wedding" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-          <Card className="glass-card">
+          <Card className="">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">Days Until Wedding</CardTitle>
             </CardHeader>
@@ -59,7 +59,7 @@ const DashboardOverviewCards: React.FC<DashboardOverviewCardsProps> = ({
           </Card>
         </motion.div>
         <motion.div key="confirmed-guests" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-          <Card className="glass-card">
+          <Card className="">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">Confirmed Guests</CardTitle>
             </CardHeader>
@@ -73,7 +73,7 @@ const DashboardOverviewCards: React.FC<DashboardOverviewCardsProps> = ({
           </Card>
         </motion.div>
         <motion.div key="budget-status" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-          <Card className="glass-card">
+          <Card className="">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">Budget Status</CardTitle>
             </CardHeader>
@@ -89,7 +89,7 @@ const DashboardOverviewCards: React.FC<DashboardOverviewCardsProps> = ({
           </Card>
         </motion.div>
         <motion.div key="tasks-completed" variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-          <Card className="glass-card">
+          <Card className="">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">Tasks Completed</CardTitle>
             </CardHeader>

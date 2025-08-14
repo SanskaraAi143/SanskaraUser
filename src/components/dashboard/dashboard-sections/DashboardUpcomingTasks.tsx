@@ -23,7 +23,7 @@ const cardVariants = {
 const DashboardUpcomingTasks: React.FC<DashboardUpcomingTasksProps> = ({ nextTasks }) => {
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-      <Card className="glass-card">
+      <Card className="">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <div>
             <CardTitle>Upcoming Tasks</CardTitle>

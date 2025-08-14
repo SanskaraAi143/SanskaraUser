@@ -7,8 +7,9 @@ import ChatDemo from '@/components/ChatDemo';
 import Pricing from '@/components/Pricing';
 import Footer from '@/components/Footer';
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import SignInDialog from "@/components/auth/SignInDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from 'react-helmet-async';
 
@@ -197,7 +198,7 @@ const Index = () => {
         
         {/* Divine Planning Crew Section (match New Latest.html style) */}
         <section id="crew" className="py-16 md:py-28 bg-wedding-cream flex justify-center items-center">
-          <div className="planning-crew glass-card max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center gap-10 p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden">
+          <div className="planning-crew  max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center gap-10 p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden">
             <div className="crew-image-container flex-1 flex justify-center items-center">              <img
                 src="/crew-bitemoji.jpeg"
                 alt="Divine Planning Crew"
@@ -209,7 +210,7 @@ const Index = () => {
               />
             </div>
             <div className="crew-description flex-1">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 title-gradient" style={{ color: '#ffd700' }}>Meet Your Divine Planning Crew</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 " style={{ color: '#ffd700' }}>Meet Your Divine Planning Crew</h2>
               <p className="mb-4 text-gray-700/90">Your dedicated team of AI assistants, each specializing in different aspects of your wedding journey:</p>
               <ul className="crew-members space-y-3 text-base md:text-lg">
                 <li className="flex items-center gap-2 font-semibold"><span className="text-2xl">👨‍🍳</span> Chef Arjun - <span className="font-normal">Your culinary excellence guide</span></li>
@@ -225,7 +226,7 @@ const Index = () => {
         {/* CTA Section */}
         <section className="py-12 md:py-20 bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white">
           <div className="container mx-auto px-4 text-center animate-fade-in">
-            <h2 className="text-2xl md:text-4xl font-playfair font-bold mb-4 md:mb-6">
+            <h2 className="text-2xl md:text-4xl  font-bold mb-4 md:mb-6">
               Begin Your Wedding Journey Today
             </h2>
             <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-6 md:mb-8">
@@ -240,11 +241,11 @@ const Index = () => {
                 Go to Dashboard
               </Button>
             ) : (
-              <Link to="/auth?mode=signup">
-                <Button size="lg">
+              <SignInDialog>
+                <Button className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium">
                   Get Started For Free
                 </Button>
-              </Link>
+              </SignInDialog>
             )}
           </div>        </section>
       </main>

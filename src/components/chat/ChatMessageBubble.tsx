@@ -20,14 +20,14 @@ const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
       className="chat-message animate-fade-in" 
       style={{ animationDelay }}
     >
-      <p className="font-medium title-gradient mb-1 text-sm">
+      <p className="font-medium  mb-1 text-sm">
         {sender}
       </p>
       <div 
         className={`p-3 md:p-4 rounded-2xl shadow-md ${
           isUserMessage 
             ? 'bg-wedding-red text-white ml-8' 
-            : 'glass-card mr-8'
+            : ' mr-8'
         }`}
       >
         <p className={`text-sm ${

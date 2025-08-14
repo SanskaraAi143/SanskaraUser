@@ -30,7 +30,7 @@ const DashboardWelcome: React.FC<DashboardWelcomeProps> = ({ profile, userName, 
       variants={cardVariants}
       className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-wedding-gold/20 shadow-lg"
     >
-      <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
+      <h1 className="text-3xl  text-wedding-gold mb-2 animate-fadeIn">
         Welcome back, {profile?.display_name || userName || "Friend"}!
       </h1>
       <p className="text-gray-600 animate-fadeIn delay-75">

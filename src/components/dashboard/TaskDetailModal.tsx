@@ -101,9 +101,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <DialogContent className="sm:max-w-lg glass-card">
+      <DialogContent className="sm:max-w-lg ">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-playfair title-gradient">
+          <DialogTitle className="text-2xl  ">
             {isNewTask ? 'Add New Task' : 'Edit Task Details'}
           </DialogTitle>
           <DialogDescription>
@@ -119,7 +119,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                 <FormItem>
                   <FormLabel className="text-wedding-brown">Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="E.g., Book photographer" {...field} className="glass-card border-wedding-gold/30" />
+                    <Input placeholder="E.g., Book photographer" {...field} className=" border-wedding-gold/30" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,7 +132,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                 <FormItem>
                   <FormLabel className="text-wedding-brown">Description (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Add more details about the task..." {...field} className="glass-card border-wedding-gold/30 min-h-[80px]" />
+                    <Textarea placeholder="Add more details about the task..." {...field} className=" border-wedding-gold/30 min-h-[80px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +146,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                   <FormItem>
                     <FormLabel className="text-wedding-brown">Due Date (Optional)</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} className="glass-card border-wedding-gold/30" />
+                      <Input type="date" {...field} className=" border-wedding-gold/30" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -160,7 +160,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormLabel className="text-wedding-brown">Priority</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="glass-card border-wedding-gold/30">
+                        <SelectTrigger className=" border-wedding-gold/30">
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
@@ -184,7 +184,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormLabel className="text-wedding-brown">Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="glass-card border-wedding-gold/30">
+                        <SelectTrigger className=" border-wedding-gold/30">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -206,7 +206,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                   <FormItem>
                     <FormLabel className="text-wedding-brown">Category (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="E.g., Venue, Catering" {...field} className="glass-card border-wedding-gold/30" />
+                      <Input placeholder="E.g., Venue, Catering" {...field} className=" border-wedding-gold/30" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -220,7 +220,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormLabel className="text-wedding-brown">Lead Party (Optional)</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="glass-card border-wedding-gold/30">
+                        <SelectTrigger className=" border-wedding-gold/30">
                           <SelectValue placeholder="Select lead party" />
                         </SelectTrigger>
                       </FormControl>

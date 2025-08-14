@@ -14,7 +14,7 @@ const cardVariants = {
 const DashboardNotifications: React.FC = () => {
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-      <Card className="glass-card">
+      <Card className="">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Bell className="mr-2 h-5 w-5 text-wedding-red" /> Notifications
