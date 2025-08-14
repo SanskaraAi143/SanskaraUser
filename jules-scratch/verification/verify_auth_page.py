@@ -6,7 +6,8 @@ def verify_auth_page_design():
         page = browser.new_page()
 
         try:
-            page.goto("http://localhost:8030/auth", timeout=60000)
+            # Navigate directly to the signup mode to be explicit
+            page.goto("http://localhost:8030/auth?mode=signup", timeout=60000)
 
             # Wait for the card title to be visible
             card_title = page.get_by_role("heading", name="Create an Account")

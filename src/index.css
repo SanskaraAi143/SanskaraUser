@@ -1,72 +1,49 @@
-/* Fonts are loaded via index.html */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 255 17% 98%; /* Light Lavender-Gray */
-    --foreground: 270 3% 24%; /* Deep Charcoal-Plum */
+    --background: 45 100% 95%;
+    --foreground: 25 26% 47%;
 
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 270 3% 24%; /* Deep Charcoal-Plum */
+    --primary: 43 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 270 3% 24%;
+    --secondary: 36 100% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --primary: 334 31% 67%; /* Dusty Rose */
-    --primary-foreground: 255 17% 98%; /* Light Lavender-Gray */
+    --muted: 45 30% 96%;
+    --muted-foreground: 25 5% 45%;
 
-    --secondary: 145 23% 71%; /* Muted Sage Green */
-    --secondary-foreground: 270 3% 24%; /* Deep Charcoal-Plum */
+    --accent: 43 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --muted: 255 13% 92%; /* Lighter shade of background for muted elements */
-    --muted-foreground: 270 3% 45%; /* A slightly lighter foreground color */
+    --card: 0 0% 100%;
+    --card-foreground: 25 26% 47%;
 
-    --accent: 336 43% 65%; /* Brighter Dusty Rose */
-    --accent-foreground: 270 3% 24%;
-
-    --destructive: 0 84.2% 60.2%; /* Keeping a standard destructive color */
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 255 13% 92%; /* Light Gray-Lavender */
-    --input: 255 13% 92%;
-    --ring: 336 43% 65%; /* Brighter Dusty Rose for focus rings */
+    --border: 43 30% 90%;
+    --input: 45 30% 96%;
+    --ring: 43 100% 50%;
 
     --radius: 0.5rem;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 26% 47%;
   }
 
-  /* Dark mode theme can be defined here if needed */
-  .dark {
-    /* Define dark mode colors here in the future */
+  body {
+    @apply bg-background text-foreground font-sans;
   }
-}
 
-@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-lora;
+  }
+
   * {
     @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Lato', sans-serif; /* Default body font */
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-lora; /* Headings font */
-  }
-}
-
-@layer components {
-  /* Re-usable component styles can be defined here */
-  .chat-message {
-    @apply px-4 py-3 rounded-lg mb-3 max-w-[85%];
-  }
-
-  .user-message {
-    @apply bg-primary text-primary-foreground self-end rounded-tr-none;
-  }
-
-  .ai-message {
-    @apply bg-muted text-foreground self-start rounded-tl-none;
   }
 }
