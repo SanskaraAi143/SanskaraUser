@@ -16,7 +16,7 @@ const cardVariants = {
 const DashboardAIAssistant: React.FC = () => {
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-      <Card className="">
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle className="flex items-center">
             <MessageCircle className="mr-2 h-5 w-5 text-wedding-red" /> AI Assistant

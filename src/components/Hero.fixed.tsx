@@ -17,10 +17,10 @@ const Hero = () => {
       <div className="container mx-auto px-4 pt-20">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2">
-            <div className=" p-8 md:p-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl  font-bold leading-tight">
+            <div className="glass-card p-8 md:p-12">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold leading-tight">
                 Plan Your Dream <br/>
-                <span className="">Hindu Wedding</span><br/>
+                <span className="title-gradient">Hindu Wedding</span><br/>
                 With AI
               </h1>
               

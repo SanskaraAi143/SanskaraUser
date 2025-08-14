@@ -93,10 +93,10 @@ const TaskTracker = () => {
           <span className="block sm:inline">{error.message}</span>
         </div>
       )}
-      <div className=" p-4 sm:p-6">
+      <div className="glass-card p-4 sm:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl  font-bold  mb-1 sm:mb-2">
+            <h2 className="text-2xl sm:text-3xl font-playfair font-bold title-gradient mb-1 sm:mb-2">
               Wedding Tasks
             </h2>
             <p className="text-sm text-wedding-brown/80">
@@ -120,7 +120,7 @@ const TaskTracker = () => {
       {loading && <div className="text-center py-10 text-wedding-brown">Loading tasks...</div>}
 
       {!loading && tasks.length === 0 && (
-        <div className="text-center py-10  p-6">
+        <div className="text-center py-10 glass-card p-6">
           <h3 className="text-xl font-semibold text-wedding-brown mb-2">No tasks yet!</h3>
           <p className="text-wedding-brown/80 mb-4">Click "Add New Task" to start planning.</p>
         </div>
@@ -153,7 +153,7 @@ const TaskTracker = () => {
       )}
 
       {processedTasks.length > tasksPerPage && (
-        <div className=" p-3 mt-6">
+        <div className="glass-card p-3 mt-6">
           <p className="text-center text-sm text-gray-500">
             Displaying {tasksPerPage} tasks per page. Pagination coming soon.
           </p>

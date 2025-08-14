@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="relative overflow-hidden">
       <div className="gradient-bg opacity-30"></div>
-      <div className=" border-t border-wedding-gold/20">
+      <div className="glass-card border-t border-wedding-gold/20">
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2">
@@ -17,7 +17,7 @@ const Footer = () => {
                     className="h-10 w-10 object-contain rounded-full"
                   />
                 </div>
-                <span className="text-2xl  font-semibold ">
+                <span className="text-2xl font-playfair font-semibold title-gradient">
                   Sanskara<span className="font-bold">AI</span>
                 </span>
               </div>              <p className="max-w-md text-lg" style={{color: '#374151'}}>
@@ -61,7 +61,7 @@ const Footer = () => {
                 </a>
               </div>
             </div>            <div>
-              <h3 className="text-lg  font-bold  mb-4">Company</h3>
+              <h3 className="text-lg font-playfair font-bold title-gradient mb-4">Company</h3>
               <ul className="space-y-3">
                 <li><a href="/about" className="nav-link">About Us</a></li>
                 <li><a href="/careers" className="nav-link">Careers</a></li>
@@ -71,7 +71,7 @@ const Footer = () => {
             </div>
 
             <div>
-              <h3 className="text-lg  font-bold  mb-4">Resources</h3>
+              <h3 className="text-lg font-playfair font-bold title-gradient mb-4">Resources</h3>
               <ul className="space-y-3">
                 <li><a href="/blog" className="nav-link">Wedding Guides</a></li>
                 <li><a href="/dashboard/vendors" className="nav-link">Vendor Directory</a></li>

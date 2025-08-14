@@ -67,7 +67,7 @@ const RitualGuidePage: React.FC = () => {
       <main className="flex-grow container mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 ">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 title-gradient">
               Hindu Wedding Ritual Guide
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -78,7 +78,7 @@ const RitualGuidePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             {rituals.map((ritual, index) => (
-              <article key={index} className=" p-8 rounded-2xl hover:shadow-xl transition-all duration-300">
+              <article key={index} className="glass-card p-8 rounded-2xl hover:shadow-xl transition-all duration-300">
                 <div className="aspect-[16/9] mb-6 rounded-lg overflow-hidden">
                   <img 
                     src={ritual.image} 
@@ -86,7 +86,7 @@ const RitualGuidePage: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h2 className="text-2xl font-bold mb-4 ">
+                <h2 className="text-2xl font-bold mb-4 title-gradient">
                   {ritual.name}
                 </h2>
                 <p className="text-gray-600 mb-6 leading-relaxed">
@@ -105,8 +105,8 @@ const RitualGuidePage: React.FC = () => {
             ))}
           </div>
 
-          <div className=" p-8 rounded-2xl text-center">
-            <h2 className="text-3xl font-bold mb-4 ">
+          <div className="glass-card p-8 rounded-2xl text-center">
+            <h2 className="text-3xl font-bold mb-4 title-gradient">
               Personalize Your Ceremony
             </h2>
             <p className="text-gray-600 mb-6 text-lg max-w-2xl mx-auto">

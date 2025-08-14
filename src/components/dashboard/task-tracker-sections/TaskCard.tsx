@@ -31,7 +31,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index, onClick, onToggleCompl
           ref={providedDraggable.innerRef}
           {...providedDraggable.draggableProps}
           {...providedDraggable.dragHandleProps}
-          className={` p-3 rounded-lg border border-wedding-gold/30 shadow-sm hover:shadow-md
+          className={`glass-card p-3 rounded-lg border border-wedding-gold/30 shadow-sm hover:shadow-md
             ${snapshotDraggable.isDragging ? 'shadow-xl ring-2 ring-wedding-orange' : ''}
           `}
           onClick={() => onClick(task)}

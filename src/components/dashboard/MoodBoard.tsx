@@ -230,9 +230,9 @@ const MoodBoard = () => {
 
   return (
     <div className="space-y-8">
-      <Card className=" shadow-2xl border-0 bg-gradient-to-br from-wedding-cream/90 via-white/80 to-wedding-gold/30 p-0">
+      <Card className="glass-card shadow-2xl border-0 bg-gradient-to-br from-wedding-cream/90 via-white/80 to-wedding-gold/30 p-0">
         <CardHeader className="pb-0 bg-gradient-to-r from-wedding-cream/80 to-wedding-gold/20 rounded-t-2xl border-b border-wedding-gold/20">
-          <CardTitle className=" text-3xl md:text-4xl text-wedding-gold drop-shadow-lg tracking-tight">Wedding Mood Board</CardTitle>
+          <CardTitle className="font-playfair text-3xl md:text-4xl text-wedding-gold drop-shadow-lg tracking-tight">Wedding Mood Board</CardTitle>
           <CardDescription className="text-lg text-yellow-900/80">Visualize your wedding aesthetic</CardDescription>
         </CardHeader>
         <div className="px-8 pt-8 flex flex-col md:flex-row md:items-center gap-4">
@@ -315,7 +315,7 @@ const MoodBoard = () => {
               <div className="col-span-full text-center p-8 text-yellow-900/60">Loading...</div>
             ) : filteredItems.length > 0 ? (
               filteredItems.map(image => (
-                <div key={image.item_id} className="relative group rounded-2xl overflow-hidden cursor-pointer  border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105" onClick={() => handleOpenImageModal(image)}>
+                <div key={image.item_id} className="relative group rounded-2xl overflow-hidden cursor-pointer glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105" onClick={() => handleOpenImageModal(image)}>
                   <img 
                     src={image.image_url} 
                     alt={image.note || 'Moodboard image'}
@@ -353,7 +353,7 @@ const MoodBoard = () => {
             </DialogTrigger>
             <DialogContent className="bg-white/90 rounded-2xl shadow-2xl border-0">
               <DialogHeader>
-                <DialogTitle className="text-wedding-gold  text-2xl">Add to your mood board</DialogTitle>
+                <DialogTitle className="text-wedding-gold font-playfair text-2xl">Add to your mood board</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <ImageUpload
@@ -398,7 +398,7 @@ const MoodBoard = () => {
             <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-full max-h-full flex flex-col items-center relative" onClick={e => e.stopPropagation()}>
               <button className="absolute top-2 right-2 text-gray-700 hover:text-black" onClick={handleCloseImageModal}><X size={28} /></button>
               <img src={modalImage.image_url} alt={modalImage.note} className="max-w-[90vw] max-h-[70vh] object-contain rounded-xl mb-4 shadow-lg" />
-              <div className="text-xl  text-wedding-gold text-center mb-2">{modalImage.note}</div>
+              <div className="text-xl font-playfair text-wedding-gold text-center mb-2">{modalImage.note}</div>
             </div>
           </div>
         )}
@@ -411,7 +411,7 @@ const MoodBoard = () => {
         }}>
           <DialogContent className="bg-white/90 rounded-2xl shadow-2xl border-0">
             <DialogHeader>
-              <DialogTitle className="text-wedding-gold  text-2xl">Edit Mood Board</DialogTitle>
+              <DialogTitle className="text-wedding-gold font-playfair text-2xl">Edit Mood Board</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <input

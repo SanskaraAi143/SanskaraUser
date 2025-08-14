@@ -187,8 +187,8 @@ const BudgetManager = () => {
           </div>
           {/* Budget Edit Dialog */}
           <Dialog open={showBudgetEdit} onOpenChange={open => setShowBudgetEdit(open)}>
-            <DialogContent className="">
-              <DialogHeader><DialogTitle className=" ">Edit Total Budget</DialogTitle></DialogHeader>
+            <DialogContent className="glass-card">
+              <DialogHeader><DialogTitle className="font-playfair title-gradient">Edit Total Budget</DialogTitle></DialogHeader>
               <div className="space-y-2 py-3">
                 <label htmlFor="total-budget-input" className="block text-sm font-medium text-wedding-brown">Set New Budget Amount</label>
                 <Input
@@ -196,7 +196,7 @@ const BudgetManager = () => {
                   type="number"
                   value={budgetInput}
                   onChange={e => setBudgetInput(e.target.value)}
-                  className="mb-4  border-wedding-gold/30"
+                  className="mb-4 glass-card border-wedding-gold/30"
                   placeholder="e.g., 500000"
                 />
               </div>
@@ -208,24 +208,24 @@ const BudgetManager = () => {
           </Dialog>
           {/* Add/Edit Expense Dialog */}
           <Dialog open={showExpenseDialog} onOpenChange={open => { setShowExpenseDialog(open); if (!open) setEditingExpense(null); }}>
-            <DialogContent className="">
-              <DialogHeader><DialogTitle className=" ">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle></DialogHeader>
+            <DialogContent className="glass-card">
+              <DialogHeader><DialogTitle className="font-playfair title-gradient">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle></DialogHeader>
               <div className="space-y-4 py-3"> {/* Increased space-y for better separation */}
                 <div>
                   <label htmlFor="expense-name" className="block text-sm font-medium text-wedding-brown mb-1">Expense Name</label>
-                  <Input id="expense-name" placeholder="E.g., Catering Deposit" value={expenseForm.item_name} onChange={e => setExpenseForm(f => ({ ...f, item_name: e.target.value }))} className=" border-wedding-gold/30" />
+                  <Input id="expense-name" placeholder="E.g., Catering Deposit" value={expenseForm.item_name} onChange={e => setExpenseForm(f => ({ ...f, item_name: e.target.value }))} className="glass-card border-wedding-gold/30" />
                 </div>
                 <div>
                   <label htmlFor="expense-category" className="block text-sm font-medium text-wedding-brown mb-1">Category</label>
-                  <Input id="expense-category" placeholder="E.g., Venue, Decor" value={expenseForm.category} onChange={e => setExpenseForm(f => ({ ...f, category: e.target.value }))} className=" border-wedding-gold/30" />
+                  <Input id="expense-category" placeholder="E.g., Venue, Decor" value={expenseForm.category} onChange={e => setExpenseForm(f => ({ ...f, category: e.target.value }))} className="glass-card border-wedding-gold/30" />
                 </div>
                 <div>
                   <label htmlFor="expense-amount" className="block text-sm font-medium text-wedding-brown mb-1">Amount (₹)</label>
-                  <Input id="expense-amount" placeholder="0.00" type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))} className=" border-wedding-gold/30" />
+                  <Input id="expense-amount" placeholder="0.00" type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))} className="glass-card border-wedding-gold/30" />
                 </div>
                 <div>
                   <label htmlFor="expense-vendor" className="block text-sm font-medium text-wedding-brown mb-1">Vendor (Optional)</label>
-                  <Input id="expense-vendor" placeholder="E.g., Royal Catering" value={expenseForm.vendor_name} onChange={e => setExpenseForm(f => ({ ...f, vendor_name: e.target.value }))} className=" border-wedding-gold/30" />
+                  <Input id="expense-vendor" placeholder="E.g., Royal Catering" value={expenseForm.vendor_name} onChange={e => setExpenseForm(f => ({ ...f, vendor_name: e.target.value }))} className="glass-card border-wedding-gold/30" />
                 </div>
                 <div className="flex items-center pt-2">
                   <input

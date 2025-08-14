@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bookmark, ChevronRight, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-// useAuth and SignInDialog will be handled by AuthActionButton
 import AuthActionButton from '@/components/auth/AuthActionButton';
 import {
   Carousel,
@@ -65,13 +64,10 @@ const RitualGuide = () => {
 
   return (
     <section className="relative py-20 md:py-32 overflow-hidden">
-      <div className="gradient-bg opacity-50"></div>
-
       <div className="container mx-auto px-4 relative z-10">
-        <div className=" p-8 md:p-12 mb-16 text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl  font-bold mb-6">
-            Discover Sacred<br/>
-            <span className="">Wedding Rituals</span>
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-lora font-bold mb-6">
+            Discover Sacred Wedding Rituals
           </h2>
           <p className="text-lg md:text-xl text-gray-700">
             Explore the meanings and significance behind traditional Hindu wedding ceremonies
@@ -81,38 +77,28 @@ const RitualGuide = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
-            <div className=" p-8 md:p-10">
-              <h3 className="text-2xl md:text-3xl  font-bold  mb-4">
-                {activeRitual.name}
-              </h3>
-              <p className="text-lg text-wedding-brown/80 mb-8">
-                {activeRitual.description}
-              </p>
-
-              <AuthActionButton
-                navigateTo="/dashboard/rituals" // Or use loggedInAction if more complex logic is needed
-                className="cta-button"
-              >
-                <Info size={20} className="mr-2" />
-                Learn More
-              </AuthActionButton>
-
-              <div className="mt-8 pt-8 border-t border-wedding-gold/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bookmark className="h-5 w-5 text-wedding-gold" />
-                    <span className="text-wedding-brown/80">Save for later</span>
-                  </div>                  <AuthActionButton
-                    variant="ghost"
-                    className="nav-link"
-                    navigateTo="/dashboard/rituals"
-                  >
-                    All Rituals
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </AuthActionButton>
-                </div>
-              </div>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-3xl">{activeRitual.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-lg text-muted-foreground mb-8">
+                        {activeRitual.description}
+                    </p>
+                    <AuthActionButton
+                        navigateTo="/dashboard/rituals"
+                    >
+                        <Info size={20} className="mr-2" />
+                        Learn More
+                    </AuthActionButton>
+                </CardContent>
+                <CardFooter>
+                    <Button variant="ghost" className="text-sm">
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        Save for later
+                    </Button>
+                </CardFooter>
+            </Card>
           </div>
 
           <div className="order-1 lg:order-2">
@@ -120,24 +106,30 @@ const RitualGuide = () => {
               <CarouselContent>
                 {rituals.map((ritual) => (
                   <CarouselItem key={ritual.id}>
-                    <button
-                      type="button"
-                      aria-label={`View details for ${ritual.name}`}
-                      className=" p-2 aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-300 hover:scale-[1.02] w-full block focus:outline-none focus:ring-2 focus:ring-wedding-gold focus:ring-offset-2"
-                      onClick={() => setActiveRitual(ritual)}
-                    >
-                      <img
-                        src={ritual.image}
-                        alt={ritual.alt || ritual.name}
-                        className="w-full h-full object-cover rounded-xl"
-                        loading="lazy"
-                      />
-                    </button>
+                    <div className="p-1">
+                        <Card className="overflow-hidden">
+                            <CardContent className="p-0">
+                                <button
+                                  type="button"
+                                  aria-label={`View details for ${ritual.name}`}
+                                  className="aspect-[4/3] w-full block focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
+                                  onClick={() => setActiveRitual(ritual)}
+                                >
+                                  <img
+                                    src={ritual.image}
+                                    alt={ritual.alt || ritual.name}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </button>
+                            </CardContent>
+                        </Card>
+                    </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="bg-gradient-primary text-white border-0 hover:bg-gradient-primary hover:opacity-90" />
-              <CarouselNext className="bg-gradient-primary text-white border-0 hover:bg-gradient-primary hover:opacity-90" />
+              <CarouselPrevious />
+              <CarouselNext />
             </Carousel>
           </div>
         </div>

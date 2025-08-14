@@ -30,9 +30,9 @@ const AboutPage = () => {
                 <Sparkles className="h-4 w-4 mr-2" />
                 Pioneering the Future of Wedding Planning
               </div>
-              <h1 className="text-5xl md:text-7xl  font-bold leading-tight mb-8">
-                Where Ancient <span className="">Wisdom</span><br/>
-                Meets Modern <span className="">Intelligence</span>
+              <h1 className="text-5xl md:text-7xl font-playfair font-bold leading-tight mb-8">
+                Where Ancient <span className="title-gradient">Wisdom</span><br/>
+                Meets Modern <span className="title-gradient">Intelligence</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
                 We're not just disrupting wedding planning—we're honoring 5,000 years of sacred traditions
@@ -67,7 +67,7 @@ const AboutPage = () => {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl  font-bold mb-8 text-gray-900">
+            <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-8 text-gray-900">
               Our Sacred Mission
             </h2>
             <div className="text-xl leading-relaxed text-gray-700 space-y-6">
@@ -94,7 +94,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl  font-bold mb-8 text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-8 text-gray-900">
                 The $50B Problem We're Solving
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
@@ -104,7 +104,7 @@ const AboutPage = () => {
             </div>
               <div className="grid md:grid-cols-2 gap-16 items-center">
               <div className="space-y-8">
-                <div className=" p-6 rounded-xl shadow-lg border-l-4 border-wedding-red">
+                <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-red">
                   <h3 className="font-bold text-xl text-wedding-red mb-3">The Traditional Way</h3>
                   <ul className="space-y-2 text-yellow-800">
                     <li>• 12+ months of chaotic planning</li>
@@ -115,7 +115,7 @@ const AboutPage = () => {
                   </ul>
                 </div>
 
-                <div className=" p-6 rounded-xl shadow-lg border-l-4 border-wedding-secondaryGold">
+                <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-secondaryGold">
                   <h3 className="font-bold text-xl text-wedding-secondaryGold mb-3">The Sanskara AI Way</h3>                  <ul className="space-y-2 text-yellow-800">
                     <li>• 3-month streamlined planning</li>
                     <li>• AI-curated vendor recommendations</li>
@@ -162,7 +162,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl  font-bold mb-8 text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-8 text-gray-900">
                 Luxury Meets Authenticity
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
@@ -170,7 +170,7 @@ const AboutPage = () => {
               </p>
             </div>
               <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center  p-8 rounded-xl">
+              <div className="text-center glass-card p-8 rounded-xl">
                 <div className="inline-flex items-center justify-center p-4 bg-wedding-gold/20 rounded-full mb-6">
                   <Brain className="h-8 w-8 text-wedding-orange" />
                 </div>
@@ -181,7 +181,7 @@ const AboutPage = () => {
                 </p>
               </div>
 
-              <div className="text-center  p-8 rounded-xl">
+              <div className="text-center glass-card p-8 rounded-xl">
                 <div className="inline-flex items-center justify-center p-4 bg-wedding-secondaryGold/20 rounded-full mb-6">
                   <Heart className="h-8 w-8 text-wedding-red" />
                 </div>
@@ -192,7 +192,7 @@ const AboutPage = () => {
                 </p>
               </div>
 
-              <div className="text-center  p-8 rounded-xl">
+              <div className="text-center glass-card p-8 rounded-xl">
                 <div className="inline-flex items-center justify-center p-4 bg-wedding-gold/20 rounded-full mb-6">
                   <Shield className="h-8 w-8 text-wedding-secondaryGold" />
                 </div>
@@ -210,7 +210,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl  font-bold mb-8 text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-8 text-gray-900">
                 Proven Traction & Explosive Growth
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
@@ -219,7 +219,7 @@ const AboutPage = () => {
             </div>
               <div className="grid md:grid-cols-2 gap-12">
               <div className="space-y-8">
-                <div className=" p-6 rounded-xl shadow-lg border-l-4 border-wedding-gold">
+                <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-gold">
                   <div className="flex items-center mb-4">
                     <TrendingUp className="h-6 w-6 text-wedding-gold mr-3" />
                     <h3 className="text-xl font-bold text-gray-900">Growth Metrics</h3>
@@ -244,7 +244,7 @@ const AboutPage = () => {
                   </div>
                 </div>
 
-                <div className=" p-6 rounded-xl shadow-lg border-l-4 border-wedding-red">
+                <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-red">
                   <div className="flex items-center mb-4">
                     <Users className="h-6 w-6 text-wedding-red mr-3" />
                     <h3 className="text-xl font-bold text-gray-900">User Impact</h3>
@@ -298,7 +298,7 @@ const AboutPage = () => {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl  font-bold mb-8 text-gray-900">
+            <h2 className="text-4xl md:text-5xl font-playfair font-bold mb-8 text-gray-900">
               Our Vision for the Future
             </h2>
             <div className="text-xl leading-relaxed text-gray-700 space-y-6 mb-12">
@@ -341,13 +341,13 @@ const AboutPage = () => {
       <section className="py-16 bg-gradient-to-br from-wedding-cream to-wedding-gold/20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl  font-bold mb-8 text-gray-900">
+            <h2 className="text-3xl md:text-4xl font-playfair font-bold mb-8 text-gray-900">
               Ready to Transform Your Wedding?
             </h2>
             <p className="text-xl text-gray-700 mb-8">
               Join thousands of couples who chose intelligence over chaos for their perfect day.
             </p>
-              <div className=" rounded-xl shadow-lg p-8 mb-8 border border-wedding-gold/30">
+              <div className="glass-card rounded-xl shadow-lg p-8 mb-8 border border-wedding-gold/30">
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="text-left">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Get in Touch</h3>

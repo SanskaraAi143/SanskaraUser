@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { AnimatePresence } from "framer-motion";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +13,9 @@ import DashboardUpcomingEvents from "@/components/dashboard/dashboard-sections/D
 import BudgetSummary from '@/components/dashboard/summary-widgets/BudgetSummary';
 import TaskSummary from '@/components/dashboard/summary-widgets/TaskSummary';
 import GuestSummary from '@/components/dashboard/summary-widgets/GuestSummary';
+import VendorStatusSummary from '@/components/dashboard/summary-widgets/VendorStatusSummary';
+import UpcomingPayments from '@/components/dashboard/summary-widgets/UpcomingPayments';
+
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -75,18 +77,8 @@ const Dashboard = () => {
 
           {/* New Analytical Elements */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-             <Card>
-                <CardHeader><CardTitle className="text-lg font-semibold">Vendor Status</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">A chart showing vendors by status (booked, contacted, etc.) will be here.</p>
-                </CardContent>
-             </Card>
-             <Card>
-                <CardHeader><CardTitle className="text-lg font-semibold">Upcoming Payments</CardTitle></CardHeader>
-                <CardContent>
-                   <p className="text-muted-foreground">A list of the next due payments from your budget will appear here.</p>
-                </CardContent>
-             </Card>
+            <VendorStatusSummary />
+            <UpcomingPayments />
           </div>
 
           {/* Upcoming Section */}

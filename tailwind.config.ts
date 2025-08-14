@@ -27,8 +27,6 @@ const config = {
         'wedding-secondaryGold': '#E67E00', // Darker secondary gold
         'wedding-cream': '#FFF8E1',
         'wedding-brown': '#4A3728', // Dark brown for high contrast
-        'from-wedding-cream': '#FFF8E1', // alias for gradient usage
-        'to-wedding-gold': '#B8860B',    // Updated alias for gradient usage
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

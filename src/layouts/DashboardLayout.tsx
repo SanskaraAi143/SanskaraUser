@@ -31,7 +31,7 @@ const DashboardLayout = () => {
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80">
-        <div className=" p-8 rounded-full">
+        <div className="glass-card p-8 rounded-full">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-wedding-gold border-t-transparent"></div>
         </div>
       </div>
@@ -95,7 +95,7 @@ const DashboardLayout = () => {
                   className="h-8 w-8 object-contain rounded-full"
                 />
               </div>
-              <span className="text-xl  font-semibold" style={{color:'#ff8f00'}}>
+              <span className="text-xl font-playfair font-semibold" style={{color:'#ff8f00'}}>
                 Sanskara<span style={{color:'#8d6e63'}}>AI</span>
               </span>
             </Link>
@@ -124,9 +124,9 @@ const DashboardLayout = () => {
         {/* Main Content */}
         <main className="flex-1 ml-64">
           {/* Header */}
-          <header className=" border-b border-wedding-gold/20 sticky top-0 z-50">
+          <header className="glass-card border-b border-wedding-gold/20 sticky top-0 z-50">
             <div className="px-8 py-4 flex items-center justify-between">
-              <h1 className="text-2xl  font-semibold ">
+              <h1 className="text-2xl font-playfair font-semibold title-gradient">
                 {sidebarLinks.find(link => link.href === location.pathname)?.name || 'Dashboard'}
               </h1>
               <UserProfileDropdown />

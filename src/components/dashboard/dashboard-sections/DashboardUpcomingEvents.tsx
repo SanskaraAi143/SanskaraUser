@@ -23,7 +23,7 @@ const cardVariants = {
 const DashboardUpcomingEvents: React.FC<DashboardUpcomingEventsProps> = ({ nextEvents }) => {
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="hidden">
-      <Card className="">
+      <Card className="glass-card">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <div>
             <CardTitle>Upcoming Events</CardTitle>
