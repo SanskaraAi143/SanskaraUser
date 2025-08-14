@@ -4,86 +4,83 @@ import FirstPartnerOnboardingForm from '@/components/onboarding/FirstPartnerOnbo
 import SecondPartnerOnboardingForm from '@/components/onboarding/SecondPartnerOnboardingForm';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const OnboardingPage: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not authenticated
     if (!loading && !user) {
-      console.log('User not authenticated, redirecting to landing page');
       navigate('/');
       return;
     }
-
-    // Redirect if fully onboarded
     if (!loading && user?.wedding_id && user.wedding_status === 'active') {
-      console.log('User already onboarded, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
   }, [user, loading, navigate]);
 
-  if (loading) {
-    return <div>Loading user data...</div>; // Or a loading spinner
-  }
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading your details...</p>
+        </div>
+      );
+    }
 
-  // If user is not authenticated, don't render anything (redirect will happen)
-  if (!user) {
-    return null;
-  }
+    if (!user) return null;
 
-  // If user is fully onboarded, don't render anything (redirect will happen)
-  if (user?.wedding_id && user.wedding_status === 'active') {
-    return null;
-  }
+    if (!user.wedding_id) {
+      return <FirstPartnerOnboardingForm />;
+    }
 
-  // Case 1: No wedding ID - user is brand new or hasn't started onboarding
-  if (!user?.wedding_id) {
+    if (user.wedding_id && user.wedding_status === 'onboarding_in_progress') {
+      const currentPartnerEmail = user.email;
+      const firstPartnerDetails = user.wedding_details_json?.partner_data?.[user.wedding_details_json.current_partner_email as string];
+      const invitedPartnerEmail = user.wedding_details_json?.other_partner_email_expected;
+
+      if (firstPartnerDetails && currentPartnerEmail === firstPartnerDetails.email) {
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Invitation Sent!</CardTitle>
+              <CardDescription>Your part is done. We're just waiting for your partner.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p>An invitation has been sent to <strong>{invitedPartnerEmail as string}</strong>.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Once they complete their part, your personalized AI planner will be activated!</p>
+              <Button onClick={() => navigate('/dashboard')} className="mt-6">
+                Go to Your Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      } else if (currentPartnerEmail === invitedPartnerEmail) {
+        return <SecondPartnerOnboardingForm initialWeddingData={user.wedding_details_json} />;
+      }
+    }
+
     return (
-      <div className="onboarding-container">
-        <h1>Welcome! Let's Plan Your Wedding.</h1>
-        <FirstPartnerOnboardingForm />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Onboarding Status Unknown</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>We couldn't determine your onboarding status. Please try logging in again or contact support if the issue persists.</p>
+        </CardContent>
+      </Card>
     );
-  }
+  };
 
-  // Case 2: Wedding ID exists, but onboarding is in progress
-  if (user.wedding_id && user.wedding_status === 'onboarding_in_progress') {
-    const currentPartnerEmail = user.email;
-    const firstPartnerDetails = user.wedding_details_json?.partner_data?.[user.wedding_details_json.current_partner_email as string];
-    const invitedPartnerEmail = user.wedding_details_json?.other_partner_email_expected;
-
-    // Check if the current user is the first partner who initiated
-    if (firstPartnerDetails && currentPartnerEmail === firstPartnerDetails.email) {
-      return (
-        <div className="onboarding-container">
-          <h1>Thanks for starting!</h1>
-          <p>Your wedding plan is awaiting completion by your partner.</p>
-          <p>We've sent an invitation to <strong>{invitedPartnerEmail as string}</strong> to complete their part.</p>
-          <p>Once they're done, your personalized AI planner will be activated!</p>
-          <Button onClick={() => navigate('/dashboard')} className="mt-4">Go to Dashboard (Waiting)</Button>
-        </div>
-      );
-    }
-    // Check if the current user is the invited second partner
-    else if (currentPartnerEmail === invitedPartnerEmail) {
-      return (
-        <div className="onboarding-container">
-          <h1>Welcome Back, Partner!</h1>
-          <p>Your partner has started the wedding plan. Please complete your details.</p>
-          <SecondPartnerOnboardingForm initialWeddingData={user.wedding_details_json} />
-        </div>
-      );
-    }
-  }
-
-  // Fallback for unexpected states
   return (
-    <div className="onboarding-container">
-      <h1>Onboarding Status Unknown</h1>
-      <p>We couldn't determine your onboarding status. Please ensure you are logged in correctly or contact support.</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-3xl">
+        {renderContent()}
+      </div>
     </div>
   );
 };
