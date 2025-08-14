@@ -308,19 +308,19 @@ const VendorCard: React.FC<VendorCardProps> = ({
         <div className="space-y-2">
           <div className="flex items-start">
             <MapPin className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.address?.city && vendor.linkedVendor?.address?.state ? `${vendor.linkedVendor.address.city}, ${vendor.linkedVendor.address.state}` : vendor.linkedVendor?.address?.fullAddress || ''}</span>
+            <span className="text-sm">{vendor.location}</span>
           </div>
           <div className="flex items-start">
             <Phone className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.phone_number || ''}</span>
+            <span className="text-sm">{vendor.contact}</span>
           </div>
           <div className="flex items-start">
             <Mail className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.contact_email || ''}</span>
+            <span className="text-sm">{vendor.email}</span>
           </div>
           <div className="flex items-start">
             <ShoppingCart className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.pricing_range ? `${vendor.linkedVendor.pricing_range.min ? '₹' + vendor.linkedVendor.pricing_range.min.toLocaleString() : ''}${vendor.linkedVendor.pricing_range.max ? '-₹' + vendor.linkedVendor.pricing_range.max.toLocaleString() : ''} ${vendor.linkedVendor.pricing_range.unit || ''}` : ''}</span>
+            <span className="text-sm">{vendor.price}</span>
           </div>
           {vendor.bookingDate && (
             <div className="flex items-start">

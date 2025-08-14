@@ -60,29 +60,29 @@ const Dashboard = () => {
           />
 
           {/* New Analytical Summary Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <Card>
-              <CardHeader><CardTitle>Budget Overview</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl md:text-2xl">Budget Overview</CardTitle></CardHeader>
               <CardContent><BudgetSummary spent={spentBudget} total={totalBudget} /></CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle>Task Progress</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl md:text-2xl">Task Progress</CardTitle></CardHeader>
               <CardContent><TaskSummary completed={completedTasks} total={totalTasks} /></CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle>Guest List Summary</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl md:text-2xl">Guest List Summary</CardTitle></CardHeader>
               <CardContent><GuestSummary confirmed={confirmedGuests} invited={invitedGuests} /></CardContent>
             </Card>
           </div>
 
           {/* Upcoming Section */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
             <Card>
-              <CardHeader><CardTitle>Upcoming Tasks</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl md:text-2xl">Upcoming Tasks</CardTitle></CardHeader>
               <CardContent><DashboardUpcomingTasks nextTasks={nextTasks} /></CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle>Upcoming Events</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-xl md:text-2xl">Upcoming Events</CardTitle></CardHeader>
               <CardContent><DashboardUpcomingEvents nextEvents={nextEvents} /></CardContent>
             </Card>
           </div>
