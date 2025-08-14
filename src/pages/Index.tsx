@@ -7,9 +7,8 @@ import ChatDemo from '@/components/ChatDemo';
 import Pricing from '@/components/Pricing';
 import Footer from '@/components/Footer';
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import SignInDialog from "@/components/auth/SignInDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from 'react-helmet-async';
 
@@ -241,11 +240,11 @@ const Index = () => {
                 Go to Dashboard
               </Button>
             ) : (
-              <SignInDialog>
-                <Button className="bg-white text-wedding-red hover:bg-wedding-cream transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium">
+              <Link to="/auth?mode=signup">
+                <Button size="lg">
                   Get Started For Free
                 </Button>
-              </SignInDialog>
+              </Link>
             )}
           </div>        </section>
       </main>
