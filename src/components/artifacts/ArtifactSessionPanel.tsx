@@ -60,7 +60,7 @@ export const ArtifactSessionPanel: React.FC<Props> = ({ userId, sessionId, onIns
   const isLoadingContent = selectedVersion ? contentLoading[selectedVersion] : false;
 
   const closePreview = () => {
-    if (selected && selected.mime_type.startsWith('image/') && content) {
+    if (selected && selected.mime_type && selected.mime_type.startsWith('image/') && content) {
       try { URL.revokeObjectURL(content); } catch {}
     }
     selectVersion(undefined);
@@ -110,8 +110,8 @@ export const ArtifactSessionPanel: React.FC<Props> = ({ userId, sessionId, onIns
               <div key={fname} className={`border rounded-md p-2 text-xs flex flex-col gap-1 bg-white/60 ${entry.selected ? 'ring-2 ring-[#ffd700]' : ''}`}> 
                 <div className="flex flex-wrap items-center gap-2">
                   <button aria-label={`Select artifact ${fname}`} onClick={() => toggleSelect(fname)} className={`h-4 w-4 border rounded flex items-center justify-center text-[10px] ${entry.selected ? 'bg-[#ffd700] text-white border-[#e0b800]' : 'bg-white'}`}>{entry.selected ? '✓' : ''}</button>
-                  <span className="font-medium truncate max-w-[140px]" title={a.filename}>{a.filename}</span>
-                  <span className="px-1.5 py-0.5 bg-gray-100 rounded border text-[10px]">{a.mime_type.split('/')[1] || a.mime_type}</span>
+                  <span className="font-medium truncate max-w-[140px]" title={a.filename || a.version}>{a.filename || a.version}</span>
+                  <span className="px-1.5 py-0.5 bg-gray-100 rounded border text-[10px]">{a.mime_type ? a.mime_type.split('/')[1] || a.mime_type : 'unknown'}</span>
                   <span className="text-[10px] text-gray-500">{formatBytes(a.size_bytes)}</span>
                   <span className="text-[10px] text-gray-400">v{a.version}</span>
                   {a.status === 'uploading' && <span className="text-[10px] text-blue-600">Uploading {a.progress ?? 0}%</span>}
@@ -145,13 +145,13 @@ export const ArtifactSessionPanel: React.FC<Props> = ({ userId, sessionId, onIns
               </button>
               <h4 className="text-sm font-semibold mb-2 truncate" title={selected.filename}>{selected.filename} <span className="text-xs text-gray-400">v{selected.version}</span></h4>
               {isLoadingContent && <div className="text-xs text-gray-500">Loading content...</div>}
-              {!isLoadingContent && content && selected.mime_type.startsWith('text/') && (
+              {!isLoadingContent && content && selected.mime_type && selected.mime_type.startsWith('text/') && (
                 <pre className="text-[11px] bg-gray-100 p-2 rounded max-h-80 overflow-auto whitespace-pre-wrap">{content.slice(0,5000)}</pre>
               )}
-              {!isLoadingContent && content && selected.mime_type.startsWith('image/') && (
+              {!isLoadingContent && content && selected.mime_type && selected.mime_type.startsWith('image/') && (
                 <img src={content} alt={selected.filename} className="max-h-80 object-contain mx-auto" />
               )}
-              {!isLoadingContent && content && !selected.mime_type.startsWith('text/') && !selected.mime_type.startsWith('image/') && (
+              {!isLoadingContent && content && selected.mime_type && !selected.mime_type.startsWith('text/') && !selected.mime_type.startsWith('image/') && (
                 <div className="text-xs text-gray-500">Preview not supported for this file type.</div>
               )}
               {!isLoadingContent && !content && (
