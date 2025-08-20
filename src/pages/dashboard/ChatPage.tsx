@@ -23,8 +23,8 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
-    if (!authLoading && user && (!user.wedding_id || user.wedding_status === 'onboarding_in_progress')) {
-      console.log("ChatPage: User not fully onboarded. Redirecting to onboarding page.");
+    if (!authLoading && user && !user.wedding_id) {
+      console.log("ChatPage: User has no wedding yet. Redirecting to onboarding page.");
       navigate('/onboarding');
     }
   }, [user, authLoading, navigate]);

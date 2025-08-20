@@ -15,7 +15,7 @@ import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string; // Use environment variable for security
 
 const FirstPartnerOnboardingForm: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -52,6 +52,17 @@ const FirstPartnerOnboardingForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false); // Loading state for form submission
   const [suggestingCeremonies, setSuggestingCeremonies] = useState(false); // Loading state for ceremony suggestions
+  const [postSubmitSummary, setPostSubmitSummary] = useState<null | {
+    wedding_details: typeof formData extends never ? any : {
+      wedding_name: string;
+      wedding_date: string;
+      wedding_location: string;
+      wedding_tradition: string;
+      wedding_style: string;
+    };
+    current_user_onboarding_details: any;
+    partner_onboarding_details: any;
+  }>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -278,11 +289,16 @@ const FirstPartnerOnboardingForm: React.FC = () => {
 
       const result = await response.json();
       console.log('Submission successful:', result);
-      toast({
-        title: "Onboarding Complete!",
-        description: "Your wedding plan has been initiated. Your partner will be invited to complete their part.",
+      // Keep a lightweight summary visible before redirect
+      setPostSubmitSummary({
+        wedding_details,
+        current_user_onboarding_details,
+        partner_onboarding_details,
       });
-      navigate('/dashboard'); // Redirect to dashboard after successful submission
+      // Refresh user state to include wedding_id and details
+      await refreshUser();
+      toast({ title: "Plan created", description: "Redirecting to dashboard..." });
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error: unknown) {
       console.error('Submission Error:', error);
       let errorMessage = "An unknown error occurred.";
@@ -615,24 +631,48 @@ const FirstPartnerOnboardingForm: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="bg-white p-8 rounded-lg shadow-md">
-        {renderStep()}
-        <div className="flex justify-between mt-8">
-          {currentStep > 0 && (
-            <Button onClick={prevStep} variant="outline">
-              ← Previous
-            </Button>
-          )}
-          {currentStep < 4 && (
-            <Button onClick={nextStep} className="ml-auto">
-              Next →
-            </Button>
-          )}
-          {currentStep === 4 && (
-            <Button onClick={handleSubmit} className="ml-auto" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit & View Summary'}
-            </Button>
-          )}
-        </div>
+        {postSubmitSummary ? (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Summary</h2>
+            <p className="text-sm text-gray-600 mb-4">We created your plan and invited your partner. Redirecting to dashboard...</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="border rounded p-4">
+                <h3 className="font-semibold mb-2">Wedding</h3>
+                <p><strong>Name:</strong> {postSubmitSummary.wedding_details.wedding_name}</p>
+                <p><strong>Date:</strong> {postSubmitSummary.wedding_details.wedding_date}</p>
+                <p><strong>Location:</strong> {postSubmitSummary.wedding_details.wedding_location}</p>
+                <p><strong>Tradition:</strong> {postSubmitSummary.wedding_details.wedding_tradition}</p>
+                <p><strong>Style:</strong> {postSubmitSummary.wedding_details.wedding_style}</p>
+              </div>
+              <div className="border rounded p-4">
+                <h3 className="font-semibold mb-2">Partner Invited</h3>
+                <p><strong>Name:</strong> {postSubmitSummary.partner_onboarding_details.name}</p>
+                <p><strong>Email:</strong> {postSubmitSummary.partner_onboarding_details.email}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {renderStep()}
+            <div className="flex justify-between mt-8">
+              {currentStep > 0 && (
+                <Button onClick={prevStep} variant="outline">
+                  ← Previous
+                </Button>
+              )}
+              {currentStep < 4 && (
+                <Button onClick={nextStep} className="ml-auto">
+                  Next →
+                </Button>
+              )}
+              {currentStep === 4 && (
+                <Button onClick={handleSubmit} className="ml-auto" disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Submit & View Summary'}
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

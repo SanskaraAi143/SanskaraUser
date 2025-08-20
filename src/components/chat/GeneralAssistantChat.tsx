@@ -113,6 +113,13 @@ const GeneralAssistantChat: React.FC = () => {
   const userCanUseArtifacts = Boolean(user?.internal_user_id && ARTIFACTS_ENABLED);
   const artifactsReady = Boolean(sessionId) && connectionState === 'connected'; // gate UI until session established
 
+  // Gate chat until second partner completes onboarding for initiator
+  const details: any = user?.wedding_details_json || {};
+  const partnerData = details?.partner_data || {};
+  const isInitiator = user?.email ? Boolean(partnerData[user.email]) : false;
+  const invitedPartnerEmail: string | undefined = details?.other_partner_email_expected;
+  const waitingForPartner = user?.wedding_status === 'onboarding_in_progress' && isInitiator;
+
   const insertVersionReference = (text: string) => {
     // If input empty, set; else append newline
     setInput(prev => prev ? prev + (prev.endsWith('\n') ? '' : '\n') + text : text);
@@ -129,6 +136,8 @@ const GeneralAssistantChat: React.FC = () => {
     return () => { /* handlers stored internally; no explicit removal API provided */ };
   }, [registerOnDisconnect, registerOnReconnectSuccess, toast]);
 
+  // waitingForPartner computed above
+
   return (
     <div className="flex flex-col h-full relative" onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
       {/* Header */}
@@ -138,30 +147,49 @@ const GeneralAssistantChat: React.FC = () => {
           <div>
             <h2 className="text-sm font-semibold">General Assistant</h2>
             <p className="text-[11px] text-gray-500">
-              {connectionState === 'failed' ? 'Disconnected' : connectionState === 'reconnecting' ? 'Reconnecting...' : (sessionId ? 'Session active' : 'Establishing session...')} • {isAssistantSpeaking ? 'Speaking' : isRecording ? 'Recording' : 'Idle'}
+              {waitingForPartner
+                ? 'Waiting for your partner to complete onboarding'
+                : (connectionState === 'failed'
+                    ? 'Disconnected'
+                    : connectionState === 'reconnecting'
+                      ? 'Reconnecting...'
+                      : (sessionId ? 'Session active' : 'Establishing session...'))} • {isAssistantSpeaking ? 'Speaking' : isRecording ? 'Recording' : 'Idle'}
             </p>
           </div>
         </div>
         <div className="flex gap-2 items-center">
-          {connectionState === 'failed' && (
+          {connectionState === 'failed' && !waitingForPartner && (
             <Button size="sm" variant="outline" onClick={reconnectNow} className="h-7 text-xs">Reconnect</Button>
           )}
-          <Button size="icon" variant="outline" className={cn('h-8 w-8', isVideoActive && activeVideoMode==='webcam' && 'bg-blue-100')} onClick={handleCameraToggle} title="Toggle Webcam">
+          <Button size="icon" variant="outline" disabled={waitingForPartner} className={cn('h-8 w-8', isVideoActive && activeVideoMode==='webcam' && 'bg-blue-100', waitingForPartner && 'opacity-50 cursor-not-allowed')} onClick={handleCameraToggle} title="Toggle Webcam">
             {isVideoActive && activeVideoMode==='webcam' ? <VideoOff className="h-4 w-4"/> : <Video className="h-4 w-4"/>}
           </Button>
-          <Button size="icon" variant="outline" className={cn('h-8 w-8', isVideoActive && activeVideoMode==='screen' && 'bg-purple-100')} onClick={handleScreenShareToggle} title="Share Screen">
+          <Button size="icon" variant="outline" disabled={waitingForPartner} className={cn('h-8 w-8', isVideoActive && activeVideoMode==='screen' && 'bg-purple-100', waitingForPartner && 'opacity-50 cursor-not-allowed')} onClick={handleScreenShareToggle} title="Share Screen">
             <MonitorPlay className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="outline" className={cn('h-8 w-8', isRecording && 'bg-red-100')} onClick={isRecording ? stopRecording : startRecording} title={isRecording ? 'Stop Recording' : 'Start Recording'}>
+          <Button size="icon" variant="outline" disabled={waitingForPartner} className={cn('h-8 w-8', isRecording && 'bg-red-100', waitingForPartner && 'opacity-50 cursor-not-allowed')} onClick={isRecording ? stopRecording : startRecording} title={isRecording ? 'Stop Recording' : 'Start Recording'}>
             <Mic className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
+      {waitingForPartner && (
+        <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-xs px-4 py-2">
+          Waiting for your partner (<strong>{(user?.wedding_details_json as any)?.other_partner_email_expected}</strong>) to complete onboarding. Some collaborative features will unlock after they join.
+        </div>
+      )}
+
       {/* Optional Video */}
       {isVideoActive && (
         <div className="relative h-48 bg-black flex items-center justify-center border-b">
           <video ref={videoRef} className="h-full w-full object-cover" autoPlay playsInline />
+        </div>
+      )}
+
+      {/* Waiting banner */}
+      {waitingForPartner && (
+        <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm px-4 py-2">
+          Waiting for your partner{invitedPartnerEmail ? ` (${invitedPartnerEmail})` : ''} to complete onboarding. Chat is disabled until they join.
         </div>
       )}
 
@@ -236,22 +264,22 @@ const GeneralAssistantChat: React.FC = () => {
             <Textarea
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={sessionId ? 'Ask anything about your planning... (Reference: "Analyze artifact version vXYZ")' : 'Waiting for session to start...'}
-              disabled={!sessionId}
+              placeholder={waitingForPartner ? 'Chat will be available once your partner completes onboarding.' : (sessionId ? 'Ask anything about your planning... (Reference: "Analyze artifact version vXYZ")' : 'Waiting for session to start...')}
+              disabled={waitingForPartner || !sessionId}
               rows={2}
               className="resize-none pr-24 text-sm"
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && sessionId) { e.preventDefault(); handleSend(); } }}
             />
             <div className="absolute right-2 bottom-2 flex gap-1">
               {userCanUseArtifacts && (
-                <Button size="icon" variant="ghost" className="h-8 w-8" title={artifactsReady ? 'Session Artifacts' : 'Waiting for session'} disabled={!artifactsReady} onClick={() => setShowArtifactPanel(p => !p)}>
+                <Button size="icon" variant="ghost" className="h-8 w-8" title={artifactsReady ? 'Session Artifacts' : 'Waiting for session'} disabled={waitingForPartner || !artifactsReady} onClick={() => setShowArtifactPanel(p => !p)}>
                   {artifactsReady ? <Paperclip className="h-4 w-4" /> : <Loader2 className="h-4 w-4 animate-spin" />}
                 </Button>
               )}
               <Button size="icon" variant="ghost" disabled className="h-8 w-8 opacity-40" title="Images (future)">
                 <ImageIcon className="h-4 w-4" />
               </Button>
-              <Button size="icon" className="h-8 w-8 bg-gradient-to-r from-[#ffd700] to-[#ff8f00]" onClick={handleSend} disabled={!sessionId || !input.trim() || connectionState!=='connected'}>
+              <Button size="icon" className="h-8 w-8 bg-gradient-to-r from-[#ffd700] to-[#ff8f00]" onClick={handleSend} disabled={waitingForPartner || !sessionId || !input.trim() || connectionState!=='connected'}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>

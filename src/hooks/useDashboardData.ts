@@ -94,7 +94,42 @@ export const useDashboardData = () => {
   const invitedGuests = guests?.length || 0;
   const weddingDate = weddingDetails?.wedding_date;
   const daysUntilWedding = weddingDate ? Math.max(0, Math.ceil((new Date(weddingDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : "-";
-  const totalBudget = budgetMax || 0;
+  // Parse budget from wedding details (single source of truth), fallback to user preferences
+  const parseIndianBudget = (val: any): number | null => {
+    if (val == null) return null;
+    if (typeof val === 'number' && !isNaN(val)) return val;
+    if (typeof val !== 'string') return null;
+    const s = val.toString().trim().toLowerCase().replace(/[,\s]+/g, '');
+    const numMatch = s.match(/([0-9]+(?:\.[0-9]+)?)/);
+    if (!numMatch) return null;
+    const n = parseFloat(numMatch[1]);
+    if (isNaN(n)) return null;
+    if (s.includes('cr') || s.includes('crore')) return Math.round(n * 10000000);
+    if (s.includes('l') || s.includes('lakh')) return Math.round(n * 100000);
+    return Math.round(n);
+  };
+
+  const extractBudgetFromDetails = (details: any, email?: string): number | null => {
+    if (!details) return null;
+    // Prefer a consolidated field if present
+    const topLevel = parseIndianBudget(details.budget_total || details.total_budget || details.budget || details.estimated_budget);
+    if (topLevel) return topLevel;
+    const pd = details.partner_data || {};
+    // Prefer current user's entry
+    if (email && pd[email]?.budget_range) {
+      const val = parseIndianBudget(pd[email].budget_range);
+      if (val) return val;
+    }
+    // Else, take the first available budget_range
+    for (const key of Object.keys(pd)) {
+      const val = parseIndianBudget(pd[key]?.budget_range);
+      if (val) return val;
+    }
+    return null;
+  };
+
+  const onboardingBudget = extractBudgetFromDetails(weddingDetails?.details, user?.email || undefined);
+  const totalBudget = (onboardingBudget ?? budgetMax) || 0;
   const spentBudget = expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
   const completedTasks = tasks?.filter(t => t.is_complete).length || 0;
   const totalTasks = tasks?.length || 0;

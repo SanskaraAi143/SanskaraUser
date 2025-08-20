@@ -31,6 +31,8 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const reconnectSuccessHandlersRef = useRef<(() => void)[]>([]);
   const connectionStateRef = useRef<ConnectionState>('idle');
   const initiatedRef = useRef(false);
+  // Track last user text we sent locally to avoid double-inserting when server echoes it back as `user_input`
+  const lastLocallySentUserTextRef = useRef<string | null>(null);
 
   const registerOnDisconnect = (fn: () => void) => { disconnectHandlersRef.current.push(fn); };
   const registerOnReconnectSuccess = (fn: () => void) => { reconnectSuccessHandlersRef.current.push(fn); };
@@ -45,11 +47,19 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     const newTranscript = [...transcriptRef.current];
     if (message.type === 'user_input') {
       const lastIdx = newTranscript.length - 1;
-      if (lastIdx >= 0 && newTranscript[lastIdx].sender === 'user' && newTranscript[lastIdx].text === '...') {
+      // If we already inserted the same user message locally, ignore server echo
+      if (lastLocallySentUserTextRef.current === message.data) {
+        lastLocallySentUserTextRef.current = null; // consume the echo
+      } else if (lastIdx >= 0 && newTranscript[lastIdx].sender === 'user' && newTranscript[lastIdx].text === '...') {
+        // Replace placeholder from voice recording flow
         newTranscript[lastIdx].text = message.data;
       } else {
+        // Insert user message coming from server (e.g., remote or not locally posted)
         newTranscript.push({ sender: 'user', text: message.data });
       }
+      // New user turn should force next assistant tokens into a new bubble
+      currentAssistantMessageIndex.current = null;
+      setIsAssistantTyping(false);
     } else if (message.type === 'text') {
       if (currentAssistantMessageIndex.current !== null && newTranscript[currentAssistantMessageIndex.current]) {
         newTranscript[currentAssistantMessageIndex.current].text += message.data;
@@ -261,9 +271,13 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       setIsAssistantSpeaking(false);
     }
     (client as any).sendText(text);
+    // Reset assistant message index so the next assistant response starts a fresh bubble
+    currentAssistantMessageIndex.current = null;
     const newTranscript = [...transcriptRef.current, { sender: 'user', text }];
     transcriptRef.current = newTranscript;
     setTranscript(newTranscript);
+    // Remember locally-sent text to ignore server echo of the same content
+    lastLocallySentUserTextRef.current = text;
   };
 
   const interruptAssistant = () => {

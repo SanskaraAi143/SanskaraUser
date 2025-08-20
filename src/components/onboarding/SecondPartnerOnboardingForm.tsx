@@ -41,7 +41,7 @@ interface SecondPartnerOnboardingFormProps {
 }
 
 const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = ({ initialWeddingData }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -396,11 +396,12 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       }
       const result = await response.json();
       console.log('Final submission success:', result);
+      await refreshUser();
       toast({
         title: "Onboarding Complete!",
-        description: "Your plan is now active. You will be redirected to the dashboard.",
+        description: "Your plan is now active. Redirecting to dashboard...",
       });
-      navigate('/dashboard'); // Redirect to dashboard after successful submission
+      navigate('/dashboard');
     } catch (err: unknown) {
       console.error('Final Submission Error:', err);
       let errorMessage = "An unknown error occurred.";

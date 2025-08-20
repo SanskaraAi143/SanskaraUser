@@ -17,11 +17,16 @@ const OnboardingPage: React.FC = () => {
       return;
     }
 
-    // Redirect if fully onboarded
-    if (!loading && user?.wedding_id && user.wedding_status === 'active') {
-      console.log('User already onboarded, redirecting to dashboard');
-      navigate('/dashboard');
-      return;
+    // Redirect rules:
+    // - If fully active, go to dashboard
+    // - Do NOT auto-redirect during onboarding_in_progress to avoid loops; render correct UI per role
+    if (!loading && user?.wedding_id) {
+      const status = user.wedding_status;
+      if (status === 'active') {
+        console.log('User onboarded — redirecting to dashboard');
+        navigate('/dashboard', { replace: true });
+        return;
+      }
     }
   }, [user, loading, navigate]);
 
@@ -52,28 +57,39 @@ const OnboardingPage: React.FC = () => {
   // Case 2: Wedding ID exists, but onboarding is in progress
   if (user.wedding_id && user.wedding_status === 'onboarding_in_progress') {
     const currentPartnerEmail = user.email;
-    const firstPartnerDetails = user.wedding_details_json?.partner_data?.[user.wedding_details_json.current_partner_email as string];
-    const invitedPartnerEmail = user.wedding_details_json?.other_partner_email_expected;
+    const details: any = user.wedding_details_json || {};
+    const partnerData = details.partner_data || {};
+    const invitedPartnerEmail = details.other_partner_email_expected as string | undefined;
+    const isInvitedPartner = invitedPartnerEmail && currentPartnerEmail === invitedPartnerEmail;
+    const isInitiator = !isInvitedPartner && !!partnerData[currentPartnerEmail as string];
 
     // Check if the current user is the first partner who initiated
-    if (firstPartnerDetails && currentPartnerEmail === firstPartnerDetails.email) {
+    if (isInitiator) {
+      const weddingName = (details.wedding_name as string) || 'Your Wedding Plan';
+      const partnerEmail = invitedPartnerEmail;
+      const weddingDate = (details.wedding_date as string) || 'To be decided';
+      const weddingLocation = (details.wedding_location as string) || 'To be decided';
       return (
         <div className="onboarding-container">
-          <h1>Thanks for starting!</h1>
-          <p>Your wedding plan is awaiting completion by your partner.</p>
-          <p>We've sent an invitation to <strong>{invitedPartnerEmail as string}</strong> to complete their part.</p>
-          <p>Once they're done, your personalized AI planner will be activated!</p>
-          <Button onClick={() => navigate('/dashboard')} className="mt-4">Go to Dashboard (Waiting)</Button>
+          <h1 className="text-2xl font-semibold mb-2">You're all set!</h1>
+          <p className="mb-4">Your wedding plan <strong>{weddingName}</strong> has been created.</p>
+          <div className="bg-white rounded border p-4 mb-4">
+            <p><strong>Date:</strong> {weddingDate}</p>
+            <p><strong>Location:</strong> {weddingLocation}</p>
+            {partnerEmail && <p><strong>Invited Partner:</strong> {partnerEmail}</p>}
+          </div>
+          <p className="mb-2">We'll notify you when your partner completes their part.</p>
+          <Button onClick={() => navigate('/dashboard')} className="mt-2">Go to Dashboard</Button>
         </div>
       );
     }
     // Check if the current user is the invited second partner
-    else if (currentPartnerEmail === invitedPartnerEmail) {
+  else if (isInvitedPartner) {
       return (
         <div className="onboarding-container">
           <h1>Welcome Back, Partner!</h1>
           <p>Your partner has started the wedding plan. Please complete your details.</p>
-          <SecondPartnerOnboardingForm initialWeddingData={user.wedding_details_json} />
+      <SecondPartnerOnboardingForm initialWeddingData={details} />
         </div>
       );
     }

@@ -1,14 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatCurrency } from "@/utils/formatters";
 
 interface BudgetSummaryProps {
   spent: number;
   total: number;
+  currency?: string; // e.g., 'INR', 'USD'
 }
 
-const BudgetSummary = ({ spent, total }: BudgetSummaryProps) => {
+const BudgetSummary = ({ spent, total, currency = 'USD' }: BudgetSummaryProps) => {
   const percentage = total > 0 ? (spent / total) * 100 : 0;
+  const formatter = new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  });
 
   return (
     <Card>
@@ -16,9 +21,9 @@ const BudgetSummary = ({ spent, total }: BudgetSummaryProps) => {
         <CardTitle className="text-lg font-semibold">Budget Overview</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(spent)}</div>
+        <div className="text-2xl font-bold">{formatter.format(spent)}</div>
         <p className="text-xs text-muted-foreground">
-          Spent of {formatCurrency(total)}
+          Spent of {formatter.format(total)}
         </p>
         <Progress value={percentage} className="mt-4 h-2" />
       </CardContent>

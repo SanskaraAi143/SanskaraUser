@@ -134,7 +134,20 @@ const AuthPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      navigate(user.wedding_id ? '/dashboard' : '/onboarding', { replace: true });
+      // If invited partner and onboarding is still in progress, force onboarding
+      const details: any = user.wedding_details_json || {};
+      const isInvitedPartner = user.role === 'invited_partner' || details?.other_partner_email_expected === user.email;
+      if (isInvitedPartner && user.wedding_status === 'onboarding_in_progress') {
+        navigate('/onboarding', { replace: true });
+        return;
+      }
+      // If they already have a wedding, go to dashboard
+      if (user.wedding_id) {
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+      // Default to onboarding for new users (no wedding yet)
+      navigate('/onboarding', { replace: true });
     }
   }, [user, navigate]);
 

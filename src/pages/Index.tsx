@@ -19,7 +19,7 @@ const Index = () => {
   
   const handleGetStarted = () => {
     if (user) {
-      if (user.wedding_id && user.wedding_status === 'active') {
+      if (user.wedding_id) {
         navigate('/dashboard');
       } else {
         navigate('/onboarding');
