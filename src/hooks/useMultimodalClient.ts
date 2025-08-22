@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import MultimodalClient from '../lib/multimodal-client.js';
+import { getSession, getChatMessages } from '../services/api';
 
 interface Message {
   sender: string;
@@ -9,7 +10,7 @@ interface Message {
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
-export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
+export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
@@ -20,6 +21,8 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // New state for loading history
+  const [historyError, setHistoryError] = useState<string | null>(null); // New state for history error
 
   const clientRef = useRef<MultimodalClient | null>(null);
   const currentAssistantMessageIndex = useRef<number | null>(null);
@@ -152,7 +155,10 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       manualReconnectRequestedRef.current = false;
       reconnectSuccessHandlersRef.current.forEach(h => h());
     };
-    client.onSessionIdReceived = (id: string) => setSessionId(id);
+    client.onSessionIdReceived = (id: string) => {
+      console.log('[useMultimodalClient] sessionId received:', id);
+      setSessionId(id);
+    };
     client.onTextReceived = handleTextReceived;
     client.onTurnComplete = handleTurnComplete;
     client.onInterrupted = handleInterrupted;
@@ -180,7 +186,40 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     if (initiatedRef.current) return;
     initiatedRef.current = true;
     attemptConnect();
-  }, [userId]);
+  }, [userId, attemptConnect]); // Added attemptConnect to dependency array for completeness
+
+  // Fetch session history when sessionId becomes available
+  useEffect(() => {
+    if (userId && weddingId && sessionId) {
+      const fetchSessionHistory = async () => {
+        setIsLoadingHistory(true); // Set loading to true
+        setHistoryError(null); // Clear previous errors
+        try {
+          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId });
+          // Use the new API endpoint to fetch chat messages
+          const response = await getChatMessages(weddingId, sessionId);
+          console.log('[useMultimodalClient] history response keys:', response ? Object.keys(response) : 'null');
+          if (response && response.messages) {
+            // Format messages to match the expected Message interface
+            const formattedMessages = response.messages.map((msg: any) => ({
+              sender: msg.sender,
+              text: msg.text,
+              isMarkdown: true, // Assuming all historical AI messages are markdown
+            }));
+            setTranscript(formattedMessages);
+          } else {
+            console.warn('[useMultimodalClient] no messages in history response');
+          }
+        } catch (error: any) {
+          console.error('Failed to fetch session history:', error);
+          setHistoryError(error.message || 'Failed to load chat history.'); // Set error message
+        } finally {
+          setIsLoadingHistory(false); // Set loading to false
+        }
+      };
+      fetchSessionHistory();
+    }
+  }, [userId, weddingId, sessionId]); // Depend on userId, weddingId, and sessionId
 
   // Cleanup on unmount
   useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
@@ -301,6 +340,8 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
+    isLoadingHistory, // Export new state
+    historyError,     // Export new state
     startRecording,
     stopRecording,
     initializeWebcam,

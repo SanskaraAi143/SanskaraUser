@@ -46,7 +46,7 @@ async function quickValidation() {
     'public/sitemap.xml',
     'public/robots.txt',
     'public/manifest.json',
-    'src/components/GDPRCompliance.tsx'
+  // GDPR banner removed
   ];
   
   console.log('\n📁 Essential Files:');

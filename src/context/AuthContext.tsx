@@ -11,8 +11,11 @@ type User = {
   name?: string;
   wedding_id?: string | null;
   role?: string;
-  wedding_status?: string | null; 
-  wedding_details_json?: Record<string, unknown>; 
+  wedding_status?: string | null;
+  wedding_details_json?: {
+    wedding_id?: string | null;
+    [key: string]: unknown; // Allow other properties
+  };
 };
 
 export type AuthContextType = {

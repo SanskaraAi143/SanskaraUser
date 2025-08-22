@@ -87,7 +87,6 @@ const Footer = () => {
             <div className="flex gap-6">
               <a href="/privacy" className="nav-link text-sm">Privacy Policy</a>
               <a href="/terms" className="nav-link text-sm">Terms of Service</a>
-              <a href="/cookies" className="nav-link text-sm">Cookie Policy</a>
             </div>
           </div>
         </div>

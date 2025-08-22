@@ -1,12 +1,12 @@
 // MCP/Google ADK API integration for agent chat, session, and artifact management
 import axios from 'axios';
 
-// Set the MCP API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://api.sanskaraai.com' // Replace with your production MCP backend URL
-  : 'http://localhost:8000'; // Local MCP backend
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-console.log('API_BASE_URL', API_BASE_URL);
+// Set the MCP API base URL (prefer Vite env for consistency with other services)
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL
+  || (process.env.NODE_ENV === 'production'
+    ? 'https://api.sanskaraai.com'
+    : 'http://localhost:8000');
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -111,6 +111,22 @@ export const getTrace = async (eventId) => {
 export const getSessionTrace = async (sessionId) => {
   const response = await api.get(`/debug/trace/session/${sessionId}`);
   return response.data;
+};
+
+// New API endpoint to fetch chat messages for a session
+export const getChatMessages = async (weddingId: string, adkSessionId: string) => {
+  try {
+    const response = await api.get(`/weddings/${weddingId}/sessions/${adkSessionId}/messages`);
+    return response.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    const detail = err?.response?.data?.detail;
+    if (status === 404 || detail === 'Chat session not found.') {
+      // First-time chat: no history yet
+      return { messages: [] };
+    }
+    throw err;
+  }
 };
 
 export default api;

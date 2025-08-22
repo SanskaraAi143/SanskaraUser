@@ -40,13 +40,20 @@ const GeneralAssistantChat: React.FC = () => {
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
+    isLoadingHistory,    // Import new state
+    historyError,        // Import new state
     interruptAssistant,
     sessionId,
     connectionState,
     reconnectNow,
     registerOnDisconnect,
     registerOnReconnectSuccess,
-  } = useMultimodalClient(user?.internal_user_id);
+  } = useMultimodalClient(
+    user?.internal_user_id,
+    typeof (user?.wedding_details_json as any)?.wedding_id === 'string'
+      ? (user?.wedding_details_json as any).wedding_id as string
+      : (typeof user?.wedding_id === 'string' ? (user!.wedding_id as string) : undefined)
+  );
 
   // Reset artifact session state when sessionId changes
   useEffect(() => {
@@ -195,7 +202,23 @@ const GeneralAssistantChat: React.FC = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gradient-to-b from-white to-[#fff9ef]">
-        {transcript.map((m: any, idx: number) => {
+        {!sessionId && (
+          <div className="text-xs text-gray-500">Waiting for session to initialize…</div>
+        )}
+        {sessionId && !((user?.wedding_details_json as any)?.wedding_id || user?.wedding_id) && (
+          <div className="text-xs text-red-500">Wedding ID not available; cannot load chat history.</div>
+        )}
+        {isLoadingHistory && (
+          <div className="flex justify-center items-center h-full text-gray-500">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading chat history...
+          </div>
+        )}
+        {historyError && (
+          <div className="flex justify-center items-center h-full text-red-500">
+            Error loading chat history: {historyError}
+          </div>
+        )}
+        {!isLoadingHistory && !historyError && transcript.map((m: any, idx: number) => {
           const fileMatch = m.sender === 'user' ? /\[FILES:\s([^\]]+)\]$/.exec(m.text) : null;
           const files = fileMatch ? fileMatch[1].split(',').map((f:string)=>f.trim()) : [];
           const displayText = fileMatch ? m.text.replace(/\n?\[FILES:[^\]]+\]$/, '') : m.text;

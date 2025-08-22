@@ -2,7 +2,6 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import GDPRCompliance from './components/GDPRCompliance';
 import PageLoader from './components/ui/PageLoader';
 import FloatingChatButton from './components/ui/FloatingChatButton';
 import { useToast } from './hooks/use-toast';
@@ -39,7 +38,7 @@ const BlogDetailPage = lazy(() => import('./pages/blog/[slug]'));
 // Support/Contact Pages
 const CareersPage = lazy(() => import('./pages/CareersPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
+// Cookie policy removed
 
 // Utility Pages - Lower priority
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -128,14 +127,13 @@ function App() {
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
                 <Route path="/careers" element={<CareersPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-                <Route path="/cookies" element={<CookiePolicyPage />} />
+                {/** Cookie policy routes removed **/}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
             <Toaster />
             <FloatingChatButton />
-            <GDPRCompliance />
+            {/** GDPR/Cookie banner removed **/}
           </div>
         </ErrorBoundary>
     </BrowserRouter>
