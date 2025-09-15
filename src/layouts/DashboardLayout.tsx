@@ -66,6 +66,7 @@ const DashboardLayout = () => {
     { name: "Budget", icon: PieChart, href: "/dashboard/budget" },
     { name: "Guest List", icon: Users, href: "/dashboard/guests" },
     { name: "Vendors", icon: ShoppingCart, href: "/dashboard/vendors" },
+    { name: "History", icon: Clock, href: "/dashboard/history" },
     { name: "Settings", icon: Settings, href: "/dashboard/settings" },
   ];
 

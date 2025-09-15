@@ -1,11 +1,12 @@
 // MCP/Google ADK API integration for agent chat, session, and artifact management
 import axios from 'axios';
+import { supabase } from './supabase/config';
 
 // Set the MCP API base URL (prefer Vite env for consistency with other services)
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL
   || (process.env.NODE_ENV === 'production'
     ? 'https://api.sanskaraai.com'
-    : 'http://localhost:8000');
+    : 'http://localhost:8765');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -113,20 +114,68 @@ export const getSessionTrace = async (sessionId) => {
   return response.data;
 };
 
-// New API endpoint to fetch chat messages for a session
-export const getChatMessages = async (weddingId: string, adkSessionId: string) => {
-  try {
-    const response = await api.get(`/weddings/${weddingId}/sessions/${adkSessionId}/messages`);
-    return response.data;
-  } catch (err: any) {
-    const status = err?.response?.status;
-    const detail = err?.response?.data?.detail;
-    if (status === 404 || detail === 'Chat session not found.') {
-      // First-time chat: no history yet
-      return { messages: [] };
-    }
-    throw err;
+interface HistoryParams {
+  limit?: number;
+  offset?: number;
+  start_date?: string;
+  end_date?: string;
+  event_types?: ('message' | 'artifact_upload' | 'system_event')[];
+}
+
+// API endpoint to fetch chat history with pagination and filters
+export const getChatMessages = async (
+  weddingId: string,
+  sessionId: string,
+  params: { limit?: number; offset?: number } = {}
+): Promise<any> => {
+  if (!sessionId) {
+    throw new Error('A session ID is required to fetch chat messages.');
   }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('User not authenticated');
+
+  const queryParams = new URLSearchParams();
+  if (params.limit) queryParams.append('limit', String(params.limit));
+  if (params.offset) queryParams.append('offset', String(params.offset));
+
+  const url = `${API_BASE_URL}/sessions/${sessionId}/history${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+  const response = await axios.get(url, {
+    headers: {
+      'accept': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+  });
+
+  // The actual API returns { events: [...] }, so we transform it to match what the client expects
+  if (response.data && Array.isArray(response.data.events)) {
+    return {
+      history: response.data.events.map((event: any) => {
+        const sender = event.content?.sender;
+        const senderType = sender === 'User' ? 'user' : 'assistant';
+
+        return {
+          event_id: event.content?.message_id || `${sessionId}-${Math.random()}`,
+          timestamp: event.metadata.timestamp,
+          event_type: event.metadata.event_type,
+          content: {
+            text: event.content?.content,
+          },
+          metadata: {
+            sender_type: senderType,
+            sender_name: sender,
+            session_id: event.content?.session_id,
+            details: event.metadata.details,
+          },
+        };
+      }),
+      total_count: response.data.total_count || response.data.events.length,
+      limit: response.data.limit || params.limit,
+      offset: response.data.offset || params.offset,
+    };
+  }
+
+  return { history: [], total_count: 0, limit: params.limit, offset: params.offset };
 };
 
 export default api;

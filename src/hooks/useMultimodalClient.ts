@@ -6,6 +6,12 @@ interface Message {
   sender: string;
   text: string;
   isMarkdown?: boolean;
+  timestamp?: string;
+  eventId?: string;
+  // Additional fields for artifact uploads and system events
+  artifactUrl?: string;
+  artifactType?: string;
+  systemEventType?: string;
 }
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
@@ -188,38 +194,60 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     attemptConnect();
   }, [userId, attemptConnect]); // Added attemptConnect to dependency array for completeness
 
-  // Fetch session history when sessionId becomes available
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const historyLimit = 20;
+
+  // Fetch session history when sessionId becomes available or when loading more
   useEffect(() => {
     if (userId && weddingId && sessionId) {
       const fetchSessionHistory = async () => {
-        setIsLoadingHistory(true); // Set loading to true
-        setHistoryError(null); // Clear previous errors
+        setIsLoadingHistory(true);
+        setHistoryError(null);
         try {
-          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId });
-          // Use the new API endpoint to fetch chat messages
-          const response = await getChatMessages(weddingId, sessionId);
-          console.log('[useMultimodalClient] history response keys:', response ? Object.keys(response) : 'null');
-          if (response && response.messages) {
-            // Format messages to match the expected Message interface
-            const formattedMessages = response.messages.map((msg: any) => ({
-              sender: msg.sender,
-              text: msg.text,
-              isMarkdown: true, // Assuming all historical AI messages are markdown
-            }));
-            setTranscript(formattedMessages);
+          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId, offset: historyOffset });
+          const response = await getChatMessages(weddingId, sessionId, {
+            limit: historyLimit,
+            offset: historyOffset,
+          });
+          
+          if (response && response.history) {
+            const reversedHistory = response.history.reverse();
+            const formattedMessages = reversedHistory
+              .filter((event: any) => event.event_type === 'message')
+              .map((event: any) => ({
+                sender: event.metadata.sender_type === 'assistant' ? 'assistant' : 'user',
+                text: event.content.text || '',
+                isMarkdown: event.metadata.sender_type === 'assistant',
+                timestamp: event.timestamp,
+                eventId: event.event_id,
+              }));
+
+            setHasMoreHistory(response.total_count > (historyOffset + historyLimit));
+            
+            setTranscript(prev => 
+              historyOffset === 0 ? formattedMessages : [...formattedMessages, ...prev]
+            );
           } else {
-            console.warn('[useMultimodalClient] no messages in history response');
+            console.warn('[useMultimodalClient] no history in response');
+            setHasMoreHistory(false);
           }
         } catch (error: any) {
           console.error('Failed to fetch session history:', error);
-          setHistoryError(error.message || 'Failed to load chat history.'); // Set error message
+          setHistoryError(error.message || 'Failed to load chat history.');
         } finally {
-          setIsLoadingHistory(false); // Set loading to false
+          setIsLoadingHistory(false);
         }
       };
       fetchSessionHistory();
     }
-  }, [userId, weddingId, sessionId]); // Depend on userId, weddingId, and sessionId
+  }, [userId, weddingId, sessionId, historyOffset]);
+
+  const loadMoreHistory = useCallback(() => {
+    if (!isLoadingHistory && hasMoreHistory) {
+      setHistoryOffset(prev => prev + historyLimit);
+    }
+  }, [isLoadingHistory, hasMoreHistory]); // Depend on userId, weddingId, and sessionId
 
   // Cleanup on unmount
   useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
@@ -340,8 +368,10 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
-    isLoadingHistory, // Export new state
-    historyError,     // Export new state
+    isLoadingHistory,
+    historyError,
+    hasMoreHistory,
+    loadMoreHistory,
     startRecording,
     stopRecording,
     initializeWebcam,
