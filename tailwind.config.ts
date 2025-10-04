@@ -21,6 +21,14 @@ const config = {
     },
     extend: {
       colors: {
+        'futuristic-bg': '#FDF6E3',
+        'futuristic-primary-accent': '#8B0000',
+        'futuristic-secondary-accent': '#000080',
+        'futuristic-gold': '#FFD700',
+        'futuristic-text-primary': '#4A4A4A',
+        'futuristic-text-secondary': '#6c757d',
+        'futuristic-container-bg': '#FFFFFF',
+        'futuristic-border': '#eee',
         'wedding-red': '#D62F32',
         'wedding-orange': '#F7941D',
         'wedding-gold': '#B8860B', // Darker gold for better contrast (4.5:1 ratio)
@@ -81,9 +89,39 @@ const config = {
           to: { height: "0" },
         },
       },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        'gentle-pulse': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.8' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.05)', opacity: '1' },
+        },
+        'speaking-pulse': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0.9' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.1)', opacity: '1' },
+        },
+        'speaking-ring-1': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.5' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.1)', opacity: '0.8' },
+        },
+        'speaking-ring-2': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.3' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.15)', opacity: '0.6' },
+        },
+      },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        'gentle-pulse': 'gentle-pulse 4s infinite ease-in-out',
+        'speaking-pulse': 'speaking-pulse 1.2s infinite ease-in-out',
+        'speaking-ring-1': 'speaking-ring-1 1.2s infinite ease-in-out',
+        'speaking-ring-2': 'speaking-ring-2 1.2s infinite ease-in-out',
       },
     },
   },

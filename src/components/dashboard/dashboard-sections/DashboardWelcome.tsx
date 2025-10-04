@@ -1,5 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { MessageCircle } from 'lucide-react';
 import { UserProfile } from '@/services/api/userApi'; // Assuming UserProfile is exported from here
 
 interface DashboardWelcomeProps {
@@ -30,12 +32,23 @@ const DashboardWelcome: React.FC<DashboardWelcomeProps> = ({ profile, userName, 
       variants={cardVariants}
       className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-wedding-gold/20 shadow-lg"
     >
-      <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
-        Welcome back, {profile?.display_name || userName || "Friend"}!
-      </h1>
-      <p className="text-gray-600 animate-fadeIn delay-75">
-        {weddingDate ? `Your wedding is in ${daysUntilWedding} days (${weddingDate})` : `Let's plan your dream wedding!`}
-      </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
+            Welcome back, {profile?.display_name || userName || "Friend"}!
+          </h1>
+          <p className="text-gray-600 animate-fadeIn delay-75">
+            {weddingDate ? `Your wedding is in ${daysUntilWedding} days (${weddingDate})` : `Let's plan your dream wedding!`}
+          </p>
+        </div>
+        <Link
+          to="/chat"
+          className="flex items-center gap-2 px-4 py-2 bg-wedding-gold text-white rounded-lg shadow-md hover:bg-wedding-gold/90 transition-colors"
+        >
+          <MessageCircle size={18} />
+          <span>Start Chat</span>
+        </Link>
+      </div>
     </motion.div>
   );
 };
