@@ -2,6 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import i18n from './i18n';
+import { I18nextProvider } from 'react-i18next';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext.tsx';
@@ -15,15 +17,20 @@ const queryClient = new QueryClient({
   },
 });
 
+import PageLoader from './components/ui/PageLoader';
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <React.Suspense fallback={<PageLoader />}>
+      <I18nextProvider i18n={i18n}>
+        <HelmetProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </QueryClientProvider>
+        </HelmetProvider>
+      </I18nextProvider>
+    </React.Suspense>
   </React.StrictMode>
 );
 

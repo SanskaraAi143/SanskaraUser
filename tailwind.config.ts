@@ -69,7 +69,7 @@ const config = {
       fontFamily: {
         lora: ['"Lora"', 'serif'],
         lato: ['"Lato"', 'sans-serif'],
-        sans: ['"Lato"', 'sans-serif'],
+        sans: ['"Lato"', '"Anek Telugu"', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
