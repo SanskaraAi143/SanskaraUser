@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { MenuIcon, LogIn } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,20 +8,15 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthActionButton from '@/components/auth/AuthActionButton';
 
 const Navbar = () => {
-  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
-
   const navLinks = [
-    { href: "/about", label: t("nav_about") },
-    { href: "/features", label: t("nav_features") },
-    { href: "/blog", label: t("nav_blog") },
-    { href: "/pricing", label: t("nav_pricing") },
+    { href: "/about", label: "About" },
+    { href: "/features", label: "Features" },
+    { href: "/blog", label: "Blog" },
+    { href: "/pricing", label: "Pricing" },
   ];
 
   return (
@@ -45,9 +39,6 @@ const Navbar = () => {
               {link.label}
             </Link>
           )}
-          <Button variant="ghost" onClick={() => changeLanguage(i18n.language === 'en' ? 'te' : 'en')}>
-            {i18n.language === 'en' ? 'తెలుగు' : 'English'}
-          </Button>
         </div>
         
         <div className="flex items-center gap-2">
@@ -58,11 +49,11 @@ const Navbar = () => {
               <Button variant="ghost" asChild>
                 <Link to="/auth?mode=signin">
                   <LogIn className="mr-2 h-4 w-4" />
-                  {t('nav_signin')}
+                  Sign In
                 </Link>
               </Button>
               <Button asChild>
-                <Link to="/auth?mode=signup">{t('nav_get_started')}</Link>
+                <Link to="/auth?mode=signup">Get Started</Link>
               </Button>
             </div>
           )}
@@ -90,18 +81,15 @@ const Navbar = () => {
                   )}
                 </nav>
                 <div className="mt-auto space-y-4">
-                  <Button variant="outline" className="w-full" onClick={() => changeLanguage(i18n.language === 'en' ? 'te' : 'en')}>
-                    {i18n.language === 'en' ? 'తెలుగు' : 'English'}
-                  </Button>
                   {user ? (
                      <UserProfileDropdown />
                   ) : (
                     <>
                       <Button variant="outline" className="w-full" asChild onClick={() => setIsOpen(false)}>
-                        <Link to="/auth?mode=signin">{t('nav_signin')}</Link>
+                        <Link to="/auth?mode=signin">Sign In</Link>
                       </Button>
                        <Button className="w-full" asChild onClick={() => setIsOpen(false)}>
-                        <Link to="/auth?mode=signup">{t('nav_get_started')}</Link>
+                        <Link to="/auth?mode=signup">Get Started</Link>
                       </Button>
                     </>
                   )}
