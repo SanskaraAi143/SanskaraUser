@@ -53,7 +53,7 @@ const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const ConditionalFloatingChatButton = () => {
   const location = useLocation();
   // Do not show the button on the new futuristic chat page
-  if (location.pathname === '/chat') {
+  if (location.pathname === '/chat' || location.pathname.startsWith('/dashboard/new-chat')) {
     return null;
   }
   return <FloatingChatButton />;

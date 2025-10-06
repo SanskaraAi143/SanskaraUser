@@ -67,8 +67,7 @@ const FuturisticChatPage: React.FC = () => {
       setAiStatus('Listening...');
     } else if (isVideoActive) {
       setAiStatus('Video call active');
-    }
-    else {
+    } else {
       setAiStatus('Tap to speak or type');
     }
   }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording, isLoadingHistory, isVideoActive]);
@@ -107,58 +106,66 @@ const FuturisticChatPage: React.FC = () => {
                   track.enabled = !newMuted;
               });
           }
-          // Also toggle mute state in the multimodal client if it controls the microphone stream
-          // This part is assumed to be handled within the hook or related logic, for now we just manage local video mute
           return newMuted;
       });
   };
 
+  const handleEndClick = () => {
+      // For now, just navigates back. Could be expanded to show a modal.
+      navigate(-1);
+  };
+
   return (
     <ChatLayout>
-      <div className={cn('app-container', { 'video-active': isVideoActive })}>
-        <div className="main-view-wrapper">
-          <main className="audio-interface">
-             <div className="video-feeds" id="video-feeds">
-                <div className="video-feed partner-feed"><span>Partner's Video</span></div>
-                <div className="video-feed user-feed">
-                  <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover"/>
-                </div>
-            </div>
-            <div className="ai-visualizer-container">
-              <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
-            </div>
-            <h1 className="ai-name">Sanskara</h1>
-            <p className="ai-status">{aiStatus}</p>
-          </main>
-           <Controls
-              isRecording={isRecording}
-              onTalkClick={handleTalkClick}
-              isVideoActive={isVideoActive}
-              onVideoClick={handleCameraToggle}
-              isMuted={isMuted}
-              onMuteClick={handleMuteToggle}
-            />
-        </div>
-
-        <div className="chat-panel open">
-          <div className="chat-header">
-            <h2 className="font-semibold">Conversation History</h2>
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm text-futuristic-text-secondary hover:text-futuristic-primary-accent"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
+      {/* Main View */}
+      <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border transition-all duration-500 ease-in-out", { 'video-active': isVideoActive })}>
+        <main className="audio-interface flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
+          <div className={cn("video-feeds absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center gap-4 p-4 transition-opacity duration-500", isVideoActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}>
+              <div className="video-feed partner-feed w-full flex-1 bg-gray-200 rounded-2xl flex justify-center items-center text-futuristic-text-secondary"><span>Partner's Video</span></div>
+              <div className="video-feed user-feed absolute w-32 h-40 bottom-48 right-4 border-2 border-white rounded-2xl shadow-lg overflow-hidden">
+                <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover"/>
+              </div>
           </div>
-          <ChatHistory
-            transcript={transcript}
-            isLoadingHistory={isLoadingHistory}
-            hasMoreHistory={hasMoreHistory}
-            loadMoreHistory={loadMoreHistory}
-          />
-          <ChatInput onSendMessage={sendTextMessage} />
+          <div className={cn("ai-visualizer-container transition-all duration-500", {"transform scale-40 -translate-x-[120%] -translate-y-[350%]": isVideoActive})}>
+            <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
+          </div>
+          <div className={cn("transition-opacity duration-300", { "opacity-0 pointer-events-none": isVideoActive })}>
+            <h1 className="ai-name text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
+            <p className="ai-status text-base text-futuristic-text-secondary min-h-[24px]">
+              {aiStatus}
+            </p>
+          </div>
+        </main>
+        <Controls
+          isRecording={isRecording}
+          onTalkClick={handleTalkClick}
+          isVideoActive={isVideoActive}
+          onVideoClick={handleCameraToggle}
+          isMuted={isMuted}
+          onMuteClick={handleMuteToggle}
+          onEndClick={handleEndClick}
+        />
+      </div>
+
+      {/* Chat Panel */}
+      <div className="flex-[2] flex flex-col bg-futuristic-container-bg">
+        <div className="flex justify-between items-center p-4 border-b border-futuristic-border shrink-0">
+          <h2 className="font-semibold">Conversation History</h2>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-futuristic-text-secondary hover:text-futuristic-primary-accent"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
         </div>
+        <ChatHistory
+          transcript={transcript}
+          isLoadingHistory={isLoadingHistory}
+          hasMoreHistory={hasMoreHistory}
+          loadMoreHistory={loadMoreHistory}
+        />
+        <ChatInput onSendMessage={sendTextMessage} disabled={!sessionId} />
       </div>
     </ChatLayout>
   );

@@ -78,16 +78,7 @@ const config = {
         lora: ['"Lora"', 'serif'],
         lato: ['"Lato"', 'sans-serif'],
         sans: ['"Lato"', 'sans-serif'],
-      },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
+        poppins: ['"Poppins"', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -118,7 +109,7 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        'gentle-pulse': 'gentle-pulse 4s infinite ease-in-out',
+        'gentle-pulse': 'gentle-pulse 4s infinite 0.5s ease-in-out',
         'speaking-pulse': 'speaking-pulse 1.2s infinite ease-in-out',
         'speaking-ring-1': 'speaking-ring-1 1.2s infinite ease-in-out',
         'speaking-ring-2': 'speaking-ring-2 1.2s infinite ease-in-out',

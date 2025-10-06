@@ -1,18 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import MessageBubble from './MessageBubble';
 import { Loader2 } from 'lucide-react';
-
-// Assuming Message interface is defined in a shared types file, e.g., @/types/index.ts or similar
-// For this component, we'll redefine a simplified version.
-interface Message {
-  id: string;
-  sender: 'user' | 'assistant' | 'system';
-  text: string;
-  isMarkdown?: boolean;
-  timestamp: string;
-  type: 'message' | 'artifact_upload' | 'system_event';
-  artifactUrl?: string;
-}
+import { Message } from '@/hooks/useMultimodalClient';
 
 interface ChatHistoryProps {
   transcript: Message[];
@@ -28,11 +17,9 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ transcript, isLoadingHistory,
 
   // Auto-scroll to bottom for new messages
   useEffect(() => {
-    // Only auto-scroll if the user isn't trying to view older messages.
-    // A common heuristic is to check if the user is near the bottom.
     const container = scrollContainerRef.current;
     if (container) {
-        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100; // 100px buffer
+        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150; // 150px buffer
         if (isScrolledToBottom) {
              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
@@ -52,7 +39,6 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ transcript, isLoadingHistory,
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container && !isLoadingHistory && hasMoreHistory && loadMoreHistory) {
-      // If scrolled to the very top, trigger loading more history.
       if (container.scrollTop === 0) {
         prevScrollHeightRef.current = container.scrollHeight;
         loadMoreHistory();
