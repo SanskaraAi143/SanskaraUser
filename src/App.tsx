@@ -138,7 +138,7 @@ function App() {
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
                 <Route path="/careers" element={<CareersPage />} />
-                <Route path="/contact" e-lement={<ContactPage />} />
+                <Route path="/contact" element={<ContactPage />} />
                 {/** Cookie policy routes removed **/}
                 <Route path="*" element={<NotFound />} />
               </Routes>
