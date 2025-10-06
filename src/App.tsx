@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import PageLoader from './components/ui/PageLoader';
@@ -21,7 +21,7 @@ const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
 const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
-const ChatInterfacePage = lazy(() => import('./pages/ChatInterfacePage')); // New import
+const FuturisticChatPage = lazy(() => import('./pages/FuturisticChatPage'));
 const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
 const TimelinePage = lazy(() => import('./pages/dashboard/TimelinePage'));
 const MoodBoardPage = lazy(() => import('./pages/dashboard/MoodBoardPage'));
@@ -29,7 +29,7 @@ const BudgetPage = lazy(() => import('./pages/dashboard/BudgetPage'));
 const GuestsPage = lazy(() => import('./pages/dashboard/GuestsPage'));
 const VendorsPage = lazy(() => import('./pages/dashboard/VendorsPage'));
 const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
-const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage'));
+// const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage')); // This file does not exist
 const RitualsPage = lazy(() => import('./pages/dashboard/RitualsPage'));
 
 // Blog Pages
@@ -49,6 +49,16 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+
+const ConditionalFloatingChatButton = () => {
+  const location = useLocation();
+  // Do not show the button on the new futuristic chat page
+  if (location.pathname === '/chat') {
+    return null;
+  }
+  return <FloatingChatButton />;
+};
+
 
 function App() {
   const { toast } = useToast();
@@ -110,11 +120,11 @@ function App() {
                 <Route path="/signin" element={<AuthPage />} />
                 <Route path="/ritual-guide" element={<RitualGuidePage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/chat" element={<FuturisticChatPage />} />
                 <Route path="/dashboard" element={<MobileDashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="chat" element={<ChatPage />} />
-                  <Route path="new-chat" element={<ChatInterfacePage />} /> {/* New route for testing */}
                   <Route path="tasks" element={<TasksPage />} />
                   <Route path="timeline" element={<TimelinePage />} />
                   <Route path="moodboard" element={<MoodBoardPage />} />
@@ -123,7 +133,7 @@ function App() {
                   <Route path="vendors" element={<VendorsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="rituals" element={<RitualsPage />} />
-                  <Route path="history" element={<HistoryPage />} />
+                  {/* <Route path="history" element={<HistoryPage />} /> */}
                 </Route>
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
@@ -134,7 +144,7 @@ function App() {
               </Routes>
             </Suspense>
             <Toaster />
-            <FloatingChatButton />
+            <ConditionalFloatingChatButton />
             {/** GDPR/Cookie banner removed **/}
           </div>
         </ErrorBoundary>
