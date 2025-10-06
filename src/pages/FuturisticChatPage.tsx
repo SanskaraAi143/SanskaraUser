@@ -28,9 +28,12 @@ const FuturisticChatPage: React.FC = () => {
     connectionState,
     sessionId,
     isVideoActive,
-    activeVideoMode,
     initializeWebcam,
     stopVideo,
+    isLoadingHistory,
+    historyError,
+    hasMoreHistory,
+    loadMoreHistory,
   } = useMultimodalClient(
     user?.internal_user_id,
     user?.wedding_id
@@ -40,11 +43,21 @@ const FuturisticChatPage: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
+    if (historyError) {
+      toast({
+        title: 'Error loading history',
+        description: historyError,
+        variant: 'destructive',
+      });
+    }
+  }, [historyError, toast]);
+
+  useEffect(() => {
     if (connectionState === 'reconnecting') {
       setAiStatus('Reconnecting...');
     } else if (connectionState === 'failed') {
       setAiStatus('Connection failed');
-    } else if (!sessionId) {
+    } else if (!sessionId && !isLoadingHistory) {
       setAiStatus('Establishing session...');
     } else if (isAssistantSpeaking) {
       setAiStatus('Speaking...');
@@ -52,10 +65,13 @@ const FuturisticChatPage: React.FC = () => {
       setAiStatus('Thinking...');
     } else if (isRecording) {
       setAiStatus('Listening...');
-    } else {
-      setAiStatus('Tap to speak again');
+    } else if (isVideoActive) {
+      setAiStatus('Video call active');
     }
-  }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording]);
+    else {
+      setAiStatus('Tap to speak or type');
+    }
+  }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording, isLoadingHistory, isVideoActive]);
 
   const handleTalkClick = () => {
     if (isRecording) {
@@ -83,57 +99,66 @@ const FuturisticChatPage: React.FC = () => {
   };
 
   const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-    // Here you would also call the mute/unmute function from your WebRTC logic
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getAudioTracks().forEach(track => {
-        track.enabled = isMuted; // isMuted is the old state, so this toggles it
+      setIsMuted(prevMuted => {
+          const newMuted = !prevMuted;
+          if (videoRef.current?.srcObject) {
+              const stream = videoRef.current.srcObject as MediaStream;
+              stream.getAudioTracks().forEach(track => {
+                  track.enabled = !newMuted;
+              });
+          }
+          // Also toggle mute state in the multimodal client if it controls the microphone stream
+          // This part is assumed to be handled within the hook or related logic, for now we just manage local video mute
+          return newMuted;
       });
-    }
   };
 
   return (
     <ChatLayout>
-      {/* Main View */}
-      <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border", { 'video-active': isVideoActive })}>
-        <main className="audio-interface flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
-          <div className="video-feeds">
-              <div className="video-feed partner-feed"><span>Partner's Video</span></div>
-              <div className="video-feed user-feed"><video ref={videoRef} autoPlay playsInline muted /></div>
-          </div>
-          <div className="ai-visualizer-container">
-            <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
-          </div>
-          <h1 className="ai-name text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
-          <p className="ai-status text-base text-futuristic-text-secondary min-h-[24px] transition-opacity duration-300">
-            {aiStatus}
-          </p>
-        </main>
-        <Controls
-          isRecording={isRecording}
-          onTalkClick={handleTalkClick}
-          isVideoActive={isVideoActive}
-          onVideoClick={handleCameraToggle}
-          isMuted={isMuted}
-          onMuteClick={handleMuteToggle}
-        />
-      </div>
-
-      {/* Chat Panel */}
-      <div className="flex-[2] flex flex-col bg-futuristic-container-bg">
-        <div className="flex justify-between items-center p-4 border-b border-futuristic-border shrink-0">
-          <h2 className="font-semibold">Conversation History</h2>
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-futuristic-text-secondary hover:text-futuristic-primary-accent"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
+      <div className={cn('app-container', { 'video-active': isVideoActive })}>
+        <div className="main-view-wrapper">
+          <main className="audio-interface">
+             <div className="video-feeds" id="video-feeds">
+                <div className="video-feed partner-feed"><span>Partner's Video</span></div>
+                <div className="video-feed user-feed">
+                  <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover"/>
+                </div>
+            </div>
+            <div className="ai-visualizer-container">
+              <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
+            </div>
+            <h1 className="ai-name">Sanskara</h1>
+            <p className="ai-status">{aiStatus}</p>
+          </main>
+           <Controls
+              isRecording={isRecording}
+              onTalkClick={handleTalkClick}
+              isVideoActive={isVideoActive}
+              onVideoClick={handleCameraToggle}
+              isMuted={isMuted}
+              onMuteClick={handleMuteToggle}
+            />
         </div>
-        <ChatHistory transcript={transcript} />
-        <ChatInput onSendMessage={sendTextMessage} />
+
+        <div className="chat-panel open">
+          <div className="chat-header">
+            <h2 className="font-semibold">Conversation History</h2>
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-sm text-futuristic-text-secondary hover:text-futuristic-primary-accent"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+          <ChatHistory
+            transcript={transcript}
+            isLoadingHistory={isLoadingHistory}
+            hasMoreHistory={hasMoreHistory}
+            loadMoreHistory={loadMoreHistory}
+          />
+          <ChatInput onSendMessage={sendTextMessage} />
+        </div>
       </div>
     </ChatLayout>
   );
