@@ -29,7 +29,7 @@ const BudgetPage = lazy(() => import('./pages/dashboard/BudgetPage'));
 const GuestsPage = lazy(() => import('./pages/dashboard/GuestsPage'));
 const VendorsPage = lazy(() => import('./pages/dashboard/VendorsPage'));
 const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
-const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage'));
+// const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage'));
 const RitualsPage = lazy(() => import('./pages/dashboard/RitualsPage'));
 
 // Blog Pages
@@ -123,7 +123,7 @@ function App() {
                   <Route path="vendors" element={<VendorsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="rituals" element={<RitualsPage />} />
-                  <Route path="history" element={<HistoryPage />} />
+                  {/* <Route path="history" element={<HistoryPage />} /> */}
                 </Route>
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
