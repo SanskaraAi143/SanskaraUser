@@ -1,46 +1,123 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import ChatLayout from '@/components/futuristic-chat/ChatLayout';
 import AudioVisualizer from '@/components/futuristic-chat/AudioVisualizer';
 import ChatHistory from '@/components/futuristic-chat/ChatHistory';
 import ChatInput from '@/components/futuristic-chat/ChatInput';
 import Controls from '@/components/futuristic-chat/Controls';
-import { ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useMultimodalClient } from '@/hooks/useMultimodalClient';
+import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 
 const FuturisticChatPage: React.FC = () => {
   const navigate = useNavigate();
-  // Mock state for demonstration purposes
-  const [isRecording, setIsRecording] = React.useState(false);
-  const [isSpeaking, setIsSpeaking] = React.useState(false);
-  const [aiStatus, setAiStatus] = React.useState('Tap to begin conversation');
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Simulate AI speaking cycle
-  const handleTalkClick = () => {
-    setIsRecording(true);
-    setAiStatus('Listening...');
-    setTimeout(() => {
-      setIsRecording(false);
-      setIsSpeaking(true);
+  const {
+    isRecording,
+    isAssistantSpeaking,
+    isAssistantTyping,
+    transcript,
+    startRecording,
+    stopRecording,
+    sendTextMessage,
+    connectionState,
+    sessionId,
+    isVideoActive,
+    activeVideoMode,
+    initializeWebcam,
+    stopVideo,
+  } = useMultimodalClient(
+    user?.internal_user_id,
+    user?.wedding_id
+  );
+
+  const [aiStatus, setAiStatus] = useState('Tap to begin conversation');
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    if (connectionState === 'reconnecting') {
+      setAiStatus('Reconnecting...');
+    } else if (connectionState === 'failed') {
+      setAiStatus('Connection failed');
+    } else if (!sessionId) {
+      setAiStatus('Establishing session...');
+    } else if (isAssistantSpeaking) {
       setAiStatus('Speaking...');
-    }, 2000);
-    setTimeout(() => {
-      setIsSpeaking(false);
+    } else if (isAssistantTyping) {
+      setAiStatus('Thinking...');
+    } else if (isRecording) {
+      setAiStatus('Listening...');
+    } else {
       setAiStatus('Tap to speak again');
-    }, 5000);
+    }
+  }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording]);
+
+  const handleTalkClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const handleCameraToggle = async () => {
+    if (isVideoActive) {
+      stopVideo();
+    } else {
+      try {
+        await initializeWebcam(videoRef.current);
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        toast({
+          title: "Camera Error",
+          description: "Could not access camera. Please check permissions.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
+    // Here you would also call the mute/unmute function from your WebRTC logic
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getAudioTracks().forEach(track => {
+        track.enabled = isMuted; // isMuted is the old state, so this toggles it
+      });
+    }
   };
 
   return (
     <ChatLayout>
       {/* Main View */}
-      <div className="flex-[3] relative flex flex-col border-r border-futuristic-border">
-        <main className="flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
-          <AudioVisualizer isSpeaking={isSpeaking} isListening={isRecording} />
-          <h1 className="text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
-          <p className="text-base text-futuristic-text-secondary min-h-[24px] transition-opacity duration-300">
+      <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border", { 'video-active': isVideoActive })}>
+        <main className="audio-interface flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
+          <div className="video-feeds">
+              <div className="video-feed partner-feed"><span>Partner's Video</span></div>
+              <div className="video-feed user-feed"><video ref={videoRef} autoPlay playsInline muted /></div>
+          </div>
+          <div className="ai-visualizer-container">
+            <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
+          </div>
+          <h1 className="ai-name text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
+          <p className="ai-status text-base text-futuristic-text-secondary min-h-[24px] transition-opacity duration-300">
             {aiStatus}
           </p>
         </main>
-        <Controls isRecording={isRecording} onTalkClick={handleTalkClick} />
+        <Controls
+          isRecording={isRecording}
+          onTalkClick={handleTalkClick}
+          isVideoActive={isVideoActive}
+          onVideoClick={handleCameraToggle}
+          isMuted={isMuted}
+          onMuteClick={handleMuteToggle}
+        />
       </div>
 
       {/* Chat Panel */}
@@ -55,8 +132,8 @@ const FuturisticChatPage: React.FC = () => {
             Back
           </button>
         </div>
-        <ChatHistory transcript={[]} />
-        <ChatInput onSendMessage={() => {}} />
+        <ChatHistory transcript={transcript} />
+        <ChatInput onSendMessage={sendTextMessage} />
       </div>
     </ChatLayout>
   );
