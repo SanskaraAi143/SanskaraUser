@@ -1,57 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ChatLayout from '@/components/futuristic-chat/ChatLayout';
 import AudioVisualizer from '@/components/futuristic-chat/AudioVisualizer';
 import ChatHistory from '@/components/futuristic-chat/ChatHistory';
 import ChatInput from '@/components/futuristic-chat/ChatInput';
 import Controls from '@/components/futuristic-chat/Controls';
-import { useAuth } from '@/context/AuthContext';
-import { useMultimodalClient } from '@/hooks/useMultimodalClient';
 import { ArrowLeft } from 'lucide-react';
 
 const FuturisticChatPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const {
-    isRecording,
-    isAssistantSpeaking,
-    isAssistantTyping,
-    transcript,
-    startRecording,
-    stopRecording,
-    sendTextMessage,
-    connectionState,
-    sessionId,
-  } = useMultimodalClient(
-    user?.internal_user_id,
-    user?.wedding_id
-  );
-  const [aiStatus, setAiStatus] = useState('Tap to begin conversation');
+  // Mock state for demonstration purposes
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [isSpeaking, setIsSpeaking] = React.useState(false);
+  const [aiStatus, setAiStatus] = React.useState('Tap to begin conversation');
 
-  useEffect(() => {
-    if (connectionState === 'reconnecting') {
-      setAiStatus('Reconnecting...');
-    } else if (connectionState === 'failed') {
-      setAiStatus('Connection failed');
-    } else if (!sessionId) {
-      setAiStatus('Establishing session...');
-    } else if (isAssistantSpeaking) {
-      setAiStatus('Speaking...');
-    } else if (isAssistantTyping) {
-      setAiStatus('Thinking...');
-    } else if (isRecording) {
-      setAiStatus('Listening...');
-    } else {
-      setAiStatus('Tap to speak again');
-    }
-  }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording]);
-
+  // Simulate AI speaking cycle
   const handleTalkClick = () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
+    setIsRecording(true);
+    setAiStatus('Listening...');
+    setTimeout(() => {
+      setIsRecording(false);
+      setIsSpeaking(true);
+      setAiStatus('Speaking...');
+    }, 2000);
+    setTimeout(() => {
+      setIsSpeaking(false);
+      setAiStatus('Tap to speak again');
+    }, 5000);
   };
 
   return (
@@ -59,7 +34,7 @@ const FuturisticChatPage: React.FC = () => {
       {/* Main View */}
       <div className="flex-[3] relative flex flex-col border-r border-futuristic-border">
         <main className="flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
-          <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
+          <AudioVisualizer isSpeaking={isSpeaking} isListening={isRecording} />
           <h1 className="text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
           <p className="text-base text-futuristic-text-secondary min-h-[24px] transition-opacity duration-300">
             {aiStatus}
@@ -80,8 +55,8 @@ const FuturisticChatPage: React.FC = () => {
             Back
           </button>
         </div>
-        <ChatHistory transcript={transcript} />
-        <ChatInput onSendMessage={sendTextMessage} />
+        <ChatHistory transcript={[]} />
+        <ChatInput onSendMessage={() => {}} />
       </div>
     </ChatLayout>
   );
