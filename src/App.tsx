@@ -18,7 +18,7 @@ const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
 
 // Dashboard Pages - Group into one chunk
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+const WeddingDashboardPage = lazy(() => import('./pages/dashboard/WeddingDashboardPage'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
 const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
 const FuturisticChatPage = lazy(() => import('./pages/FuturisticChatPage'));
@@ -122,7 +122,7 @@ function App() {
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/chat" element={<FuturisticChatPage />} />
                 <Route path="/dashboard" element={<MobileDashboardLayout />}>
-                  <Route index element={<Dashboard />} />
+                  <Route index element={<WeddingDashboardPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="chat" element={<ChatPage />} />
                   <Route path="tasks" element={<TasksPage />} />

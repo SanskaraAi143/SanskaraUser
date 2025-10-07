@@ -658,3 +658,48 @@ CREATE INDEX IF NOT EXISTS idx_memories_created_at ON memories (created_at DESC)
 -- (Optional ANN index; may require re-create if dimension changed from previous 1536)
 DROP INDEX IF EXISTS idx_memories_embedding_ivfflat;
 CREATE INDEX idx_memories_embedding_ivfflat ON memories USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
+
+-- Function to invite a collaborator to a wedding
+CREATE OR REPLACE FUNCTION invite_wedding_collaborator(p_wedding_id UUID, p_invitee_email TEXT, p_role TEXT)
+RETURNS JSONB AS $$
+DECLARE
+    v_invitee_user_id UUID;
+    v_inviter_user_id UUID;
+    v_wedding_name TEXT;
+BEGIN
+    -- 1. Get the user_id of the invitee from their email
+    SELECT user_id INTO v_invitee_user_id
+    FROM public.users
+    WHERE email = p_invitee_email;
+
+    -- 2. If the user doesn't exist, we can't add them yet.
+    -- (Future enhancement: send an actual platform invitation)
+    IF v_invitee_user_id IS NULL THEN
+        RETURN jsonb_build_object('success', false, 'message', 'User with this email does not exist on the platform.');
+    END IF;
+
+    -- 3. Get the wedding name for the notification message
+    SELECT wedding_name INTO v_wedding_name FROM public.weddings WHERE wedding_id = p_wedding_id;
+
+    -- 4. Check if the user is already a member of the wedding
+    IF EXISTS (SELECT 1 FROM public.wedding_members WHERE wedding_id = p_wedding_id AND user_id = v_invitee_user_id) THEN
+        RETURN jsonb_build_object('success', false, 'message', 'User is already a member of this wedding.');
+    END IF;
+
+    -- 5. Insert the new member into the wedding_members table
+    INSERT INTO public.wedding_members (wedding_id, user_id, role)
+    VALUES (p_wedding_id, v_invitee_user_id, p_role);
+
+    -- 6. Create a notification for the invited user
+    INSERT INTO public.notifications (recipient_user_id, message, notification_type, related_entity_type, related_entity_id)
+    VALUES (
+        v_invitee_user_id,
+        'You have been invited to collaborate on the ' || v_wedding_name || ' wedding plan.',
+        'wedding_invitation',
+        'wedding',
+        p_wedding_id
+    );
+
+    RETURN jsonb_build_object('success', true, 'message', 'Collaborator added successfully.');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
