@@ -3,10 +3,7 @@ import axios from 'axios';
 import { supabase } from './supabase/config';
 
 // Set the MCP API base URL (prefer Vite env for consistency with other services)
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL
-  || (process.env.NODE_ENV === 'production'
-    ? 'https://api.sanskaraai.com'
-    : 'http://localhost:8765');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

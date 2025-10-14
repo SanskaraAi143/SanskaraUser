@@ -105,7 +105,7 @@ const FeaturesPage = () => {
                 Get Started Free
               </a>
               <a 
-                href="/dashboard/chat" 
+                href="/chat" 
                 className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-wedding-red transition-colors"
               >
                 Try AI Assistant

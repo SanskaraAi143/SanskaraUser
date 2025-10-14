@@ -21,7 +21,6 @@ const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
 // Dashboard Pages - Group into one chunk
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
-const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
 const FuturisticChatPage = lazy(() => import('./pages/FuturisticChatPage'));
 const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
 const TimelinePage = lazy(() => import('./pages/dashboard/TimelinePage'));
@@ -127,7 +126,6 @@ function App() {
                 <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
-                  <Route path="chat" element={<ChatPage />} />
                   <Route path="tasks" element={<TasksPage />} />
                   <Route path="timeline" element={<TimelinePage />} />
                   <Route path="moodboard" element={<MoodBoardPage />} />

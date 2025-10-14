@@ -59,7 +59,7 @@ const DashboardLayout = () => {
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
-    { name: "Chat with AI", icon: MessageCircle, href: "/dashboard/chat" },
+    { name: "Chat with AI", icon: MessageCircle, href: "/chat" },
     { name: "Tasks", icon: CheckSquare, href: "/dashboard/tasks" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
     { name: "Mood Board", icon: Paintbrush, href: "/dashboard/moodboard" },
@@ -125,7 +125,7 @@ const DashboardLayout = () => {
             </nav>
           </div>
           <div className="px-6 py-4">            <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
-              <Link to="/dashboard/chat">Ask AI</Link>
+              <Link to="/chat">Ask AI</Link>
             </Button>
           </div>
         </aside>

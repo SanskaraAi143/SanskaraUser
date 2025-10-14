@@ -87,7 +87,7 @@ export default function VirtualTryOn() {
   const fetchVenuePhotos = async (placeId: string) => {
     setIsFetchingVenuePhotos(true); // Start loading
     try {
-      const response = await fetch(`http://localhost:8765/api/venue-photos?place_id=${placeId}`);
+      const response = await fetch(`/api/venue-photos?place_id=${placeId}`);
       const data = await response.json();
       if (data.success && data.photos) {
         setFetchedVenuePhotos(data.photos);
@@ -118,7 +118,7 @@ export default function VirtualTryOn() {
       (async () => { // Wrapped in a self-executing async function
         setIsGeneratingVisualization(true); // Start visualization loading
         try {
-          const result = await fetch('http://localhost:8765/api/generate-visualization', {
+          const result = await fetch('/api/generate-visualization', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
