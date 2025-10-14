@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Task } from '@/services/api/tasksApi'; // Assuming Task type is exported
+import { DatePicker } from "@/components/ui/date-picker";
 
 const VALID_LEAD_PARTIES = ['', 'bride_side', 'groom_side', 'couple', 'shared'] as const;
 type ValidLeadParty = typeof VALID_LEAD_PARTIES[number];
@@ -23,7 +24,7 @@ import { Loader2 } from 'lucide-react';
 const taskFormSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }).max(100, { message: "Title must be 100 characters or less." }),
   description: z.string().max(500, { message: "Description must be 500 characters or less." }).optional().or(z.literal('')), // Optional, allow empty string
-  due_date: z.string().optional().or(z.literal('')), // Optional, allow empty string. Could also use z.date() if a date picker is used.
+  due_date: z.date().optional().nullable(),
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["No Status", "To Do", "Doing", "Done"]),
   category: z.string().max(50, { message: "Category must be 50 characters or less." }).optional().or(z.literal('')),
@@ -50,7 +51,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
     defaultValues: {
       title: '',
       description: '',
-      due_date: '',
+      due_date: null,
       priority: 'medium',
       status: 'To Do',
       category: '',
@@ -63,7 +64,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
       form.reset({
         title: task.title || '',
         description: task.description || '',
-        due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '', // Format for date input
+        due_date: task.due_date ? new Date(task.due_date) : undefined,
         priority: task.priority || 'medium',
         status: task.status || 'To Do',
         category: task.category || '',
@@ -146,7 +147,11 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                   <FormItem>
                     <FormLabel className="text-wedding-brown">Due Date (Optional)</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} className="glass-card border-wedding-gold/30" />
+                      <DatePicker
+                        date={field.value ? new Date(field.value) : undefined}
+                        setDate={(newDate) => field.onChange(newDate)}
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

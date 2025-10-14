@@ -1,13 +1,15 @@
 import React from 'react';
-import { Video, Mic, Phone, MicOff, VideoOff } from 'lucide-react';
+import { Video, Mic, Phone, MicOff, VideoOff, MonitorPlay } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ControlsProps {
   isMuted?: boolean;
   isVideoActive?: boolean;
+  activeVideoMode?: 'webcam' | 'screen' | null;
   isRecording?: boolean;
   onTalkClick: () => void;
-  onVideoClick: () => void;
+  onCameraClick: () => void;
+  onScreenShareClick: () => void;
   onMuteClick: () => void;
   onEndClick: () => void;
 }
@@ -15,9 +17,11 @@ interface ControlsProps {
 const Controls: React.FC<ControlsProps> = ({
   isMuted,
   isVideoActive,
+  activeVideoMode,
   isRecording,
   onTalkClick,
-  onVideoClick,
+  onCameraClick,
+  onScreenShareClick,
   onMuteClick,
   onEndClick
 }) => {
@@ -25,13 +29,20 @@ const Controls: React.FC<ControlsProps> = ({
 
   return (
     <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white via-white/80 to-transparent z-10">
-      <div className="flex justify-around items-center max-w-sm mx-auto">
+      <div className="flex justify-around items-center max-w-lg mx-auto">
         <button
-          onClick={onVideoClick}
-          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isVideoActive })}
-          title="Toggle Video"
+          onClick={onCameraClick}
+          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isVideoActive && activeVideoMode === 'webcam' })}
+          title="Toggle Webcam"
         >
-          {isVideoActive ? <VideoOff size={24} /> : <Video size={24} />}
+          {isVideoActive && activeVideoMode === 'webcam' ? <VideoOff size={24} /> : <Video size={24} />}
+        </button>
+        <button
+          onClick={onScreenShareClick}
+          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isVideoActive && activeVideoMode === 'screen' })}
+          title="Share Screen"
+        >
+          <MonitorPlay size={24} />
         </button>
         <button
           onClick={onMuteClick}

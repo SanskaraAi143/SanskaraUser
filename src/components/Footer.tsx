@@ -29,7 +29,7 @@ const Footer = () => {
                   href="https://www.linkedin.com/company/sanskaraai/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-white shadow-lg transform hover:scale-110 transition-transform duration-300"
+                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-gray-600 shadow-lg transform hover:scale-110 transition-transform duration-300"
                   aria-label="LinkedIn"
                 >
                   <Linkedin size={20} />
@@ -38,7 +38,7 @@ const Footer = () => {
                   href="https://www.instagram.com/sanskaraai/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-white shadow-lg transform hover:scale-110 transition-transform duration-300"
+                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-gray-600 shadow-lg transform hover:scale-110 transition-transform duration-300"
                   aria-label="Instagram"
                 >
                   <Instagram size={20} />
@@ -46,7 +46,7 @@ const Footer = () => {
                 <a
                   href="mailto:admin@sanskaraai.com"
                   aria-label="Email Admin"
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-white shadow-lg transform hover:scale-110 transition-transform duration-300"
+                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-gray-600 shadow-lg transform hover:scale-110 transition-transform duration-300"
                 >
                   <Mail size={20} />
                 </a>
@@ -55,7 +55,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Vendors GitHub"
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-white shadow-lg transform hover:scale-110 transition-transform duration-300"
+                  className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-primary text-gray-600 shadow-lg transform hover:scale-110 transition-transform duration-300"
                 >
                   <Github size={20} />
                 </a>

@@ -9,6 +9,7 @@ import { logError } from './utils/errorLogger';
 import { useAuth } from './context/AuthContext';
 
 // Layouts - Keep eager for critical path
+import DashboardLayout from './layouts/DashboardLayout';
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 
 // Core Pages - High priority
@@ -49,6 +50,7 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const VirtualVenuePage = lazy(() => import('./pages/VirtualVenuePage'));
 
 const ConditionalFloatingChatButton = () => {
   const location = useLocation();
@@ -121,7 +123,8 @@ function App() {
                 <Route path="/ritual-guide" element={<RitualGuidePage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/chat" element={<FuturisticChatPage />} />
-                <Route path="/dashboard" element={<MobileDashboardLayout />}>
+                <Route path="/virtual-venue" element={<VirtualVenuePage />} />
+                <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="chat" element={<ChatPage />} />

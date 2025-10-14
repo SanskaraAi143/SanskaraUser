@@ -26,7 +26,10 @@ const AuthActionButton: React.FC<AuthActionButtonProps> = ({
         navigate(navigateTo);
       }
     } else {
-      // If not logged in, navigate to the auth page to sign up or sign in.
+      // If not logged in, store the intended destination and navigate to the auth page.
+      if (navigateTo) {
+        sessionStorage.setItem('post-auth-redirect', navigateTo);
+      }
       navigate('/auth?mode=signup');
     }
   };

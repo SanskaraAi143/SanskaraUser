@@ -110,7 +110,7 @@ const SignUpForm = () => {
                     <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                    <FormItem><FormLabel>Confirm Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Confirm Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormMessage>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</> : 'Create Account'}
@@ -134,6 +134,13 @@ const AuthPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      const redirectPath = sessionStorage.getItem('post-auth-redirect');
+      if (redirectPath) {
+        sessionStorage.removeItem('post-auth-redirect');
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+
       // If invited partner and onboarding is still in progress, force onboarding
       const details: any = user.wedding_details_json || {};
       const isInvitedPartner = user.role === 'invited_partner' || details?.other_partner_email_expected === user.email;

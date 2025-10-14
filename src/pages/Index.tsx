@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
@@ -16,6 +16,24 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      if (!user) {
+        // User is not logged in, play audio
+        audio.play().catch(error => {
+          // Autoplay was prevented, which is common in modern browsers.
+          // We can't do much here, but we log it for debugging.
+          console.log("Audio autoplay was prevented by the browser.");
+        });
+      } else {
+        // User is logged in, pause audio
+        audio.pause();
+      }
+    }
+  }, [user]);
   
   const handleGetStarted = () => {
     if (user) {
@@ -149,6 +167,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <audio ref={audioRef} src="/audio_app.mp3" loop />
       <Helmet>
         {/* Existing meta tags from index.html will be overridden if also defined here,
             but it's good practice to have them defined per-page for clarity & SPAs.

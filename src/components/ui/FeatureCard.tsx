@@ -5,7 +5,7 @@ interface FeatureCardProps {
   title: string;
   description: string;
   // Allow any other props to be passed down to the div if necessary
-  [key: string]: React.HTMLAttributes<HTMLDivElement>;
+  [key: string]: any;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, ...rest }) => {

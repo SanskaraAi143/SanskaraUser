@@ -1,5 +1,7 @@
 import React from 'react';
-import { MessageSquare, BookOpen, Users, Bookmark, Palette, Calendar, FileCheck, Star } from 'lucide-react';
+import { MessageSquare, BookOpen, Users, Bookmark, Palette, Calendar, FileCheck, Star, Sparkles } from 'lucide-react';
+import FeatureCard from '@/components/ui/FeatureCard';
+import { Link } from 'react-router-dom';
 
 type Feature = {
   icon: JSX.Element;
@@ -9,56 +11,60 @@ type Feature = {
 
 const features: Feature[] = [
 	{
-		icon: <MessageSquare size={28} className="text-white" />,
+		icon: <Sparkles size={28} className="text-gray-600" />,
+		title: 'Virtual Try-On',
+		description:
+			'Visualize your wedding outfit in any venue with our AI-powered virtual try-on feature.',
+	},
+	{
+		icon: <MessageSquare size={28} className="text-gray-600" />,
 		title: 'AI Wedding Assistant',
 		description:
 			'Get instant guidance about rituals, customs, and planning steps from our intelligent AI assistant.',
 	},
 	{
-		icon: <BookOpen size={28} className="text-white" />,
+		icon: <BookOpen size={28} className="text-gray-600" />,
 		title: 'Ritual Knowledge',
 		description:
 			'Learn about Hindu wedding rituals, their meaning, and how to incorporate them into your ceremony.',
 	},
 	{
-		icon: <Users size={28} className="text-white" />,
+		icon: <Users size={28} className="text-gray-600" />,
 		title: 'Vendor Recommendations',
 		description:
 			'Discover and connect with vendors who specialize in Hindu weddings in your area.',
 	},
 	{
-		icon: <Bookmark size={28} className="text-white" />,
+		icon: <Bookmark size={28} className="text-gray-600" />,
 		title: 'Task Tracking',
 		description:
 			'Stay organized with a customized to-do list based on your wedding timeline and traditions.',
 	},
 	{
-		icon: <Palette size={28} className="text-white" />,
+		icon: <Palette size={28} className="text-gray-600" />,
 		title: 'Mood Boards',
 		description:
 			'Create visual inspiration boards for colors, decorations, and outfits for your special day.',
 	},
 	{
-		icon: <Calendar size={28} className="text-white" />,
+		icon: <Calendar size={28} className="text-gray-600" />,
 		title: 'Timeline Creation',
 		description:
 			'Generate a personalized wedding timeline integrating all important rituals and events.',
 	},
 	{
-		icon: <FileCheck size={28} className="text-white" />,
+		icon: <FileCheck size={28} className="text-gray-600" />,
 		title: 'Budget Management',
 		description:
 			'Track expenses and manage your budget with ceremony-specific recommendations.',
 	},
 	{
-		icon: <Star size={28} className="text-white" />,
+		icon: <Star size={28} className="text-gray-600" />,
 		title: 'Ceremony Customization',
 		description:
 			'Get suggestions on how to personalize traditions while respecting cultural significance.',
 	},
 ];
-
-import FeatureCard from '@/components/ui/FeatureCard'; // Import the new component
 
 const Features: React.FC = () => {
 	return (
@@ -77,14 +83,27 @@ const Features: React.FC = () => {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-					{features.map((feature, index) => (
-						<FeatureCard
-							key={index}
-							icon={feature.icon}
-							title={feature.title}
-							description={feature.description}
-						/>
-					))}
+					{features.map((feature, index) => {
+            if (feature.title === 'Virtual Try-On') {
+              return (
+                <Link to="/virtual-venue" key={index}>
+                  <FeatureCard
+                    icon={feature.icon}
+                    title={feature.title}
+                    description={feature.description}
+                  />
+                </Link>
+              );
+            }
+            return (
+              <FeatureCard
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            );
+          })}
 				</div>
 			</div>
 		</section>
