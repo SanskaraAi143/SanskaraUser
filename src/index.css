@@ -103,3 +103,38 @@
     }
   }
 }
+  .glass-card {
+    @apply bg-white/5 border border-white/10 backdrop-blur-lg;
+  }
+
+  .feature-card {
+    @apply relative p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg overflow-hidden transition-all duration-300;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(45deg, #ffd700, #ff8f00);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover::before {
+    opacity: 1;
+  }
