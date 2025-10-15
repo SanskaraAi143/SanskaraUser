@@ -31,9 +31,8 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
   const [historyError, setHistoryError] = useState<string | null>(null); // New state for history error
 
   const clientRef = useRef<MultimodalClient | null>(null);
-  const currentAssistantMessageIndex = useRef<number | null>(null);
+  const assistantMessageInProgress = useRef(false);
   const transcriptRef = useRef<Message[]>([]);
-  const processingLockRef = useRef<boolean>(false);
   const reconnectAttemptsRef = useRef(0);
   const manualReconnectRequestedRef = useRef(false);
   const disconnectHandlersRef = useRef<(() => void)[]>([]);
@@ -51,46 +50,48 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
   useEffect(() => { connectionStateRef.current = connectionState; }, [connectionState]);
 
   const handleTextReceived = useCallback((message: { type: string; data: string }) => {
-    if (processingLockRef.current) return;
-    processingLockRef.current = true;
-    const newTranscript = [...transcriptRef.current];
-    if (message.type === 'user_input') {
-      const lastIdx = newTranscript.length - 1;
-      // If we already inserted the same user message locally, ignore server echo
-      if (lastLocallySentUserTextRef.current === message.data) {
-        lastLocallySentUserTextRef.current = null; // consume the echo
-      } else if (lastIdx >= 0 && newTranscript[lastIdx].sender === 'user' && newTranscript[lastIdx].text === '...') {
-        // Replace placeholder from voice recording flow
-        newTranscript[lastIdx].text = message.data;
-      } else {
-        // Insert user message coming from server (e.g., remote or not locally posted)
-        newTranscript.push({ sender: 'user', text: message.data });
+    setTranscript(prevTranscript => {
+      const newTranscript = [...prevTranscript];
+      const lastMessage = newTranscript.length > 0 ? newTranscript[newTranscript.length - 1] : null;
+
+      if (message.type === 'user_input') {
+        assistantMessageInProgress.current = false;
+        if (lastLocallySentUserTextRef.current === message.data) {
+          lastLocallySentUserTextRef.current = null; // Consume echo
+        } else if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
+        } else {
+          newTranscript.push({ sender: 'user', text: message.data });
+        }
+      } else if (message.type === 'text') {
+        if (assistantMessageInProgress.current && lastMessage?.sender === 'assistant') {
+          // This is the key fix: create a new object to ensure re-render
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: lastMessage.text + message.data };
+        } else {
+          assistantMessageInProgress.current = true;
+          newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
+        }
+      } else if (message.type === 'user_transcription') {
+        assistantMessageInProgress.current = false;
+        if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
+        } else {
+          newTranscript.push({ sender: 'user', text: message.data });
+        }
       }
-      // New user turn should force next assistant tokens into a new bubble
-      currentAssistantMessageIndex.current = null;
-      setIsAssistantTyping(false);
-    } else if (message.type === 'text') {
-      if (currentAssistantMessageIndex.current !== null && newTranscript[currentAssistantMessageIndex.current]) {
-        newTranscript[currentAssistantMessageIndex.current].text += message.data;
-      } else {
-        newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
-        currentAssistantMessageIndex.current = newTranscript.length - 1;
-      }
-    }
-    transcriptRef.current = newTranscript;
-    setTranscript(newTranscript);
-    processingLockRef.current = false;
+      return newTranscript;
+    });
   }, []);
 
   const handleTurnComplete = useCallback(() => {
-    currentAssistantMessageIndex.current = null;
+    assistantMessageInProgress.current = false;
     setIsSpeaking(false);
     setIsAssistantSpeaking(false);
     setIsAssistantTyping(false);
   }, []);
 
   const handleInterrupted = useCallback(() => {
-    currentAssistantMessageIndex.current = null;
+    assistantMessageInProgress.current = false;
     setIsSpeaking(false);
     setIsAssistantSpeaking(false);
     if (clientRef.current && (clientRef.current as any).interrupt) {
@@ -104,12 +105,9 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
   }, []);
 
   const setTypingHeuristic = useCallback(() => {
-    if (currentAssistantMessageIndex.current !== null) {
-      const msg = transcriptRef.current[currentAssistantMessageIndex.current];
-      if (msg && msg.sender === 'assistant') {
-        setIsAssistantTyping(true);
-        return;
-      }
+    if (assistantMessageInProgress.current) {
+      setIsAssistantTyping(true);
+      return;
     }
     setIsAssistantTyping(false);
   }, []);
@@ -214,14 +212,19 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
           if (response && response.history) {
             const reversedHistory = response.history.reverse();
             const formattedMessages = reversedHistory
-              .filter((event: any) => event.event_type === 'message')
-              .map((event: any) => ({
-                sender: event.metadata.sender_type === 'assistant' ? 'assistant' : 'user',
-                text: event.content.text || '',
-                isMarkdown: event.metadata.sender_type === 'assistant',
-                timestamp: event.timestamp,
-                eventId: event.event_id,
-              }));
+              .map((event: any) => {
+                // The event_type filter was too restrictive, let's see all events
+                if (event.event_type !== 'message') {
+                  console.log('Non-message event in history:', event);
+                }
+                return {
+                  sender: event.metadata?.sender_type === 'assistant' ? 'assistant' : 'user',
+                  text: event.content?.text || `[Unsupported event: ${event.event_type}]`,
+                  isMarkdown: event.metadata?.sender_type === 'assistant',
+                  timestamp: event.timestamp,
+                  eventId: event.event_id,
+                };
+              });
 
             setHasMoreHistory(response.total_count > (historyOffset + historyLimit));
 
@@ -241,13 +244,13 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
       };
       fetchSessionHistory();
     }
-  }, [userId, weddingId, sessionId, historyOffset]);
+  }, [userId, weddingId, sessionId, historyOffset, historyLimit]);
 
   const loadMoreHistory = useCallback(() => {
     if (!isLoadingHistory && hasMoreHistory) {
       setHistoryOffset(prev => prev + historyLimit);
     }
-  }, [isLoadingHistory, hasMoreHistory]); // Depend on userId, weddingId, and sessionId
+  }, [isLoadingHistory, hasMoreHistory]);
 
   // Cleanup on unmount
   useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
@@ -272,7 +275,7 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
       const newTranscript = [...transcriptRef.current, { sender: 'user', text: '...' }];
       transcriptRef.current = newTranscript;
       setTranscript(newTranscript);
-      currentAssistantMessageIndex.current = null;
+      assistantMessageInProgress.current = false;
     } catch (e) {
       console.error('Error starting recording', e);
     }
@@ -339,7 +342,7 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     }
     (client as any).sendText(text);
     // Reset assistant message index so the next assistant response starts a fresh bubble
-    currentAssistantMessageIndex.current = null;
+    assistantMessageInProgress.current = false;
     const newTranscript = [...transcriptRef.current, { sender: 'user', text }];
     transcriptRef.current = newTranscript;
     setTranscript(newTranscript);

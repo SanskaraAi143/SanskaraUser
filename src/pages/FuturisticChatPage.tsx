@@ -15,6 +15,11 @@ import { ARTIFACTS_ENABLED } from '@/config/artifacts';
 import { ArtifactSessionPanel } from '@/components/artifacts/ArtifactSessionPanel';
 import { useSessionArtifactsStore } from '@/store/sessionArtifactsStore';
 import { uploadArtifactV2 } from '@/services/api/sessionArtifactsApi';
+import ChatErrorBoundary from '@/components/chat/ChatErrorBoundary';
+import ConnectionStatusIndicator from '@/components/chat/ConnectionStatusIndicator';
+import EnhancedChatHistory from '@/components/chat/EnhancedChatHistory';
+import { getChatMessages, runAgent } from '@/services/api';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 const FuturisticChatPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,13 +32,11 @@ const FuturisticChatPage: React.FC = () => {
 
   const { resetForSession, uploadFile, selectedArtifacts, toggleSelect, clearSelection } = useSessionArtifactsStore();
 
+  // Use original multimodal client for functionality (works with existing backend)
   const {
     isRecording,
     isAssistantSpeaking,
-    isAssistantTyping,
-    transcript,
-    startRecording,
-    stopRecording,
+    transcript: multimodalTranscript,
     sendTextMessage,
     connectionState,
     sessionId,
@@ -46,24 +49,33 @@ const FuturisticChatPage: React.FC = () => {
     historyError,
     hasMoreHistory,
     loadMoreHistory,
+    startRecording,
+    stopRecording,
   } = useMultimodalClient(
     user?.internal_user_id,
     user?.wedding_id
   );
 
+  // Use multimodal transcript as primary source, WebSocket messages are handled separately
+  // WebSocket integration moved to separate effect below to avoid circular dependencies
+
+  // WebSocket overlay for enhanced features disabled to prevent infinite loop
+  // TODO: Re-enable when WebSocket backend is ready and infinite loop is fixed
+  /*
+  const {
+    isConnected: wsConnected,
+    messages: wsMessages,
+  } = useWebSocket({
+    autoConnect: true, // Enable WebSocket auto-connect after message parsing fix
+  });
+  */
+  const wsConnected = false;
+  const wsMessages: any[] = [];
+
   const [aiStatus, setAiStatus] = useState('Tap to begin conversation');
   const [isMuted, setIsMuted] = useState(false);
 
-  useEffect(() => {
-    if (historyError) {
-      toast({
-        title: 'Error loading history',
-        description: historyError,
-        variant: 'destructive',
-      });
-    }
-  }, [historyError, toast]);
-
+  // Update status based on connection and recording state
   useEffect(() => {
     if (connectionState === 'reconnecting') {
       setAiStatus('Reconnecting...');
@@ -73,8 +85,6 @@ const FuturisticChatPage: React.FC = () => {
       setAiStatus('Establishing session...');
     } else if (isAssistantSpeaking) {
       setAiStatus('Speaking...');
-    } else if (isAssistantTyping) {
-      setAiStatus('Thinking...');
     } else if (isRecording) {
       setAiStatus('Listening...');
     } else if (isVideoActive) {
@@ -82,7 +92,16 @@ const FuturisticChatPage: React.FC = () => {
     } else {
       setAiStatus('Tap to speak or type');
     }
-  }, [connectionState, sessionId, isAssistantSpeaking, isAssistantTyping, isRecording, isLoadingHistory, isVideoActive, activeVideoMode]);
+  }, [connectionState, sessionId, isAssistantSpeaking, isRecording, isLoadingHistory, isVideoActive, activeVideoMode]);
+
+  // WebSocket messages are logged but not integrated with multimodal transcript
+  // to avoid infinite loops - this is for future enhancement
+  useEffect(() => {
+    if (wsMessages.length > 0) {
+      console.log('WebSocket messages received:', wsMessages);
+      // TODO: In future, integrate WebSocket messages with multimodal transcript when backend supports it
+    }
+  }, [wsMessages]);
 
   // Reset artifact session state when sessionId changes
   useEffect(() => {
@@ -235,12 +254,20 @@ const FuturisticChatPage: React.FC = () => {
             Back
           </button>
         </div>
-        <ChatHistory
-          transcript={transcript}
-          isLoadingHistory={isLoadingHistory}
-          hasMoreHistory={hasMoreHistory}
-          loadMoreHistory={loadMoreHistory}
-        />
+        <ChatErrorBoundary>
+          <EnhancedChatHistory
+            transcript={multimodalTranscript}
+            isLoadingHistory={isLoadingHistory}
+            hasMoreHistory={hasMoreHistory}
+            loadMoreHistory={loadMoreHistory}
+            virtualized={multimodalTranscript.length > 50}
+          />
+        </ChatErrorBoundary>
+
+        {/* Connection Status Indicator */}
+        <div className="p-4 border-t border-futuristic-border">
+          <ConnectionStatusIndicator showDetails={true} />
+        </div>
         {/* Selected artifact pills */}
         {selectedArtifacts.length > 0 && (
           <div className="px-4 pt-2 pb-1 bg-futuristic-container-bg border-t border-futuristic-border flex gap-2 flex-wrap items-center">
