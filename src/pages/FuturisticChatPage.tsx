@@ -6,6 +6,7 @@ import AudioVisualizer from '@/components/futuristic-chat/AudioVisualizer';
 import ChatHistory from '@/components/futuristic-chat/ChatHistory';
 import ChatInput from '@/components/futuristic-chat/ChatInput';
 import Controls from '@/components/futuristic-chat/Controls';
+import PlanningContextSidebar from '@/components/futuristic-chat/PlanningContextSidebar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useMultimodalClient } from '@/hooks/useMultimodalClient';
@@ -208,7 +209,7 @@ const FuturisticChatPage: React.FC = () => {
   }, [sendTextMessage, selectedArtifacts, keepSelection, clearSelection]);
 
   return (
-    <ChatLayout>
+    <ChatLayout sidebar={<PlanningContextSidebar />}>
       {/* Main View */}
       <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border transition-all duration-500 ease-in-out", { 'video-active': isVideoActive })}
         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
@@ -225,7 +226,7 @@ const FuturisticChatPage: React.FC = () => {
           <div className={cn("transition-opacity duration-300", { "opacity-0 pointer-events-none": isVideoActive })}>
             <h1 className="ai-name text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
             <p className="ai-status text-base text-futuristic-text-secondary min-h-[24px]">
-              {aiStatus}
+            {aiStatus}
             </p>
           </div>
         </main>

@@ -39,6 +39,14 @@ const DashboardWelcome: React.FC<DashboardWelcomeProps> = ({ profile, userName, 
           </h1>
           <p className="text-gray-600 animate-fadeIn delay-75">
             {weddingDate ? `Your wedding is in ${daysUntilWedding} days (${weddingDate})` : `Let's plan your dream wedding!`}
+            {weddingDate && daysUntilWedding !== '-' && (
+              <span className="block text-sm text-gray-500 mt-1">
+                {typeof daysUntilWedding === 'number' && daysUntilWedding <= 30 && daysUntilWedding > 7 && "Time to send out your digital invites!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding <= 7 && daysUntilWedding > 0 && "Finalize your Sangeet playlist!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding === 0 && "It's your wedding day! Enjoy!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding > 30 && "Keep up the great planning!"}
+              </span>
+            )}
           </p>
         </div>
         <Link

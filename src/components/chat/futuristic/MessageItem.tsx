@@ -7,8 +7,8 @@ export interface Message {
   role: 'user' | 'bot' | 'system'; // 'system' for neutral info if needed
   content: string; // For now, simple text. Later can be structured content.
   timestamp?: string;
+  actions?: { type: string; label: string; payload: Record<string, unknown> }[];
   // Future: richMedia?: { type: 'image' | 'video' | 'graph', url: string }
-  // Future: interactiveElements?: Record<string, unknown>;
 }
 
 interface MessageItemProps {
@@ -34,6 +34,19 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         */}
         <div className="message-content">
           <p>{message.content}</p>
+          {message.actions && message.actions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {message.actions.map((action, index) => (
+                <button
+                  key={index}
+                  className="px-3 py-1 text-sm rounded-full bg-futuristic-primary-accent text-white hover:bg-futuristic-primary-accent/80 transition-colors"
+                  onClick={() => console.log('Action triggered:', action)} // TODO: Implement actual action dispatch
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {message.timestamp && (
           <div className="message-timestamp">

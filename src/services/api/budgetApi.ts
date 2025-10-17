@@ -10,14 +10,20 @@ export type Budget = {
   created_at?: string;
 };
 
+export type ExpenseStatus = 'Quote Received' | 'Deposit Paid' | 'Paid in Full';
+
 export type Expense = {
   item_id: string;
   wedding_id: string;
   item_name: string;
   category: string;
-  amount: number;
+  estimated_cost?: number;
+  actual_cost?: number;
+  amount_paid: number; // This will be the main amount field
   vendor_name: string;
-  status: string; // 'Pending' or 'Paid'
+  status: ExpenseStatus; // Updated: 'Quote Received', 'Deposit Paid', or 'Paid in Full'
+  paid_by?: string; // e.g., 'Bride\'s Father', 'Groom', 'Couple\'s Joint Account'
+  attachments?: string[]; // URLs to invoices or receipts
   contribution_by?: string; // 'bride_side', 'groom_side', 'shared'
   created_at?: string;
   updated_at?: string;

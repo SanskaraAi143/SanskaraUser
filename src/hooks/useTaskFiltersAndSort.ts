@@ -47,7 +47,8 @@ export const useTaskFiltersAndSort = (allTasks: Task[]) => {
       // Filter by search term
       if (search !== '' &&
           !(task.title.toLowerCase().includes(search.toLowerCase()) ||
-            (task.description && task.description.toLowerCase().includes(search.toLowerCase()))))
+            (task.description && task.description.toLowerCase().includes(search.toLowerCase())) ||
+            (task.assignee && task.assignee.toLowerCase().includes(search.toLowerCase())))) // Added assignee to search
         return false;
 
       // Filter by lead_party based on user role

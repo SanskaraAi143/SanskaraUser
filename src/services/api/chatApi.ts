@@ -43,7 +43,8 @@ export const sendChatMessage = async (
   weddingId: string,
   sessionId?: string,
   category?: string,
-  attachments?: string[]
+  attachments?: string[],
+  vendorId?: string // Add vendorId here
 ): Promise<{ messages: ChatMessage[], session_id: string }> => {
   try {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -69,6 +70,7 @@ export const sendChatMessage = async (
         session_id: sessionId,
         category,
         attachments, // optional array of artifact_ids (backend may ignore)
+        vendor_id: vendorId, // Add vendor_id to the body
       }),
     });
     

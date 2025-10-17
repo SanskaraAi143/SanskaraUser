@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DashboardWelcome from "@/components/dashboard/dashboard-sections/DashboardWelcome";
 import DashboardUpcomingTasks from "@/components/dashboard/dashboard-sections/DashboardUpcomingTasks";
 import DashboardUpcomingEvents from "@/components/dashboard/dashboard-sections/DashboardUpcomingEvents";
+import WhatNextWidget from "@/components/dashboard/dashboard-sections/WhatNextWidget";
 
 // Import new summary widgets
 import BudgetSummary from '@/components/dashboard/summary-widgets/BudgetSummary';
@@ -16,6 +17,7 @@ import GuestSummary from '@/components/dashboard/summary-widgets/GuestSummary';
 import VendorStatusSummary from '@/components/dashboard/summary-widgets/VendorStatusSummary';
 import UpcomingPayments from '@/components/dashboard/summary-widgets/UpcomingPayments';
 import OnboardingSummary from '@/components/dashboard/summary-widgets/OnboardingSummary';
+import FamilyActivityWidget from "@/components/dashboard/dashboard-sections/FamilyActivityWidget";
 
 
 const Dashboard = () => {
@@ -26,8 +28,11 @@ const Dashboard = () => {
     loading,
     error,
     daysUntilWedding,
-    confirmedGuests,
-    invitedGuests,
+    confirmedGuests, // Keep for now as it's still used in DashboardWelcome
+    invitedGuests, // Keep for now as it's still used in DashboardWelcome
+    attendingGuests,
+    awaitingGuests,
+    declinedGuests,
     totalBudget,
     spentBudget,
     completedTasks,
@@ -58,8 +63,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 p-4 md:p-6">
-      {/* Waiting for partner banner for initiator during onboarding_in_progress */}
+    <div className="space-y-6 md:space-y-8 p-4 md:p-6 font-body">
+      {/* Only show waiting banner if wedding status is actually onboarding_in_progress */}
       {user?.wedding_status === 'onboarding_in_progress' && (() => {
         const details: any = weddingDetails?.details || user?.wedding_details_json || {};
         const partnerData = details?.partner_data || {};
@@ -67,9 +72,9 @@ const Dashboard = () => {
         if (!isInitiator) return null;
         const invitedEmail = details?.other_partner_email_expected;
         return (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 text-amber-900 p-4">
-            <div className="font-medium">Waiting for your partner to finish onboarding</div>
-            <div className="text-sm mt-1">{invitedEmail ? `We emailed ${invitedEmail}. Some collaborative features will unlock after they join.` : 'Some collaborative features will unlock after your partner joins.'}</div>
+          <div className="rounded-lg border border-border bg-card-bg text-foreground p-4 shadow-sm">
+            <div className="font-medium text-primary">Waiting for your partner to finish onboarding</div>
+            <div className="text-sm mt-1 text-text-secondary">{invitedEmail ? `We emailed ${invitedEmail}. Some collaborative features will unlock after they join.` : 'Some collaborative features will unlock after your partner joins.'}</div>
           </div>
         );
       })()}
@@ -81,7 +86,7 @@ const Dashboard = () => {
         daysUntilWedding={daysUntilWedding}
       />
 
-      <Suspense fallback={<div className="text-center py-10">Loading dashboard widgets...</div>}>
+      <Suspense fallback={<div className="text-center py-10 text-text-secondary">Loading dashboard widgets...</div>}>
         <div className="space-y-6 md:space-y-8">
 
           {/* Analytical Summary Section */}
@@ -96,7 +101,7 @@ const Dashboard = () => {
               })()) || 'USD'}
             />
             <TaskSummary completed={completedTasks} total={totalTasks} />
-            <GuestSummary confirmed={confirmedGuests} invited={invitedGuests} />
+            <GuestSummary attending={attendingGuests} awaiting={awaitingGuests} declined={declinedGuests} />
           </div>
 
           {/* Onboarding data from single source of truth */}
@@ -112,27 +117,13 @@ const Dashboard = () => {
           {/* New Analytical Elements */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             <VendorStatusSummary />
-            <UpcomingPayments />
+            <FamilyActivityWidget />
           </div>
 
           {/* Upcoming Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Next Important Tasks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DashboardUpcomingTasks nextTasks={nextTasks} />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Upcoming Timeline Events</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DashboardUpcomingEvents nextEvents={nextEvents} />
-              </CardContent>
-            </Card>
+            <WhatNextWidget nextTasks={nextTasks} nextEvents={nextEvents} />
+            <UpcomingPayments />
           </div>
 
         </div>

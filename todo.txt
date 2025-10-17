@@ -1,0 +1,279 @@
+Frontend Chat Implementation Guide
+Overview
+This guide provides a comprehensive implementation for the frontend chat feature in Sanskara AI. The chat system enables real-time conversation with the AI agent, supporting text, audio, video, and file attachments. This guide covers the architecture, data flow, component structure, and edge cases for robust implementation.
+
+Architecture
+WebSocket-Based Real-Time Communication
+The chat uses WebSocket connections for real-time bidirectional communication with the backend agent service. The implementation leverages multiple concurrency paradigms:
+
+REST APIs: Historical chat data, session management, artifact uploads
+WebSocket: Real-time messaging, audio/video streaming, agent responses
+Key Technologies
+React with hooks for state management
+WebSocket API for real-time communication
+RTK Query for REST API interactions
+Zustand or Redux for WebSocket state management
+Custom hooks for WebSocket connection management
+Error boundaries for graceful failure handling
+Connection Management
+WebSocket Service Implementation
+// websocketService.ts
+class WebSocketService {
+  private ws: WebSocket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 3;
+  private reconnectDelay = 1000; // ms
+  private subscribers = new Set<(message: WebSocketMessage) => void>();
+  private connectionState = 'disconnected';
+
+  constructor(private url: string, private userId: string) {}
+
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        resolve();
+        return;
+      }
+
+      this.connectionState = 'connecting';
+      const fullUrl = `${this.url}?user_id=${this.userId}`;
+
+      try {
+        this.ws = new WebSocket(fullUrl);
+
+        this.ws.onopen = () => {
+          this.connectionState = 'connected';
+          this.reconnectAttempts = 0;
+          resolve();
+        };
+
+        this.ws.onmessage = (event) => {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data);
+            this.notifySubscribers(message);
+          } catch (error) {
+            console.error('Failed to parse WebSocket message:', error);
+          }
+        };
+
+        this.ws.onclose = (event) => {
+          this.connectionState = 'disconnected';
+          if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.scheduleReconnect();
+          }
+        };
+
+        this.ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          this.connectionState = 'error';
+        };
+
+      } catch (error) {
+        this.connectionState = 'error';
+        reject(error);
+      }
+    });
+  }
+
+  private scheduleReconnect() {
+    this.reconnectAttempts++;
+    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+
+    setTimeout(() => {
+      console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+      this.connect();
+    }, delay);
+  }
+
+  private notifySubscribers(message: WebSocketMessage) {
+    this.subscribers.forEach(callback => callback(message));
+  }
+
+  subscribe(callback: (message: WebSocketMessage) => void): () => void {
+    this.subscribers.add(callback);
+    return () => this.subscribers.delete(callback);
+  }
+
+  send(message: any) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+    } else {
+      throw new Error('WebSocket is not connected');
+    }
+  }
+
+  disconnect() {
+    this.connectionState = 'disconnected';
+    this.ws?.close();
+    this.ws = null;
+  }
+
+  getConnectionState() {
+    return this.connectionState;
+  }
+}
+
+// WebSocket Message Types
+interface WebSocketMessage {
+  type: 'text' | 'audio' | 'video' | 'blob' | 'session_id' | 'chat_session_id' | 'ready' | 'error' | 'interrupted' | 'turn_complete' | 'reconnecting';
+  data?: any;
+  mime?: string;
+}
+Edge Cases and Error Handling
+Connection Issues
+Network Interruption: WebSocket automatically attempts reconnection with exponential backoff
+Server Restart: Session resumption via stored session IDs
+Invalid User ID: Graceful error display with clear messaging
+Multiple Concurrent Connections: Handle session conflicts and notify user
+Message Sending Failures
+WebSocket Closed: Queue messages and send when reconnected
+Large Messages: Validate message size before sending
+Malformed Messages: Client-side validation and error feedback
+Audio/Video Features
+Permission Denied: Fallback to text-only mode with clear guidance
+Device Not Found: Handle missing microphone/camera gracefully
+Browser Incompatibility: Detect and provide fallbacks for unsupported browsers
+Network Bandwidth: Monitor and adapt media quality for connection speed
+File Attachments
+Unsupported Formats: Client-side file type validation
+Size Limits: Prevent uploads exceeding size limits
+Upload Interruptions: Resume capability for failed uploads
+Storage Quotas: Handle backend storage limit errors
+State Management Edge Cases
+Race Conditions: Proper state updates and conflict resolution
+Memory Leaks: Clean up subscriptions and event listeners
+Local Storage Full: Handle storage quota exceeded errors
+Concurrent Sessions: Sync state across multiple tabs
+Performance Considerations
+Large Message Histories: Implement virtual scrolling for performance
+Memory Usage: Limit cached messages and clean up old data
+CPU Intensive Operations: Offload processing to Web Workers if needed
+Battery Impact: Reduce polling and optimize for mobile devices
+Component Implementation Examples
+Error Boundary for Chat
+class ChatErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log to monitoring service
+    logError('ChatError', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="chat-error-fallback">
+          <h3>Chat temporarily unavailable</h3>
+          <p>Please refresh the page to continue chatting</p>
+          <button onClick={() => window.location.reload()}>
+            Refresh Chat
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+Connection Status Indicator
+const ConnectionStatus = ({ status, onRetry }) => {
+  const getStatusInfo = () => {
+    switch (status) {
+      case 'connected':
+        return { text: 'Connected to Sanskara AI', color: 'green', icon: '🟢' };
+      case 'connecting':
+        return { text: 'Connecting...', color: 'yellow', icon: '🟡' };
+      case 'reconnecting':
+        return { text: 'Reconnecting...', color: 'orange', icon: '🟠' };
+      case 'error':
+        return { text: 'Connection lost', color: 'red', icon: '🔴', showRetry: true };
+      default:
+        return { text: 'Disconnected', color: 'gray', icon: '⚪' };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
+  return (
+    <div className={`connection-status ${statusInfo.color}`}>
+      <span className="status-icon">{statusInfo.icon}</span>
+      <span className="status-text">{statusInfo.text}</span>
+      {statusInfo.showRetry && (
+        <button onClick={onRetry} className="retry-button">
+          Retry
+        </button>
+      )}
+    </div>
+  );
+};
+Data Flow Architecture
+Message Flow
+User Input: Text/images/audio collected via React components
+Validation: Client-side validation for size, type, and format
+WebSocket Send: Messages encoded and sent via WebSocket
+Backend Processing: Agent processes and responds via WebSocket
+UI Update: Messages rendered in real-time
+Persistence: Messages saved to database via backend
+Session Management
+Session Creation: Automatic session creation on first connection
+Session Resumption: Reconnect to existing sessions when possible
+Session Persistence: Sessions maintained across page refreshes
+Multiple Wedding Support: Sessions scoped to specific weddings
+File Handling Flow
+File Selection: User selects files via drag/drop or file picker
+Client Validation: Check file type and size constraints
+Upload to Backend: Files uploaded via REST API endpoints
+Artifact Storage: Backend stores and provides access URLs
+Message Integration: Files referenced in chat messages
+Display: Rendered in chat with proper preview/thumbnail
+Security Considerations
+Authentication
+JWT tokens for WebSocket connections
+Session-based authentication via query parameters
+Token refresh handling for long sessions
+Data Sanitization
+Sanitize user input before display
+Validate file uploads for malicious content
+Escape special characters in messages
+Privacy
+Local message caching with user consent
+Clear local storage on logout
+Respect user privacy settings
+Testing Strategy
+Unit Tests
+WebSocket connection handling
+Message parsing and validation
+Component rendering and interactions
+Error handling scenarios
+Integration Tests
+Full chat message flow
+File upload and display
+Connection recovery scenarios
+Multi-user interactions (where applicable)
+E2E Tests
+Complete user journeys
+Cross-browser compatibility
+Mobile responsiveness
+Performance under load
+Deployment and Monitoring
+Feature Flags
+Gradual rollout of new features
+A/B testing capabilities
+Easy rollback mechanisms
+Monitoring
+WebSocket connection health
+Message delivery metrics
+Error rates and user impact
+Performance monitoring
+Logging
+Structured logging for debugging
+User action tracking (privacy compliant)
+Performance metrics collection
+This implementation guide covers the complete architecture for a robust, production-ready chat system that handles all the features and edge cases of the Sanskara AI platform.

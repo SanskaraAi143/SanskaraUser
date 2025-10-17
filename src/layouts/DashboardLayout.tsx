@@ -1,24 +1,25 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  CalendarDays, 
-  Users, 
-  Clock, 
-  Settings, 
-  LayoutDashboard, 
-  FileText, 
-  ShoppingCart,
-  User,
+import {
+  Clock,
+  FileText,
   LogOut,
-  MessageCircle,
-  PieChart,
-  Paintbrush,
-  CheckSquare,
+  User,
   Linkedin,
   Instagram,
-  Mail
+  Mail,
+  LayoutDashboard,
+  MessageSquare,
+  CheckSquare,
+  Calendar,
+  Image,
+  DollarSign,
+  Users,
+  Briefcase,
+  Settings
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
@@ -59,19 +60,22 @@ const DashboardLayout = () => {
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
-    { name: "Chat with AI", icon: MessageCircle, href: "/chat" },
+    { name: "Chat with AI", icon: MessageSquare, href: "/chat" },
     { name: "Tasks", icon: CheckSquare, href: "/dashboard/tasks" },
-    { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
-    { name: "Mood Board", icon: Paintbrush, href: "/dashboard/moodboard" },
-    { name: "Budget", icon: PieChart, href: "/dashboard/budget" },
+    { name: "Timeline", icon: Calendar, href: "/dashboard/timeline" },
+    { name: "Mood Board", icon: Image, href: "/dashboard/moodboard" },
+    { name: "Budget", icon: DollarSign, href: "/dashboard/budget" },
     { name: "Guest List", icon: Users, href: "/dashboard/guests" },
-    { name: "Vendors", icon: ShoppingCart, href: "/dashboard/vendors" },
+    { name: "Vendors", icon: Briefcase, href: "/dashboard/vendors" },
     { name: "History", icon: Clock, href: "/dashboard/history" },
     { name: "Settings", icon: Settings, href: "/dashboard/settings" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-wedding-cream via-white to-wedding-cream/80">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Motif Background */}
+      <div className="absolute inset-0 motif-background"></div>
+
       {/* Floating particles background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="floating-particles">

@@ -27,6 +27,9 @@ export interface DashboardData {
   daysUntilWedding: number | string;
   confirmedGuests: number;
   invitedGuests: number;
+  attendingGuests: number;
+  awaitingGuests: number;
+  declinedGuests: number;
   totalBudget: number;
   spentBudget: number;
   completedTasks: number;
@@ -83,6 +86,7 @@ export const useDashboardData = () => {
 
     // If user has a wedding_id but onboarding is still in progress, display limited data
     if (weddingId && weddingStatus === 'onboarding_in_progress') {
+      console.log("wedding id is = ", weddingId);
       console.log("User's wedding onboarding is in progress. Displaying limited dashboard data.");
       // Data will be null or empty arrays from React Query hooks, which is desired for limited data.
       return;
@@ -90,8 +94,11 @@ export const useDashboardData = () => {
   }, [user, weddingId, weddingStatus, navigate]);
 
   // Derived stats
-  const confirmedGuests = guests?.filter(g => g.status === "Confirmed").length || 0;
-  const invitedGuests = guests?.length || 0;
+  const attendingGuests = guests?.filter(g => Object.values(g.rsvp_status || {}).some(status => status === "Confirmed")).length || 0;
+  const awaitingGuests = guests?.filter(g => Object.values(g.rsvp_status || {}).some(status => status === "Pending" || status === "Invited")).length || 0;
+  const declinedGuests = guests?.filter(g => Object.values(g.rsvp_status || {}).some(status => status === "Declined")).length || 0;
+  const confirmedGuests = attendingGuests; // Keeping for backward compatibility if needed
+  const invitedGuests = guests?.length || 0; // Total guests invited
   const weddingDate = weddingDetails?.wedding_date;
   const daysUntilWedding = weddingDate ? Math.max(0, Math.ceil((new Date(weddingDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : "-";
   // Parse budget from wedding details (single source of truth), fallback to user preferences
@@ -130,7 +137,7 @@ export const useDashboardData = () => {
 
   const onboardingBudget = extractBudgetFromDetails(weddingDetails?.details, user?.email || undefined);
   const totalBudget = (onboardingBudget ?? budgetMax) || 0;
-  const spentBudget = expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
+  const spentBudget = expenses?.reduce((sum, e) => sum + (e.amount_paid || 0), 0) || 0;
   const completedTasks = tasks?.filter(t => t.is_complete).length || 0;
   const totalTasks = tasks?.length || 0;
   const nextEvents = timelineEvents?.slice(0, 3) || [];
@@ -162,6 +169,9 @@ export const useDashboardData = () => {
     daysUntilWedding,
     confirmedGuests,
     invitedGuests,
+    attendingGuests,
+    awaitingGuests,
+    declinedGuests,
     totalBudget,
     spentBudget,
     completedTasks,

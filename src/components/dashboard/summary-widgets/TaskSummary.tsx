@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import CircularProgress from "@/components/ui/CircularProgress"; // Import the new component
 
 interface TaskSummaryProps {
   completed: number;
@@ -14,12 +14,11 @@ const TaskSummary = ({ completed, total }: TaskSummaryProps) => {
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Task Progress</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{completed} / {total}</div>
-        <p className="text-xs text-muted-foreground">
-          Tasks completed
+      <CardContent className="flex flex-col items-center justify-center">
+        <CircularProgress percentage={percentage} size={80} strokeWidth={8} />
+        <p className="text-sm text-muted-foreground mt-2">
+          {completed} of {total} tasks completed
         </p>
-        <Progress value={percentage} className="mt-4 h-2" />
       </CardContent>
     </Card>
   );

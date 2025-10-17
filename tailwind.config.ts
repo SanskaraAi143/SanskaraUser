@@ -21,45 +21,32 @@ const config = {
     },
     extend: {
       colors: {
-        'futuristic-bg': '#FDF6E3',
-        'futuristic-primary-accent': '#8B0000',
-        'futuristic-secondary-accent': '#000080',
-        'futuristic-gold': '#FFD700',
-        'futuristic-text-primary': '#4A4A4A',
-        'futuristic-text-secondary': '#6c757d',
-        'futuristic-container-bg': '#FFFFFF',
-        'futuristic-border': '#eee',
-        'wedding-red': '#D62F32',
-        'wedding-orange': '#F7941D',
-        'wedding-gold': '#B8860B', // Darker gold for better contrast (4.5:1 ratio)
-        'wedding-secondaryGold': '#E67E00', // Darker secondary gold
-        'wedding-cream': '#FFF8E1',
-        'wedding-brown': '#4A3728', // Dark brown for high contrast
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // New Design System Colors
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: 'oklch(60% 0.15 30)', // A warm, inviting primary color
+          foreground: 'oklch(95% 0.02 30)', // Light text on primary
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: 'oklch(85% 0.05 60)', // A soft, complementary secondary color
+          foreground: 'oklch(20% 0.02 60)', // Dark text on secondary
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: 'oklch(75% 0.1 90)', // A subtle accent color
+          foreground: 'oklch(20% 0.02 90)', // Dark text on accent
         },
+        destructive: {
+          DEFAULT: 'oklch(60% 0.15 15)', // A clear, but not harsh, red
+          foreground: 'oklch(95% 0.02 15)', // Light text on destructive
+        },
+        background: 'oklch(98% 0.01 60)', // Soft, light background
+        foreground: 'oklch(20% 0.02 60)', // Dark text for readability
+        'text-secondary': 'oklch(45% 0.02 60)', // Lighter text for secondary information
+        border: 'oklch(90% 0.01 60)', // Subtle border color
+        'card-bg': 'oklch(100% 0.01 60)', // Slightly off-white for cards
+
+        // Existing HSL colors (will be updated in index.css)
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -68,17 +55,40 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        '0': '0',
+        '1': '0.25rem',   // 4px
+        '2': '0.5rem',    // 8px
+        '3': '0.75rem',   // 12px
+        '4': '1rem',      // 16px
+        '5': '1.25rem',   // 20px
+        '6': '1.5rem',    // 24px
+        '8': '2rem',      // 32px
+        '10': '2.5rem',   // 40px
+        '12': '3rem',     // 48px
+        '16': '4rem',     // 64px
+        '20': '5rem',     // 80px
+        '24': '6rem',     // 96px
+        '32': '8rem',     // 128px
+        '40': '10rem',    // 160px
+        '48': '12rem',    // 192px
+        '56': '14rem',    // 224px
+        '64': '16rem',    // 256px
+      },
       fontFamily: {
-        lora: ['"Lora"', 'serif'],
-        lato: ['"Lato"', 'sans-serif'],
-        sans: ['"Lato"', 'sans-serif'],
-        poppins: ['"Poppins"', 'sans-serif'],
+        heading: ['Playfair Display', 'serif'],
+        body: ['Roboto', 'sans-serif'],
+        sans: ['Roboto', 'sans-serif'], // Default sans-serif
       },
       keyframes: {
         "accordion-down": {

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form'; // Added useFieldArray
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,10 @@ import { Textarea } from '@/components/ui/textarea'; // For description
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // For status & priority
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from '@/components/ui/checkbox'; // For subtask checkboxes
 import type { Task } from '@/services/api/tasksApi'; // Assuming Task type is exported
 import { DatePicker } from "@/components/ui/date-picker";
+import { PlusCircle, Trash2 } from 'lucide-react'; // Added PlusCircle and Trash2 icons
 
 const VALID_LEAD_PARTIES = ['', 'bride_side', 'groom_side', 'couple', 'shared'] as const;
 type ValidLeadParty = typeof VALID_LEAD_PARTIES[number];
@@ -26,8 +28,13 @@ const taskFormSchema = z.object({
   description: z.string().max(500, { message: "Description must be 500 characters or less." }).optional().or(z.literal('')), // Optional, allow empty string
   due_date: z.date().optional().nullable(),
   priority: z.enum(["low", "medium", "high"]),
-  status: z.enum(["No Status", "To Do", "Doing", "Done"]),
+  status: z.enum(["Backlog", "To Do", "Doing", "Done"]), // Changed "No Status" to "Backlog"
   category: z.string().max(50, { message: "Category must be 50 characters or less." }).optional().or(z.literal('')),
+  assignee: z.string().max(50, { message: "Assignee must be 50 characters or less." }).optional().or(z.literal('')), // New field
+  subtasks: z.array(z.object({
+    title: z.string().min(1),
+    is_complete: z.boolean(),
+  })).optional(), // New field for subtasks
   lead_party: z.enum(VALID_LEAD_PARTIES).optional().or(z.literal('')), // Optional lead_party field
 });
 
@@ -53,8 +60,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
       description: '',
       due_date: null,
       priority: 'medium',
-      status: 'To Do',
+      status: 'Backlog', // Changed default from 'To Do' to 'Backlog'
       category: '',
+      assignee: '', // Add default value for assignee
+      subtasks: [], // Add default value for subtasks
       lead_party: '', // Add default value for lead_party
     },
   });
@@ -66,8 +75,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
         description: task.description || '',
         due_date: task.due_date ? new Date(task.due_date) : undefined,
         priority: task.priority || 'medium',
-        status: task.status || 'To Do',
+        status: task.status || 'Backlog', // Directly use task.status, as 'No Status' is no longer a valid type
         category: task.category || '',
+        assignee: task.assignee || '', // Set assignee from task
+        subtasks: task.subtasks || [], // Set subtasks from task
         lead_party: isValidLeadParty(task.lead_party) ? task.lead_party : '',
       });
     }
@@ -99,6 +110,11 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
       }
     }
   };
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "subtasks",
+  });
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
@@ -148,7 +164,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormLabel className="text-wedding-brown">Due Date (Optional)</FormLabel>
                     <FormControl>
                       <DatePicker
-                        date={field.value ? new Date(field.value) : undefined}
+                        date={field.value || undefined} // field.value is already a Date object or null/undefined
                         setDate={(newDate) => field.onChange(newDate)}
                         className="w-full"
                       />
@@ -194,7 +210,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="No Status">No Status</SelectItem>
+                        <SelectItem value="Backlog">Backlog</SelectItem>
                         <SelectItem value="To Do">To Do</SelectItem>
                         <SelectItem value="Doing">Doing</SelectItem>
                         <SelectItem value="Done">Done</SelectItem>
@@ -212,6 +228,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                     <FormLabel className="text-wedding-brown">Category (Optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="E.g., Venue, Catering" {...field} className="glass-card border-wedding-gold/30" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="assignee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-wedding-brown">Assignee (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="E.g., John Doe" {...field} className="glass-card border-wedding-gold/30" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -241,6 +270,53 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, open, onClose, 
                 )}
               />
             </div>
+
+            {/* Subtasks Section */}
+            <div className="space-y-3">
+              <FormLabel className="text-wedding-brown">Subtasks (Optional)</FormLabel>
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center space-x-2">
+                  <FormField
+                    control={form.control}
+                    name={`subtasks.${index}.is_complete`}
+                    render={({ field: subtaskField }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={subtaskField.value}
+                            onCheckedChange={subtaskField.onChange}
+                            className="text-wedding-gold"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`subtasks.${index}.title`}
+                    render={({ field: subtaskField }) => (
+                      <FormItem className="flex-grow">
+                        <FormControl>
+                          <Input
+                            placeholder="Subtask title"
+                            {...subtaskField}
+                            className="glass-card border-wedding-gold/30"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" onClick={() => append({ title: '', is_complete: false })} className="w-full">
+                <PlusCircle className="h-4 w-4 mr-2" /> Add Subtask
+              </Button>
+            </div>
+
             <DialogFooter className="pt-4">
               {!isNewTask && onDelete && (
                 <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting} className="mr-auto">

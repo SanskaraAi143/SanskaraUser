@@ -21,9 +21,11 @@ const BudgetSummary = ({ spent, total, currency = 'USD' }: BudgetSummaryProps) =
         <CardTitle className="text-lg font-semibold">Budget Overview</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatter.format(spent)}</div>
+        <div className="text-2xl font-bold">
+          {formatter.format(spent)} / {formatter.format(total)}
+        </div>
         <p className="text-xs text-muted-foreground">
-          Spent of {formatter.format(total)}
+          {percentage.toFixed(0)}% of budget spent
         </p>
         <Progress value={percentage} className="mt-4 h-2" />
       </CardContent>
