@@ -3,12 +3,19 @@ import TaskDetailModal, { TaskFormValues } from './TaskDetailModal';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import CategoryManager from './CategoryManager';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, LayoutGrid, List, Filter } from 'lucide-react';
+import { DateRange } from "react-day-picker";
 
 import type { Task } from '@/services/api/tasksApi';
 import { useTaskManagement } from '@/hooks/useTaskManagement';
 import { useTaskFiltersAndSort } from '@/hooks/useTaskFiltersAndSort';
 import TaskKanbanColumn from './task-tracker-sections/TaskKanbanColumn';
+import { TaskTableView } from './task-tracker-sections/TaskTableView';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 
 const TaskTracker = () => {
   const {
@@ -26,6 +33,8 @@ const TaskTracker = () => {
     filterStatus, setFilterStatus,
     filterPriority, setFilterPriority,
     filterCategory, setFilterCategory,
+    filterStartDate, setFilterStartDate,
+    filterEndDate, setFilterEndDate,
     sortBy, setSortBy,
     sortOrder, setSortOrder,
     search, setSearch,
@@ -34,6 +43,7 @@ const TaskTracker = () => {
 
   const [modalTask, setModalTask] = useState<Partial<Task> | null>(null);
   const [categories, setCategories] = useState<string[]>(() => JSON.parse(localStorage.getItem('categories') || '[]'));
+  const [currentView, setCurrentView] = useState<'board' | 'table'>('table');
 
   const [tasksPerPage, setTasksPerPage] = useState(() => Number(localStorage.getItem('tasksPerPage')) || 10); // Increased default
   const [currentPage, setCurrentPage] = useState(1); // Will be used for pagination if implemented
@@ -69,7 +79,7 @@ const TaskTracker = () => {
     const taskToUpdate = tasks.find(t => t.task_id === draggableId);
     if (!taskToUpdate) return;
 
-    const newStatus = destination.droppableId as Task['status'];
+    const newStatus = destination.droppableId as 'Backlog' | 'To Do' | 'Doing' | 'Done';
     const newIsComplete = newStatus === 'Done';
 
     // Optimistic UI update
@@ -83,7 +93,7 @@ const TaskTracker = () => {
       });
   }
 
-  const kanbanStatuses: Array<Task['status']> = ["No Status", "To Do", "Doing", "Done"];
+  const kanbanStatuses: Array<Task['status']> = ["Backlog", "To Do", "Doing", "Done"];
 
   return (
     <div className="space-y-6 p-1">
@@ -113,6 +123,110 @@ const TaskTracker = () => {
               onAdd={cat => setCategories(prev => [...prev, cat])}
               onDelete={cat => setCategories(prev => prev.filter(c => c !== cat))}
             />
+
+            {/* View Switcher */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentView('board')}
+                className={currentView === 'board' ? 'bg-wedding-gold text-white' : ''}
+              >
+                <LayoutGrid className="h-4 w-4 mr-2" /> Board
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentView('table')}
+                className={currentView === 'table' ? 'bg-wedding-gold text-white' : ''}
+              >
+                <List className="h-4 w-4 mr-2" /> Table
+              </Button>
+            </div>
+
+            {/* Filter Button */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" /> Filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 glass-card p-4">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none text-wedding-brown">Filter Tasks</h4>
+                    <p className="text-sm text-wedding-brown/80">Filter by category, priority, assignee, or date range.</p>
+                  </div>
+                  <div className="grid gap-2">
+                    {/* Date Range Filter */}
+                    <Label htmlFor="date-range" className="text-wedding-brown">Date Range</Label>
+                    <DatePickerWithRange
+                      date={{ from: filterStartDate || undefined, to: filterEndDate || undefined }}
+                      setDate={(range: DateRange | undefined) => {
+                        setFilterStartDate(range?.from || null);
+                        setFilterEndDate(range?.to || null);
+                      }}
+                    />
+
+                    {/* Category Filter */}
+                    <Label htmlFor="filter-category" className="text-wedding-brown">Category</Label>
+                    <Select onValueChange={setFilterCategory} defaultValue={filterCategory}>
+                      <SelectTrigger className="w-full glass-card border-wedding-gold/30">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Priority Filter */}
+                    <Label htmlFor="filter-priority" className="text-wedding-brown">Priority</Label>
+                    <Select onValueChange={(value: "high" | "low" | "all" | "medium") => setFilterPriority(value)} defaultValue={filterPriority}>
+                      <SelectTrigger className="w-full glass-card border-wedding-gold/30">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Priorities</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Assignee Filter */}
+                    <Label htmlFor="filter-assignee" className="text-wedding-brown">Assignee</Label>
+                    <Select onValueChange={(value) => setSearch(value === 'all' ? '' : value)} defaultValue={search}>
+                      <SelectTrigger className="w-full glass-card border-wedding-gold/30">
+                        <SelectValue placeholder="Filter by assignee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Assignees</SelectItem>
+                        {Array.from(new Set(tasks.map(task => task.assignee).filter(Boolean) as string[])).map(assignee => (
+                          <SelectItem key={assignee} value={assignee}>{assignee}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Status Filter */}
+                    <Label htmlFor="filter-status" className="text-wedding-brown">Status</Label>
+                    <Select onValueChange={(value: "Backlog" | "To Do" | "Doing" | "Done" | "all") => setFilterStatus(value)} defaultValue={filterStatus}>
+                      <SelectTrigger className="w-full glass-card border-wedding-gold/30">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        {kanbanStatuses.map(status => (
+                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
@@ -127,19 +241,33 @@ const TaskTracker = () => {
       )}
 
       {!loading && tasks.length > 0 && (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {kanbanStatuses.map((statusValue) => (
-              <TaskKanbanColumn
-                key={statusValue}
-                status={statusValue}
-                tasks={processedTasks.filter((task) => task.status === statusValue)}
-                onTaskClick={setModalTask}
-                onToggleComplete={toggleTaskCompletion}
-              />
-            ))}
-          </div>
-        </DragDropContext>
+        <>
+          {currentView === 'board' && (
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {kanbanStatuses.map((statusValue) => (
+                  <TaskKanbanColumn
+                    key={statusValue}
+                    status={statusValue}
+                    tasks={processedTasks.filter((task) => task.status === statusValue)}
+                    onTaskClick={setModalTask}
+                    onToggleComplete={toggleTaskCompletion}
+                  />
+                ))}
+              </div>
+            </DragDropContext>
+          )}
+
+          {currentView === 'table' && (
+            <TaskTableView
+              tasks={processedTasks}
+              onTaskClick={setModalTask}
+              onDelete={deleteTask}
+              onToggleComplete={toggleTaskCompletion}
+            />
+          )}
+
+        </>
       )}
 
       {modalTask && (

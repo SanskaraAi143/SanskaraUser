@@ -1,6 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { fetchGuestList, addGuest, updateGuest, removeGuest, Guest } from '../../services/api/guestListApi';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  fetchGuestList,
+  addGuest,
+  updateGuest,
+  removeGuest,
+  Guest,
+  Household,
+  fetchHouseholds,
+  addHousehold,
+  updateHousehold,
+  removeHousehold,
+} from '../../services/api/guestListApi';
 import { useAuth } from '@/context/AuthContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'bg-gray-400',
@@ -9,41 +39,59 @@ const STATUS_COLORS: Record<string, string> = {
   Declined: 'bg-red-400',
 };
 
+// Define your event types
+const WEDDING_EVENTS = ['Sangeet', 'Wedding', 'Reception'];
+
 export default function GuestList() {
   const { user } = useAuth();
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<Partial<Guest>>({});
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showHouseholdForm, setShowHouseholdForm] = useState(false);
+  const [guestForm, setGuestForm] = useState<Partial<Guest>>({});
+  const [householdForm, setHouseholdForm] = useState<Partial<Household>>({});
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
+  const [editingHouseholdId, setEditingHouseholdId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadGuests = async () => {
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterSide, setFilterSide] = useState('');
+  const [filterRsvpStatus, setFilterRsvpStatus] = useState('');
+  const [filterEvent, setFilterEvent] = useState('');
+  const [filterTag, setFilterTag] = useState('');
+
+  const loadData = async () => {
     setLoading(true);
     try {
       if (user?.wedding_id) {
-        const data = await fetchGuestList(user.wedding_id);
-        setGuests(data);
+        const [guestData, householdData] = await Promise.all([
+          fetchGuestList(user.wedding_id),
+          fetchHouseholds(user.wedding_id),
+        ]);
+        setGuests(guestData);
+        setHouseholds(householdData);
       }
     } catch (e: unknown) {
-      setError((e as Error).message || 'Failed to load guests');
+      setError((e as Error).message || 'Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user?.wedding_id) loadGuests();
+    if (user?.wedding_id) loadData();
     // eslint-disable-next-line
   }, [user?.wedding_id]);
 
-  const handleEdit = (guest: Guest) => {
-    setForm(guest);
-    setEditingId(guest.guest_id);
-    setShowForm(true);
+  const handleGuestEdit = (guest: Guest) => {
+    setGuestForm(guest);
+    setEditingGuestId(guest.guest_id);
+    setShowGuestForm(true);
   };
 
-  const handleDelete = async (guest_id: string) => {
+  const handleGuestDelete = async (guest_id: string) => {
     if (!window.confirm('Remove this guest?')) return;
     try {
       await removeGuest(guest_id);
@@ -53,302 +101,490 @@ export default function GuestList() {
     }
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleGuestFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.guest_name || !user?.wedding_id) return;
+    if (!guestForm.guest_name || !user?.wedding_id) return;
     try {
-      if (editingId) {
-        const updated = await updateGuest(editingId, form);
-        setGuests((prev) => prev.map((g) => (g.guest_id === editingId ? updated : g)));
+      if (editingGuestId) {
+        const updated = await updateGuest(editingGuestId, guestForm);
+        setGuests((prev) => prev.map((g) => (g.guest_id === editingGuestId ? updated : g)));
       } else {
-        const newGuest = await addGuest({ ...form, wedding_id: user.wedding_id } as Guest);
+        const newGuest = await addGuest({ ...guestForm, wedding_id: user.wedding_id } as Guest);
         setGuests((prev) => [newGuest, ...prev]);
       }
-      setShowForm(false);
-      setForm({});
-      setEditingId(null);
+      setShowGuestForm(false);
+      setGuestForm({});
+      setEditingGuestId(null);
     } catch (e: unknown) {
-      setError((e as Error).message || 'Failed to load guests');
+      setError((e as Error).message || 'Failed to save guest');
     }
   };
 
+  const handleHouseholdEdit = (household: Household) => {
+    setHouseholdForm(household);
+    setEditingHouseholdId(household.household_id);
+    setShowHouseholdForm(true);
+  };
+
+  const handleHouseholdDelete = async (household_id: string) => {
+    if (!window.confirm('Remove this household and all associated guests?')) return;
+    try {
+      await removeHousehold(household_id);
+      setHouseholds((prev) => prev.filter((h) => h.household_id !== household_id));
+      // Also remove associated guests
+      setGuests((prev) => prev.filter((g) => g.household_id !== household_id));
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to remove household');
+    }
+  };
+
+  const handleHouseholdFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!householdForm.household_name || !user?.wedding_id) return;
+    try {
+      if (editingHouseholdId) {
+        const updated = await updateHousehold(editingHouseholdId, householdForm);
+        setHouseholds((prev) => prev.map((h) => (h.household_id === editingHouseholdId ? updated : h)));
+      } else {
+        const newHousehold = await addHousehold({ ...householdForm, wedding_id: user.wedding_id } as Household);
+        setHouseholds((prev) => [newHousehold, ...prev]);
+      }
+      setShowHouseholdForm(false);
+      setHouseholdForm({});
+      setEditingHouseholdId(null);
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to save household');
+    }
+  };
+
+  const filteredGuests = useMemo(() => {
+    let filtered = guests;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (guest) =>
+          guest.guest_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guest.contact_info?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guest.relation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guest.tags?.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (filterSide) {
+      filtered = filtered.filter((guest) => guest.side === filterSide);
+    }
+
+    if (filterRsvpStatus && filterEvent) {
+      filtered = filtered.filter(
+        (guest) => guest.rsvp_status?.[filterEvent] === filterRsvpStatus
+      );
+    } else if (filterRsvpStatus) {
+      // If no specific event is selected, filter by overall status (if applicable)
+      // For now, this assumes 'Confirmed' means confirmed for at least one event
+      // This logic might need refinement based on how 'overall status' is defined
+      filtered = filtered.filter((guest) =>
+        Object.values(guest.rsvp_status || {}).some(
+          (status) => status === filterRsvpStatus
+        )
+      );
+    }
+
+    if (filterTag) {
+      filtered = filtered.filter((guest) => guest.tags?.includes(filterTag));
+    }
+
+    return filtered;
+  }, [guests, searchTerm, filterSide, filterRsvpStatus, filterEvent, filterTag]);
+
+  // Group guests by household
+  const guestsByHousehold = useMemo(() => {
+    const grouped = households.map(household => ({
+      household,
+      guests: filteredGuests.filter(guest => guest.household_id === household.household_id)
+    }));
+    // Add guests without a household
+    grouped.push({
+      household: { household_id: 'no-household', wedding_id: user?.wedding_id || '', household_name: 'No Household' },
+      guests: filteredGuests.filter(guest => !guest.household_id)
+    });
+    return grouped;
+  }, [households, filteredGuests, user?.wedding_id]);
+
+  // Summary statistics
+  const totalInvited = guests.length;
+  const attendingWedding = guests.filter(g => g.rsvp_status?.Wedding === 'Confirmed').length;
+  const attendingReception = guests.filter(g => g.rsvp_status?.Reception === 'Confirmed').length;
+
   return (
-    <div>
-      <div className="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8 animate-fadein">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Guest List</h2>
-            <p className="text-gray-500 text-sm mt-1">Manage your wedding guests and track RSVPs.</p>
-          </div>
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg font-semibold shadow"
-            onClick={() => { setShowForm(true); setForm({}); setEditingId(null); }}
-          >
-            + Add Guest
-          </button>
+    <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8 animate-fadein">
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Guest List</h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Manage your wedding guests, households, and track RSVPs.
+          </p>
         </div>
-        {error && <div className="text-red-500 mb-2">{error}</div>}
-        <div className="overflow-x-auto mt-4">
-          <table className="min-w-full table-auto border-separate border-spacing-y-2">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-4 py-2 rounded-l-lg text-left font-semibold text-gray-700">Name</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
-                <th className="px-4 py-2 rounded-r-lg text-center font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
-              ) : guests.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">No guests added yet.</td></tr>
-              ) : guests.map(guest => (
-                <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
-                  <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
-                  <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
-                  <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
-                  <td className="px-4 py-2 text-gray-700">{guest.side}</td>
-                  <td className="px-4 py-2">
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${STATUS_COLORS[guest.status || 'Pending'] || 'bg-gray-400'}`}>{guest.status || 'Pending'}</span>
-                  </td>
-                  <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
-                  <td className="px-4 py-2 flex gap-2 justify-center">
-                    <button className="text-blue-600 hover:text-blue-900 font-semibold" onClick={() => handleEdit(guest)}>Edit</button>
-                    <button className="text-red-500 hover:text-red-800 font-semibold" onClick={() => handleDelete(guest.guest_id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex gap-2">
+          <Button onClick={() => { setShowHouseholdForm(true); setHouseholdForm({}); setEditingHouseholdId(null); }}>
+            + Add Household
+          </Button>
+          <Button onClick={() => { setShowGuestForm(true); setGuestForm({}); setEditingGuestId(null); }}>
+            + Add Guest
+          </Button>
         </div>
       </div>
-      {/* MODAL: Only rendered when showForm is true */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all" onClick={e => { if (e.target === e.currentTarget) { setShowForm(false); setForm({}); setEditingId(null); } }}>
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-lg p-8 animate-[fadeInScale_0.3s_ease]" onClick={e => e.stopPropagation()}>
-            <button
-              type="button"
-              className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold focus:outline-none"
-              aria-label="Close Guest Form"
-              onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }}
-            >
-              ×
-            </button>
-            <h3 className="text-xl font-bold mb-3 text-gray-800 flex items-center gap-2">
-              {editingId ? 'Edit Guest' : 'Add New Guest'}
-              <span className="text-sm font-normal text-gray-400">(All fields optional except Name)</span>
-            </h3>
-            <form
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              onSubmit={handleFormSubmit}
-              autoComplete="off"
-              aria-label={editingId ? 'Edit Guest Form' : 'Add Guest Form'}
-            >
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <label htmlFor="guest_name" className="font-semibold text-gray-700 flex items-center gap-1">
-                  Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="guest_name"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  placeholder="e.g., John Doe"
-                  value={form.guest_name || ''}
-                  onChange={e => setForm(f => ({ ...f, guest_name: e.target.value }))}
-                  required
-                  aria-required="true"
-                  aria-describedby="guest_name_help"
-                />
-                <span id="guest_name_help" className="text-xs text-gray-400">Full name of the guest</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="contact_info" className="font-semibold text-gray-700">Contact Info <span className="ml-1 text-xs text-gray-400">(Phone or Email)</span></label>
-                <input
-                  id="contact_info"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  placeholder="e.g., 9876543210 or john@email.com"
-                  value={form.contact_info || ''}
-                  onChange={e => setForm(f => ({ ...f, contact_info: e.target.value }))}
-                  aria-describedby="contact_info_help"
-                />
-                <span id="contact_info_help" className="text-xs text-gray-400">For RSVP or reminders</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="relation" className="font-semibold text-gray-700">Relation <span className="text-xs text-gray-400">(e.g., Cousin, Friend)</span></label>
-                <input
-                  id="relation"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  placeholder="e.g., Cousin"
-                  value={form.relation || ''}
-                  onChange={e => setForm(f => ({ ...f, relation: e.target.value }))}
-                  aria-describedby="relation_help"
-                />
-                <span id="relation_help" className="text-xs text-gray-400">Optional</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="side" className="font-semibold text-gray-700">Side</label>
-                <select
-                  id="side"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  value={form.side || ''}
-                  onChange={e => setForm(f => ({ ...f, side: e.target.value }))}
-                  aria-describedby="side_help"
-                >
-                  <option value="">Select side</option>
-                  <option value="Groom">Groom</option>
-                  <option value="Bride">Bride</option>
-                  <option value="Both">Both</option>
-                </select>
-                <span id="side_help" className="text-xs text-gray-400">Which side is this guest from?</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="status" className="font-semibold text-gray-700">Status</label>
-                <select
-                  id="status"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  value={form.status || ''}
-                  onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  aria-describedby="status_help"
-                >
-                  <option value="">Select status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Invited">Invited</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Declined">Declined</option>
-                </select>
-                <span id="status_help" className="text-xs text-gray-400">Current invitation status</span>
-              </div>
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <label htmlFor="dietary_requirements" className="font-semibold text-gray-700">
-                  Dietary Requirements
-                  <span className="ml-1 text-xs text-gray-400" title="e.g., Vegan, Jain, No Nuts">(Optional)</span>
-                </label>
-                <input
-                  id="dietary_requirements"
-                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                  placeholder="e.g., Vegan, Jain, No Nuts"
-                  value={form.dietary_requirements || ''}
-                  onChange={e => setForm(f => ({ ...f, dietary_requirements: e.target.value }))}
-                  aria-describedby="dietary_help"
-                />
-                <span id="dietary_help" className="text-xs text-gray-400">Any food preferences or allergies?</span>
-              </div>
-              <div className="md:col-span-2 flex gap-3 mt-4 items-center">
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold shadow transition focus:outline-none focus:ring-2 focus:ring-green-400"
-                  aria-label={editingId ? 'Update Guest' : 'Add Guest'}
-                >
-                  {editingId ? (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      Update
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                      Add
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  onClick={() => { setShowForm(false); setForm({}); setEditingId(null); }}
-                  aria-label="Cancel Guest Form"
-                >
-                  Cancel
-                </button>
-                <span className="text-xs text-gray-400 ml-2">* Required fields</span>
-              </div>
-            </form>
-          </div>
+
+      {/* Summary Statistics */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div className="bg-blue-50 p-4 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-600">Total Invited</p>
+          <p className="text-2xl font-bold text-blue-700">{totalInvited}</p>
         </div>
-      )}
-  {/* Filtering logic moved outside JSX */}
-  {/* Add search and filter state if needed */}
-  {/* Example: const [search, setSearch] = useState(''); const [filter, setFilter] = useState(''); */}
-  {/*
-    Uncomment and implement search/filter UI as needed:
-    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search guests..." />
-    <select value={filter} onChange={e => setFilter(e.target.value)}>...</select>
-  */}
-  {/*
-    Filtering logic:
-  */}
-  {/*
-    const filteredGuests = guests.filter(g => {
-      const match =
-        g.guest_name.toLowerCase().includes(search.toLowerCase()) ||
-        (g.contact_info || '').toLowerCase().includes(search.toLowerCase()) ||
-        (g.relation || '').toLowerCase().includes(search.toLowerCase());
-      if (filter) return match && (g.status === filter || g.side === filter);
+        <div className="bg-green-50 p-4 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-600">Attending Wedding</p>
+          <p className="text-2xl font-bold text-green-700">{attendingWedding}</p>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-600">Attending Reception</p>
+          <p className="text-2xl font-bold text-purple-700">{attendingReception}</p>
+        </div>
+      </div>
 
-      // Collaboration logic: Filter guests based on user role and guest side
-      if (user?.role) {
-        const userRole = user.role.toLowerCase();
-        const guestSide = (g.side || '').toLowerCase();
+      {/* Filtering Options */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <Input
+          placeholder="Search by Name, Contact, Relation, Tag..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="col-span-full sm:col-span-2 lg:col-span-2"
+        />
+        <Select value={filterSide} onValueChange={setFilterSide}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by Side" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Sides</SelectItem>
+            <SelectItem value="Bride">Bride</SelectItem>
+            <SelectItem value="Groom">Groom</SelectItem>
+            <SelectItem value="Both">Both</SelectItem>
+          </SelectContent>
+        </Select>
 
-        // Planners can see all guests
-        if (userRole === 'planner') {
-          return match;
-        }
+        <Select value={filterEvent} onValueChange={setFilterEvent}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by Event" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Events</SelectItem>
+            {WEDDING_EVENTS.map((event) => (
+              <SelectItem key={event} value={event}>
+                {event}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        // Bride/Groom can see their own side and 'Both'
-        if (userRole.includes('bride') && (guestSide.includes('bride') || guestSide === 'both')) {
-          return match;
-        }
-        if (userRole.includes('groom') && (guestSide.includes('groom') || guestSide === 'both')) {
-          return match;
-        }
+        <Select value={filterRsvpStatus} onValueChange={setFilterRsvpStatus}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by RSVP Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Invited">Invited</SelectItem>
+            <SelectItem value="Confirmed">Confirmed</SelectItem>
+            <SelectItem value="Declined">Declined</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          placeholder="Filter by Tag (e.g., VVIP)"
+          value={filterTag}
+          onChange={(e) => setFilterTag(e.target.value)}
+        />
+      </div>
 
-        return false; // Hide if not matching role or not a planner
-      }
-
-      return match; // If no user role, show all guests (or implement default visibility)
-    });
-  */}
-  {/* For now, just use guests directly, or implement filteredGuests as above */}
-  <div className="overflow-x-auto">
-    <table className="min-w-full table-auto border-separate border-spacing-y-2">
-      <thead>
-        <tr className="bg-gray-50">
-          <th className="px-4 py-2 rounded-l-lg text-left font-semibold text-gray-700">Name</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
-          <th className="px-4 py-2 rounded-r-lg text-center font-semibold text-gray-700">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+      {/* Guest and Household List */}
+      <div className="overflow-x-auto mt-4">
         {loading ? (
-          <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
-        ) : guests.length === 0 ? (
-          <tr><td colSpan={7} className="text-center py-8 text-gray-400">No guests added yet.</td></tr>
-        ) : guests.map(guest => (
-          <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
-            <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
-            <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
-            <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
-            <td className="px-4 py-2 text-gray-700">{guest.side}</td>
-            <td className="px-4 py-2">
-              <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${STATUS_COLORS[guest.status || 'Pending'] || 'bg-gray-400'}`}>{guest.status || 'Pending'}</span>
-            </td>
-            <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
-            <td className="px-4 py-2 flex gap-2 justify-center">
-              <button className="text-blue-600 hover:text-blue-900 font-semibold" onClick={() => handleEdit(guest)}>Edit</button>
-              <button className="text-red-500 hover:text-red-800 font-semibold" onClick={() => handleDelete(guest.guest_id)}>Delete</button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+          <div className="text-center py-8 text-gray-400">Loading...</div>
+        ) : guests.length === 0 && households.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">No guests or households added yet.</div>
+        ) : (
+          guestsByHousehold.map(({ household, guests: householdGuests }) => (
+            <div key={household.household_id} className="mb-6 border rounded-lg shadow-sm">
+              <div className="flex items-center justify-between bg-gray-50 p-3 border-b rounded-t-lg">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {household.household_name}
+                  {household.household_id !== 'no-household' && (
+                    <span className="ml-2 text-sm font-normal text-gray-500">
+                      ({householdGuests.length} {householdGuests.length === 1 ? 'guest' : 'guests'})
+                    </span>
+                  )}
+                </h3>
+                {household.household_id !== 'no-household' && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleHouseholdEdit(household)}>
+                      Edit Household
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleHouseholdDelete(household.household_id)}>
+                      Delete Household
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {householdGuests.length > 0 ? (
+                <table className="min-w-full table-auto border-separate border-spacing-y-2 p-3">
+                  <thead>
+                    <tr className="bg-white">
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Contact</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Relation</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Side</th>
+                      {WEDDING_EVENTS.map((event) => (
+                        <th key={event} className="px-4 py-2 text-left font-semibold text-gray-700">
+                          {event} RSVP
+                        </th>
+                      ))}
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Dietary</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Tags</th>
+                      <th className="px-4 py-2 text-center font-semibold text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {householdGuests.map((guest) => (
+                      <tr key={guest.guest_id} className="bg-white hover:bg-blue-50 transition rounded-xl shadow-sm">
+                        <td className="px-4 py-2 font-semibold text-gray-800">{guest.guest_name}</td>
+                        <td className="px-4 py-2 text-gray-700">{guest.contact_info}</td>
+                        <td className="px-4 py-2 text-gray-700">{guest.relation}</td>
+                        <td className="px-4 py-2 text-gray-700">{guest.side}</td>
+                        {WEDDING_EVENTS.map((event) => (
+                          <td key={event} className="px-4 py-2">
+                            <span
+                              className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white ${
+                                STATUS_COLORS[guest.rsvp_status?.[event] || 'Pending'] || 'bg-gray-400'
+                              }`}
+                            >
+                              {guest.rsvp_status?.[event] || 'Pending'}
+                            </span>
+                          </td>
+                        ))}
+                        <td className="px-4 py-2 text-gray-700">{guest.dietary_requirements}</td>
+                        <td className="px-4 py-2 text-gray-700">
+                          {guest.tags && guest.tags.length > 0 ? guest.tags.join(', ') : '-'}
+                        </td>
+                        <td className="px-4 py-2 flex gap-2 justify-center">
+                          <Button variant="outline" size="sm" onClick={() => handleGuestEdit(guest)}>
+                            Edit
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => handleGuestDelete(guest.guest_id)}>
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                household.household_id !== 'no-household' && (
+                  <p className="p-3 text-gray-500">No guests in this household yet.</p>
+                )
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Guest Form Modal */}
+      <Dialog open={showGuestForm} onOpenChange={setShowGuestForm}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{editingGuestId ? 'Edit Guest' : 'Add New Guest'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleGuestFormSubmit} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="guest_name" className="text-right">
+                Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="guest_name"
+                value={guestForm.guest_name || ''}
+                onChange={(e) => setGuestForm((f) => ({ ...f, guest_name: e.target.value }))}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="household_id" className="text-right">
+                Household
+              </Label>
+              <Select
+                value={guestForm.household_id || ''}
+                onValueChange={(value) => setGuestForm((f) => ({ ...f, household_id: value }))}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a household" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No Household</SelectItem>
+                  {households.map((h) => (
+                    <SelectItem key={h.household_id} value={h.household_id}>
+                      {h.household_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="contact_info" className="text-right">
+                Contact Info
+              </Label>
+              <Input
+                id="contact_info"
+                value={guestForm.contact_info || ''}
+                onChange={(e) => setGuestForm((f) => ({ ...f, contact_info: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="relation" className="text-right">
+                Relation
+              </Label>
+              <Input
+                id="relation"
+                value={guestForm.relation || ''}
+                onChange={(e) => setGuestForm((f) => ({ ...f, relation: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="side" className="text-right">
+                Side
+              </Label>
+              <Select
+                value={guestForm.side || ''}
+                onValueChange={(value) => setGuestForm((f) => ({ ...f, side: value }))}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select side" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Select side</SelectItem>
+                  <SelectItem value="Groom">Groom</SelectItem>
+                  <SelectItem value="Bride">Bride</SelectItem>
+                  <SelectItem value="Both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dietary_requirements" className="text-right">
+                Dietary
+              </Label>
+              <Input
+                id="dietary_requirements"
+                value={guestForm.dietary_requirements || ''}
+                onChange={(e) => setGuestForm((f) => ({ ...f, dietary_requirements: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tags" className="text-right">
+                Tags (comma-separated)
+              </Label>
+              <Input
+                id="tags"
+                value={guestForm.tags?.join(', ') || ''}
+                onChange={(e) =>
+                  setGuestForm((f) => ({ ...f, tags: e.target.value.split(',').map((tag) => tag.trim()) }))
+                }
+                className="col-span-3"
+              />
+            </div>
+
+            {/* Event-specific RSVPs */}
+            <div className="col-span-full">
+              <h4 className="mb-2 text-lg font-semibold">Event RSVPs</h4>
+              {WEDDING_EVENTS.map((event) => (
+                <div key={event} className="grid grid-cols-4 items-center gap-4 mb-2">
+                  <Label className="text-right">{event}</Label>
+                  <Select
+                    value={guestForm.rsvp_status?.[event] || 'Pending'}
+                    onValueChange={(value) =>
+                      setGuestForm((f) => ({
+                        ...f,
+                        rsvp_status: { ...f.rsvp_status, [event]: value },
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Invited">Invited</SelectItem>
+                      <SelectItem value="Confirmed">Confirmed</SelectItem>
+                      <SelectItem value="Declined">Declined</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+
+            <Button type="submit" className="col-span-full mt-4">
+              {editingGuestId ? 'Update Guest' : 'Add Guest'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Household Form Modal */}
+      <Dialog open={showHouseholdForm} onOpenChange={setShowHouseholdForm}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{editingHouseholdId ? 'Edit Household' : 'Add New Household'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleHouseholdFormSubmit} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="household_name" className="text-right">
+                Household Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="household_name"
+                value={householdForm.household_name || ''}
+                onChange={(e) => setHouseholdForm((f) => ({ ...f, household_name: e.target.value }))}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="address" className="text-right">
+                Address
+              </Label>
+              <Input
+                id="address"
+                value={householdForm.address || ''}
+                onChange={(e) => setHouseholdForm((f) => ({ ...f, address: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="contact_info" className="text-right">
+                Contact Info
+              </Label>
+              <Input
+                id="contact_info"
+                value={householdForm.contact_info || ''}
+                onChange={(e) => setHouseholdForm((f) => ({ ...f, contact_info: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <Button type="submit" className="col-span-full mt-4">
+              {editingHouseholdId ? 'Update Household' : 'Add Household'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

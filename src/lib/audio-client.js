@@ -102,58 +102,65 @@ export default class AudioClient {
 
                 this.ws.onmessage = async (event) => {
                     try {
-                        // Log raw message data to help debug
-                        console.log('Raw WebSocket message received:', event.data);
+                        // Handle multiple JSON messages in a single frame
+                        const messages = this.parseMultipleJSONs(event.data);
 
-                        const message = JSON.parse(event.data);
+                        for (const message of messages) {
+                            console.log('Processing message:', message.type, message.data ? message.data.substring(0, 50) + '...' : '');
 
-                        if (message.type === 'ready') {
-                            // Legacy ready message – already handled on open, but keep for backward compat
-                            if (!this._readyEmitted) {
-                                this._readyEmitted = true;
-                                this.isConnected = true;
-                                this.onReady();
+                            // Handle each message type
+                            try {
+                                if (message.type === 'ready') {
+                                    // Legacy ready message – already handled on open, but keep for backward compat
+                                    if (!this._readyEmitted) {
+                                        this._readyEmitted = true;
+                                        this.isConnected = true;
+                                        this.onReady();
+                                    }
+                                }
+                                else if (message.type === 'audio') {
+                                    // Handle receiving audio data from server
+                                    const audioData = message.data;
+                                    this.onAudioReceived(audioData);
+                                    await this.playAudio(audioData);
+                                }
+                                else if (message.type === 'text' || message.type === 'user_input') {
+                                    // Handle receiving text or user input from server
+                                    this.onTextReceived(message);
+                                }
+                                else if (message.type === 'turn_complete') {
+                                    // Model is done speaking
+                                    this.isModelSpeaking = false;
+                                    this.onTurnComplete();
+                                }
+                                else if (message.type === 'interrupted') {
+                                    // Response was interrupted
+                                    this.isModelSpeaking = false;
+                                    this.onInterrupted(message.data);
+                                }
+                                else if (message.type === 'error') {
+                                    // Handle server error
+                                    this.onError(message.data);
+                                }
+                                else if (message.type === 'session_id') {
+                                    // Handle session ID (legacy format)
+                                    console.log('Received session ID message:', message);
+                                    this.sessionId = message.data;
+                                    this.onSessionIdReceived(message.data);
+                                }
+                                else if (message.type === 'session' && (message.session_id || (message.data && message.data.session_id))) {
+                                    // New format: { type: 'session', session_id: '...' }
+                                    const sid = message.session_id || message.data.session_id;
+                                    console.log('Received session (new format):', sid);
+                                    this.sessionId = sid;
+                                    this.onSessionIdReceived(sid);
+                                }
+                            } catch (messageError) {
+                                console.error('Error processing individual message:', messageError);
                             }
                         }
-                        else if (message.type === 'audio') {
-                            // Handle receiving audio data from server
-                            const audioData = message.data;
-                            this.onAudioReceived(audioData);
-                            await this.playAudio(audioData);
-                        }
-                        else if (message.type === 'text' || message.type === 'user_input') {
-                            // Handle receiving text or user input from server
-                            this.onTextReceived(message);
-                        }
-                        else if (message.type === 'turn_complete') {
-                            // Model is done speaking
-                            this.isModelSpeaking = false;
-                            this.onTurnComplete();
-                        }
-                        else if (message.type === 'interrupted') {
-                            // Response was interrupted
-                            this.isModelSpeaking = false;
-                            this.onInterrupted(message.data);
-                        }
-                        else if (message.type === 'error') {
-                            // Handle server error
-                            this.onError(message.data);
-                        }
-                        else if (message.type === 'session_id') {
-                            // Handle session ID (legacy format)
-                            console.log('Received session ID message:', message);
-                            this.sessionId = message.data;
-                            this.onSessionIdReceived(message.data);
-                        }
-                        else if (message.type === 'session' && (message.session_id || (message.data && message.data.session_id))) {
-                            // New format: { type: 'session', session_id: '...' }
-                            const sid = message.session_id || message.data.session_id;
-                            console.log('Received session (new format):', sid);
-                            this.sessionId = sid;
-                            this.onSessionIdReceived(sid);
-                        }
                     } catch (error) {
-                        console.error('Error processing message:', error);
+                        console.error('Error processing message batch:', error);
                     }
                 };
             } catch (error) {
@@ -481,5 +488,23 @@ export default class AudioClient {
             bytes[i] = binaryString.charCodeAt(i);
         }
         return bytes.buffer;
+    }
+
+    // Parse multiple JSON objects from a single WebSocket message
+    parseMultipleJSONs(data) {
+        const messages = [];
+        const jsonRegex = /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g;
+        let match;
+
+        while ((match = jsonRegex.exec(data)) !== null) {
+            try {
+                const parsed = JSON.parse(match[0]);
+                messages.push(parsed);
+            } catch (error) {
+                console.warn('[AudioClient] Failed to parse individual JSON chunk:', match[0], error);
+            }
+        }
+
+        return messages.length > 0 ? messages : [JSON.parse(data)]; // Fallback to single JSON parse
     }
 }

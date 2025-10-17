@@ -6,13 +6,17 @@ export interface WeddingDetails {
   wedding_date: string;
   wedding_location: string;
   wedding_tradition: string;
-  // Add other wedding details properties as they are used
+  wedding_name?: string;
+  wedding_style?: string;
+  status?: string;
+  details?: Record<string, any> | null;
+  total_budget?: number; // Added total_budget property
 }
 
 export const getWeddingDetails = async (weddingId: string): Promise<WeddingDetails | null> => {
   const { data, error } = await supabase
     .from('weddings')
-    .select('*')
+  .select('wedding_id, wedding_name, wedding_date, wedding_location, wedding_tradition, wedding_style, status, details, total_budget')
     .eq('wedding_id', weddingId)
     .single();
   if (error) throw error;

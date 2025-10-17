@@ -1,15 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import MultimodalClient from '../lib/multimodal-client.js';
+import { getSession, getChatMessages } from '../services/api';
 
 interface Message {
   sender: string;
   text: string;
   isMarkdown?: boolean;
+  timestamp?: string;
+  eventId?: string;
+  // Additional fields for artifact uploads and system events
+  artifactUrl?: string;
+  artifactType?: string;
+  systemEventType?: string;
 }
 
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
-export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
+export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
@@ -20,17 +27,20 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // New state for loading history
+  const [historyError, setHistoryError] = useState<string | null>(null); // New state for history error
 
   const clientRef = useRef<MultimodalClient | null>(null);
-  const currentAssistantMessageIndex = useRef<number | null>(null);
+  const assistantMessageInProgress = useRef(false);
   const transcriptRef = useRef<Message[]>([]);
-  const processingLockRef = useRef<boolean>(false);
   const reconnectAttemptsRef = useRef(0);
   const manualReconnectRequestedRef = useRef(false);
   const disconnectHandlersRef = useRef<(() => void)[]>([]);
   const reconnectSuccessHandlersRef = useRef<(() => void)[]>([]);
   const connectionStateRef = useRef<ConnectionState>('idle');
   const initiatedRef = useRef(false);
+  // Track last user text we sent locally to avoid double-inserting when server echoes it back as `user_input`
+  const lastLocallySentUserTextRef = useRef<string | null>(null);
 
   const registerOnDisconnect = (fn: () => void) => { disconnectHandlersRef.current.push(fn); };
   const registerOnReconnectSuccess = (fn: () => void) => { reconnectSuccessHandlersRef.current.push(fn); };
@@ -40,38 +50,48 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   useEffect(() => { connectionStateRef.current = connectionState; }, [connectionState]);
 
   const handleTextReceived = useCallback((message: { type: string; data: string }) => {
-    if (processingLockRef.current) return;
-    processingLockRef.current = true;
-    const newTranscript = [...transcriptRef.current];
-    if (message.type === 'user_input') {
-      const lastIdx = newTranscript.length - 1;
-      if (lastIdx >= 0 && newTranscript[lastIdx].sender === 'user' && newTranscript[lastIdx].text === '...') {
-        newTranscript[lastIdx].text = message.data;
-      } else {
-        newTranscript.push({ sender: 'user', text: message.data });
+    setTranscript(prevTranscript => {
+      const newTranscript = [...prevTranscript];
+      const lastMessage = newTranscript.length > 0 ? newTranscript[newTranscript.length - 1] : null;
+
+      if (message.type === 'user_input') {
+        assistantMessageInProgress.current = false;
+        if (lastLocallySentUserTextRef.current === message.data) {
+          lastLocallySentUserTextRef.current = null; // Consume echo
+        } else if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
+        } else {
+          newTranscript.push({ sender: 'user', text: message.data });
+        }
+      } else if (message.type === 'text') {
+        if (assistantMessageInProgress.current && lastMessage?.sender === 'assistant') {
+          // This is the key fix: create a new object to ensure re-render
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: lastMessage.text + message.data };
+        } else {
+          assistantMessageInProgress.current = true;
+          newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
+        }
+      } else if (message.type === 'user_transcription') {
+        assistantMessageInProgress.current = false;
+        if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
+          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
+        } else {
+          newTranscript.push({ sender: 'user', text: message.data });
+        }
       }
-    } else if (message.type === 'text') {
-      if (currentAssistantMessageIndex.current !== null && newTranscript[currentAssistantMessageIndex.current]) {
-        newTranscript[currentAssistantMessageIndex.current].text += message.data;
-      } else {
-        newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
-        currentAssistantMessageIndex.current = newTranscript.length - 1;
-      }
-    }
-    transcriptRef.current = newTranscript;
-    setTranscript(newTranscript);
-    processingLockRef.current = false;
+      return newTranscript;
+    });
   }, []);
 
   const handleTurnComplete = useCallback(() => {
-    currentAssistantMessageIndex.current = null;
+    assistantMessageInProgress.current = false;
     setIsSpeaking(false);
     setIsAssistantSpeaking(false);
     setIsAssistantTyping(false);
   }, []);
 
   const handleInterrupted = useCallback(() => {
-    currentAssistantMessageIndex.current = null;
+    assistantMessageInProgress.current = false;
     setIsSpeaking(false);
     setIsAssistantSpeaking(false);
     if (clientRef.current && (clientRef.current as any).interrupt) {
@@ -85,12 +105,9 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   }, []);
 
   const setTypingHeuristic = useCallback(() => {
-    if (currentAssistantMessageIndex.current !== null) {
-      const msg = transcriptRef.current[currentAssistantMessageIndex.current];
-      if (msg && msg.sender === 'assistant') {
-        setIsAssistantTyping(true);
-        return;
-      }
+    if (assistantMessageInProgress.current) {
+      setIsAssistantTyping(true);
+      return;
     }
     setIsAssistantTyping(false);
   }, []);
@@ -142,7 +159,10 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       manualReconnectRequestedRef.current = false;
       reconnectSuccessHandlersRef.current.forEach(h => h());
     };
-    client.onSessionIdReceived = (id: string) => setSessionId(id);
+    client.onSessionIdReceived = (id: string) => {
+      console.log('[useMultimodalClient] sessionId received:', id);
+      setSessionId(id);
+    };
     client.onTextReceived = handleTextReceived;
     client.onTurnComplete = handleTurnComplete;
     client.onInterrupted = handleInterrupted;
@@ -170,7 +190,67 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     if (initiatedRef.current) return;
     initiatedRef.current = true;
     attemptConnect();
-  }, [userId]);
+  }, [userId, attemptConnect]); // Added attemptConnect to dependency array for completeness
+
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const historyLimit = 20;
+
+  // Fetch session history when sessionId becomes available or when loading more
+  useEffect(() => {
+    if (userId && weddingId && sessionId) {
+      const fetchSessionHistory = async () => {
+        setIsLoadingHistory(true);
+        setHistoryError(null);
+        try {
+          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId, offset: historyOffset });
+          const response = await getChatMessages(weddingId, sessionId, {
+            limit: historyLimit,
+            offset: historyOffset,
+          });
+
+          if (response && response.history) {
+            const reversedHistory = response.history.reverse();
+            const formattedMessages = reversedHistory
+              .map((event: any) => {
+                // The event_type filter was too restrictive, let's see all events
+                if (event.event_type !== 'message') {
+                  console.log('Non-message event in history:', event);
+                }
+                return {
+                  sender: event.metadata?.sender_type === 'assistant' ? 'assistant' : 'user',
+                  text: event.content?.text || `[Unsupported event: ${event.event_type}]`,
+                  isMarkdown: event.metadata?.sender_type === 'assistant',
+                  timestamp: event.timestamp,
+                  eventId: event.event_id,
+                };
+              });
+
+            setHasMoreHistory(response.total_count > (historyOffset + historyLimit));
+
+            setTranscript(prev =>
+              historyOffset === 0 ? formattedMessages : [...formattedMessages, ...prev]
+            );
+          } else {
+            console.warn('[useMultimodalClient] no history in response');
+            setHasMoreHistory(false);
+          }
+        } catch (error: any) {
+          console.error('Failed to fetch session history:', error);
+          setHistoryError(error.message || 'Failed to load chat history.');
+        } finally {
+          setIsLoadingHistory(false);
+        }
+      };
+      fetchSessionHistory();
+    }
+  }, [userId, weddingId, sessionId, historyOffset, historyLimit]);
+
+  const loadMoreHistory = useCallback(() => {
+    if (!isLoadingHistory && hasMoreHistory) {
+      setHistoryOffset(prev => prev + historyLimit);
+    }
+  }, [isLoadingHistory, hasMoreHistory]);
 
   // Cleanup on unmount
   useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
@@ -195,7 +275,7 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       const newTranscript = [...transcriptRef.current, { sender: 'user', text: '...' }];
       transcriptRef.current = newTranscript;
       setTranscript(newTranscript);
-      currentAssistantMessageIndex.current = null;
+      assistantMessageInProgress.current = false;
     } catch (e) {
       console.error('Error starting recording', e);
     }
@@ -261,9 +341,13 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
       setIsAssistantSpeaking(false);
     }
     (client as any).sendText(text);
+    // Reset assistant message index so the next assistant response starts a fresh bubble
+    assistantMessageInProgress.current = false;
     const newTranscript = [...transcriptRef.current, { sender: 'user', text }];
     transcriptRef.current = newTranscript;
     setTranscript(newTranscript);
+    // Remember locally-sent text to ignore server echo of the same content
+    lastLocallySentUserTextRef.current = text;
   };
 
   const interruptAssistant = () => {
@@ -287,6 +371,10 @@ export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
+    isLoadingHistory,
+    historyError,
+    hasMoreHistory,
+    loadMoreHistory,
     startRecording,
     stopRecording,
     initializeWebcam,

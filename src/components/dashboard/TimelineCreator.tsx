@@ -10,6 +10,7 @@ import { Edit2, Trash2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAuth } from '@/context/AuthContext';
+import { DatePicker } from "@/components/ui/date-picker";
 
 // UI TimelineEvent type
 interface UITimelineEvent {
@@ -55,7 +56,12 @@ const TimelineCreator = () => {
   // Utility: map Supabase event to UI event
   function mapSupabaseEventToUI(event: { event_id: string; event_name: string; event_date_time: string; location: string; description: string; visibility?: string; relevant_party?: string; }): UITimelineEvent {
     const dateObj = event.event_date_time ? new Date(event.event_date_time) : new Date();
-    const timeStr = event.event_date_time ? dateObj.toISOString().substring(11,16) : '';
+    let timeStr = '';
+    if (event.event_date_time) {
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        timeStr = `${hours}:${minutes}`;
+    }
     return {
       id: event.event_id,
       title: event.event_name,
@@ -315,10 +321,13 @@ const handleAddEvent = async () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Date</label>
-              <Input 
-                type="date" 
-                value={format(formData.date, 'yyyy-MM-dd')}
-                onChange={(e) => setFormData({...formData, date: new Date(e.target.value)})}
+              <DatePicker
+                date={formData.date}
+                setDate={(newDate) => {
+                  if (newDate) {
+                    setFormData({ ...formData, date: newDate });
+                  }
+                }}
               />
             </div>
             <div className="space-y-2">

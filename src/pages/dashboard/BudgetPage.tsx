@@ -13,7 +13,7 @@ const BudgetPage = () => {
           Manage your wedding expenses and keep track of your budget in one place.
         </p>
       </div>
-      
+
       <BudgetManager />
     </div>
   );

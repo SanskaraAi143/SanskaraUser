@@ -1,15 +1,16 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import GDPRCompliance from './components/GDPRCompliance';
 import PageLoader from './components/ui/PageLoader';
 import FloatingChatButton from './components/ui/FloatingChatButton';
 import { useToast } from './hooks/use-toast';
 import { logError } from './utils/errorLogger';
 import { useAuth } from './context/AuthContext';
+import { useIsMobile } from './hooks/use-mobile';
 
 // Layouts - Keep eager for critical path
+import DashboardLayout from './layouts/DashboardLayout';
 import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 
 // Core Pages - High priority
@@ -21,8 +22,7 @@ const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
 // Dashboard Pages - Group into one chunk
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
-const ChatPage = lazy(() => import('./pages/dashboard/ChatPage'));
-const ChatInterfacePage = lazy(() => import('./pages/ChatInterfacePage')); // New import
+const FuturisticChatPage = lazy(() => import('./pages/FuturisticChatPage'));
 const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
 const TimelinePage = lazy(() => import('./pages/dashboard/TimelinePage'));
 const MoodBoardPage = lazy(() => import('./pages/dashboard/MoodBoardPage'));
@@ -30,6 +30,7 @@ const BudgetPage = lazy(() => import('./pages/dashboard/BudgetPage'));
 const GuestsPage = lazy(() => import('./pages/dashboard/GuestsPage'));
 const VendorsPage = lazy(() => import('./pages/dashboard/VendorsPage'));
 const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
+// const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage')); // This file does not exist
 const RitualsPage = lazy(() => import('./pages/dashboard/RitualsPage'));
 
 // Blog Pages
@@ -39,7 +40,7 @@ const BlogDetailPage = lazy(() => import('./pages/blog/[slug]'));
 // Support/Contact Pages
 const CareersPage = lazy(() => import('./pages/CareersPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
+// Cookie policy removed
 
 // Utility Pages - Lower priority
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -49,10 +50,22 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const VirtualVenuePage = lazy(() => import('./pages/VirtualVenuePage'));
+
+const ConditionalFloatingChatButton = () => {
+  const location = useLocation();
+  // Do not show the button on the new futuristic chat page
+  if (location.pathname === '/chat' || location.pathname.startsWith('/dashboard/new-chat')) {
+    return null;
+  }
+  return <FloatingChatButton />;
+};
+
 
 function App() {
   const { toast } = useToast();
   const { loading } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleOffline = () => {
@@ -110,11 +123,11 @@ function App() {
                 <Route path="/signin" element={<AuthPage />} />
                 <Route path="/ritual-guide" element={<RitualGuidePage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
-                <Route path="/dashboard" element={<MobileDashboardLayout />}>
+                <Route path="/chat" element={<FuturisticChatPage />} />
+                <Route path="/virtual-venue" element={<VirtualVenuePage />} />
+                <Route path="/dashboard" element={isMobile ? <MobileDashboardLayout /> : <DashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
-                  <Route path="chat" element={<ChatPage />} />
-                  <Route path="new-chat" element={<ChatInterfacePage />} /> {/* New route for testing */}
                   <Route path="tasks" element={<TasksPage />} />
                   <Route path="timeline" element={<TimelinePage />} />
                   <Route path="moodboard" element={<MoodBoardPage />} />
@@ -123,19 +136,19 @@ function App() {
                   <Route path="vendors" element={<VendorsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="rituals" element={<RitualsPage />} />
+                  {/* <Route path="history" element={<HistoryPage />} /> */}
                 </Route>
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
                 <Route path="/careers" element={<CareersPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-                <Route path="/cookies" element={<CookiePolicyPage />} />
+                {/** Cookie policy routes removed **/}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
             <Toaster />
-            <FloatingChatButton />
-            <GDPRCompliance />
+            <ConditionalFloatingChatButton />
+            {/** GDPR/Cookie banner removed **/}
           </div>
         </ErrorBoundary>
     </BrowserRouter>

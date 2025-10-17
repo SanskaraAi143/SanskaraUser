@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Sparkles, Calendar, Heart } from 'lucide-react';
+import { Sparkles, Calendar, Heart, Wand2 } from 'lucide-react';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { useIsMobile } from "@/hooks/use-mobile";
 import FloatingParticles from '@/components/effects/FloatingParticles';
@@ -46,18 +46,14 @@ const Hero = () => {
                   <Calendar size={isMobile ? 16 : 20} className="mr-2" />
                   See Sample Plan
                 </AuthActionButton>
-              </div>
-              
-              <div className="mt-6 md:mt-8 flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-wedding-red/20 border-2 border-white flex items-center justify-center text-xs font-semibold text-wedding-red">
-                      {String.fromCharCode(64 + i)}
-                    </div>
-                  ))}
-                </div>                <p className="text-sm md:text-base" style={{color: '#374151'}}>
-                  <span className="font-medium">500+</span> couples planned their dream wedding with AI guidance
-                </p>
+                <AuthActionButton
+                  navigateTo="/virtual-venue"
+                  variant="outline"
+                  className="h-10 md:h-12 px-4 md:px-6 text-base md:text-lg border-purple-500 text-purple-500 hover:bg-purple-500/10 w-full sm:w-auto"
+                >
+                  <Wand2 size={isMobile ? 16 : 20} className="mr-2" />
+                  Virtual Try-On
+                </AuthActionButton>
               </div>
             </div>
           </div>

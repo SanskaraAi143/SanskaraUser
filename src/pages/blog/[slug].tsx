@@ -234,7 +234,7 @@ const BlogDetailPage: React.FC = () => {
             />
           )}
         </Helmet>
-        
+
         <header>
           <Navbar />
         </header>

@@ -24,52 +24,13 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { getUserVendors, SupabaseVendorRaw, Vendor } from "@/services/api/vendorApi";
 import { useAuth } from '@/context/AuthContext';
-
-interface DisplayVendor {
-  id: string;
-  wedding_id?: string;
-  name: string;
-  category: string;
-  location: string;
-  rating: number;
-  contact: string;
-  email: string;
-  price: string;
-  bookingDate?: string;
-  status: 'recommended' | 'contacted' | 'booked' | 'pending' | 'completed' | 'user_added';
-  notes?: string;
-  owner_party?: string; // Add owner_party
-  linkedVendor?: SupabaseVendorRaw | null; // This will be SupabaseVendorRaw or null
-  // Properties from SupabaseVendorRaw that might be directly accessed
-  vendor_id?: string;
-  vendor_name?: string;
-  vendor_category?: string;
-  contact_email?: string;
-  phone_number?: string;
-  website_url?: string;
-  address?: {
-    fullAddress: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  pricing_range?: {
-    min: number;
-    max: number;
-    currency: string;
-    unit: string;
-    details: string;
-  };
-  portfolio_image_urls?: string[];
-  description?: string;
-}
+import VendorsGrid, { DisplayVendor } from "@/components/dashboard/MyWeddingTeamDashboard";
 
 const VendorsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [vendors, setVendors] = useState<DisplayVendor[]>([]);
-  const [allVendors, setAllVendors] = useState<DisplayVendor[]>([]); // For global vendors
-  const [showAllVendors, setShowAllVendors] = useState(false);
+  const [activeTab, setActiveTab] = useState("marketplace"); // Default to marketplace
+  const [vendors, setVendors] = useState<DisplayVendor[]>([]); // User's shortlisted/hired vendors
+  const [marketplaceVendors, setMarketplaceVendors] = useState<DisplayVendor[]>([]); // All vendors for marketplace
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -102,6 +63,8 @@ const VendorsPage = () => {
             notes: item.notes || '',
             owner_party: item.owner_party, // Add owner_party here
             linkedVendor: item.linkedVendor,
+            paymentStatus: '₹50,000 / ₹1,20,000 Paid', // DUMMY DATA
+            contractLink: 'https://example.com/contract.pdf' // DUMMY DATA
           };
         });
         setVendors(mapped);
@@ -113,9 +76,9 @@ const VendorsPage = () => {
       .finally(() => setLoading(false));
   }, [user]);
 
-  // Fetch all vendors for 'View All Vendors' mode
+  // Fetch all vendors for 'Vendor Marketplace'
   useEffect(() => {
-    if (showAllVendors && allVendors.length === 0) {
+    if (activeTab === "marketplace" && marketplaceVendors.length === 0) {
       setLoading(true);
       import('@/services/api/vendorApi').then(({ getVendorRecommendations }) => {
         getVendorRecommendations('', '', undefined)
@@ -139,23 +102,44 @@ const VendorsPage = () => {
                 bookingDate: '',
                 status,
                 notes: vendor.description || '',
+                paymentStatus: '₹50,000 / ₹1,20,000 Paid', // DUMMY DATA
+                contractLink: 'https://example.com/contract.pdf' // DUMMY DATA
               };
             });
-            setAllVendors(mapped);
+            setMarketplaceVendors(mapped);
             setError(null);
           })
           .catch((e: unknown) => {
-        setError((e as Error).message || 'Failed to load all vendors');
+            setError((e as Error).message || 'Failed to load marketplace vendors');
           })
           .finally(() => setLoading(false));
       });
     }
-  }, [showAllVendors, allVendors.length]);
+  }, [activeTab, marketplaceVendors.length]);
 
-  const filteredVendors = vendors.filter(vendor => {
-    if (activeTab !== "all" && vendor.status !== activeTab) {
-      return false;
+  const filteredUserVendors = vendors.filter(vendor => {
+    // Filter for "My Wedding Team" tab specific statuses if needed, or by default show all user vendors
+    if (activeTab === "my-wedding-team" && searchTerm) {
+      return (
+        vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
+    return true; // Show all user vendors if no search term or not in my-wedding-team tab
+  });
+
+  const filteredMarketplaceVendors = marketplaceVendors.filter(vendor => {
+    return (
+      vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // This part of the filter logic applies only to the 'My Wedding Team' tab
+  const applyUserRoleFilter = (vendor: DisplayVendor) => {
+    if (activeTab !== "my-wedding-team") return true; // Only apply this filter in 'My Wedding Team' tab
 
     // Filter by user role and owner_party
     if (user?.role) {
@@ -187,19 +171,11 @@ const VendorsPage = () => {
       return false;
     }
 
-    return (
-      vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-  
-  const handleAddVendor = () => {
-    toast({
-      title: "Feature coming soon",
-      description: "Vendor management will be available in the next update",
-    });
+    // Default to true if no role or owner_party is defined, or if not in 'My Wedding Team' tab
+    return true;
   };
+
+  const vendorsToDisplay = activeTab === "marketplace" ? filteredMarketplaceVendors : filteredUserVendors.filter(applyUserRoleFilter);
 
   return (
     <div className="space-y-6">
@@ -210,13 +186,6 @@ const VendorsPage = () => {
             Manage and track all your wedding vendors in one place.
           </p>
         </div>
-        <button
-          className="px-4 py-2 rounded bg-wedding-red text-white hover:bg-wedding-dark-red transition disabled:opacity-60"
-          onClick={() => setShowAllVendors((v) => !v)}
-        >
-          {showAllVendors ? 'View My Vendors' : 'View All Vendors'}
-        </button>
-
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start">
@@ -231,261 +200,26 @@ const VendorsPage = () => {
             />
           </div>
         </div>
-        {!showAllVendors && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full flex gap-2">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="contacted">Contacted</TabsTrigger>
-              <TabsTrigger value="booked">Booked</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full flex gap-2">
+            <TabsTrigger value="marketplace">Vendor Marketplace</TabsTrigger>
+            <TabsTrigger value="my-wedding-team">My Wedding Team</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
-      
-   <VendorsGrid
-     loading={loading}
-     error={error}
-     showAllVendors={showAllVendors}
-     allVendors={allVendors}
-     vendors={vendors}
-     filteredVendors={filteredVendors}
-     searchTerm={searchTerm}
-     setSearchTerm={setSearchTerm}
-     setActiveTab={setActiveTab}
-     user={user as { wedding_id: string, internal_user_id: string, role: string }}
-     setVendors={setVendors}
-   />
-   </div>
- );
-};
-
-// VendorCard component
-interface VendorCardProps {
-  vendor: DisplayVendor;
-  showAllVendors: boolean;
-  vendors: DisplayVendor[];
-  user: { wedding_id: string, internal_user_id: string, role: string };
-  setVendors: React.Dispatch<React.SetStateAction<DisplayVendor[]>>;
-}
-
-const VendorCard: React.FC<VendorCardProps> = ({
-  vendor,
-  showAllVendors,
-  vendors,
-  user,
-  setVendors,
-}) => {
-  return (
-    <Card key={vendor.id} className="overflow-hidden">
-      <CardHeader className="pb-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{vendor.name}</CardTitle>
-            <div className="flex items-center mt-1">
-              <Badge variant="outline" className="mr-2">{vendor.category}</Badge>
-              <div className="flex items-center">
-                <Star className="h-3 w-3 fill-wedding-red text-wedding-red mr-1" />
-                <span>{vendor.rating || 0}</span>
-              </div>
-            </div>
-          </div>
-          {!showAllVendors && (
-            <Badge
-              className={`
-                ${vendor.status === 'completed' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''}
-                ${vendor.status === 'booked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' : ''}
-                ${vendor.status === 'contacted' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' : ''}
-                ${vendor.status === 'pending' ? 'bg-gray-100 text-gray-800 hover:bg-gray-100' : ''}
-              `}
-            >
-              {vendor.status === 'completed' ? 'Completed' : vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <div className="space-y-2">
-          <div className="flex items-start">
-            <MapPin className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.address?.city && vendor.linkedVendor?.address?.state ? `${vendor.linkedVendor.address.city}, ${vendor.linkedVendor.address.state}` : vendor.linkedVendor?.address?.fullAddress || ''}</span>
-          </div>
-          <div className="flex items-start">
-            <Phone className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.phone_number || ''}</span>
-          </div>
-          <div className="flex items-start">
-            <Mail className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.contact_email || ''}</span>
-          </div>
-          <div className="flex items-start">
-            <ShoppingCart className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-            <span className="text-sm">{vendor.linkedVendor?.pricing_range ? `${vendor.linkedVendor.pricing_range.min ? '₹' + vendor.linkedVendor.pricing_range.min.toLocaleString() : ''}${vendor.linkedVendor.pricing_range.max ? '-₹' + vendor.linkedVendor.pricing_range.max.toLocaleString() : ''} ${vendor.linkedVendor.pricing_range.unit || ''}` : ''}</span>
-          </div>
-          {vendor.bookingDate && (
-            <div className="flex items-start">
-              <Calendar className="h-4 w-4 text-gray-500 mt-0.5 mr-2" />
-              <span className="text-sm">Booked for: {new Date(vendor.bookingDate).toLocaleDateString()}</span>
-            </div>
-          )}
-          {vendor.notes && (
-            <div className="mt-2 text-sm text-gray-600 border-t pt-2">
-              <span className="italic">{vendor.notes}</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-      {showAllVendors ? (
-        <CardFooter className="flex justify-end pt-2">
-          <Button
-            variant="default"
-            size="sm"
-            disabled={vendors.some((v) => v.linkedVendor?.vendor_id === vendor.id || v.id === vendor.id)}
-            onClick={async () => {
-              try {
-                const api = await import('@/services/api/vendorApi');
-                if (typeof api.addVendorToUser === 'function') {
-                  await api.addVendorToUser(
-                    user.wedding_id,
-                    vendor,
-                    user.role || 'shared'
-                  );
-                  window.location.reload();
-                } else {
-                  throw new Error('addVendorToUser not found');
-                }
-              } catch (err) {
-                if (typeof toast === 'function') toast({ title: 'Error', description: 'Could not add vendor' });
-              }
-            }}
-          >
-            {vendors.some((v) => v.linkedVendor?.vendor_id === vendor.id || v.id === vendor.id)
-              ? 'Added'
-              : 'Add to My Vendors'}
-          </Button>
-        </CardFooter>
-      ) : (
-        <CardFooter className="flex justify-between pt-2">
-          <Button variant="outline" size="sm">
-            Contact
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={async () => {
-              try {
-                const api = await import('@/services/api/vendorApi');
-                await api.removeVendorFromUser(vendor.id);
-                if (typeof toast === 'function') toast({ title: 'Removed', description: 'Vendor removed from your list.' });
-                setVendors((prev) => prev.filter((v) => v.id !== vendor.id));
-              } catch (err) {
-                if (typeof toast === 'function') toast({ title: 'Error', description: 'Could not remove vendor' });
-              }
-            }}
-          >
-            Remove
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
-  );
-};
-
-// VendorsGrid component
-interface VendorsGridProps {
-  loading: boolean;
-  error: string | null;
-  showAllVendors: boolean;
-  allVendors: DisplayVendor[];
-  vendors: DisplayVendor[];
-  filteredVendors: DisplayVendor[];
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  user: { wedding_id: string, internal_user_id: string, role: string };
-  setVendors: React.Dispatch<React.SetStateAction<DisplayVendor[]>>;
-}
-
-const VendorsGrid: React.FC<VendorsGridProps> = ({
-  loading,
-  error,
-  showAllVendors,
-  allVendors,
-  vendors,
-  filteredVendors,
-  searchTerm,
-  setSearchTerm,
-  setActiveTab,
-  user,
-  setVendors,
-}) => {
-  const vendorsToRender = showAllVendors
-    ? allVendors.filter((vendor) =>
-        vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : filteredVendors.filter((vendor) =>
-        vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vendor.location?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="col-span-full flex justify-center items-center h-40 bg-gray-50 rounded-lg">
-          <span>Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="col-span-full flex justify-center items-center h-40 bg-red-50 rounded-lg">
-          <span className="text-red-600">{error}</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (vendorsToRender.length === 0) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="col-span-full flex justify-center items-center h-40 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <p className="text-muted-foreground">No vendors found</p>
-            <Button
-              variant="link"
-              onClick={() => {
-                setSearchTerm("");
-                setActiveTab("all");
-              }}
-            >
-              Clear filters
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {vendorsToRender.map((vendor) => (
-        <VendorCard
-          key={vendor.id}
-          vendor={vendor}
-          showAllVendors={showAllVendors}
-          vendors={vendors}
-          user={user}
-          setVendors={setVendors}
-        />
-      ))}
+       
+    <VendorsGrid
+       loading={loading}
+       error={error}
+       activeTab={activeTab}
+       vendorsToDisplay={vendorsToDisplay}
+       user={user as { wedding_id: string, internal_user_id: string, role: string }}
+       setVendors={setVendors}
+     />
     </div>
   );
 };
+
+
 
 export default VendorsPage;

@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { BASE_API_URL } from '@/config/api'; // Import BASE_API_URL
+import { Info } from 'lucide-react';
 
 // Google Gemini AI configuration
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || ''; // Load from environment variable
@@ -41,7 +42,7 @@ interface SecondPartnerOnboardingFormProps {
 }
 
 const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = ({ initialWeddingData }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -396,11 +397,12 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       }
       const result = await response.json();
       console.log('Final submission success:', result);
+      await refreshUser();
       toast({
         title: "Onboarding Complete!",
-        description: "Your plan is now active. You will be redirected to the dashboard.",
+        description: "Your plan is now active. Redirecting to dashboard...",
       });
-      navigate('/dashboard'); // Redirect to dashboard after successful submission
+      navigate('/dashboard');
     } catch (err: unknown) {
       console.error('Final Submission Error:', err);
       let errorMessage = "An unknown error occurred.";
@@ -424,6 +426,10 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
       return (
         <div className="module">
           <h2 className="text-2xl font-bold mb-4">Find Your Wedding Plan</h2>
+          <p className="mb-4 text-green-700 font-semibold bg-green-50 p-3 rounded-md border border-green-200">
+            <Info size={18} className="inline-block mr-2" />
+            This part usually takes about 2 minutes to complete!
+          </p>
           <p className="mb-4">Please enter your email address to load the plan started by your partner.</p>
           <Label htmlFor="unlockEmail">Your Email Address:</Label>
           <Input
@@ -521,10 +527,10 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
               <div className="grid grid-cols-2 gap-2">
                 {formData.ceremonies.map((ceremony, index) => (
                   <div key={index} className="flex items-center space-x-2 bg-blue-50 p-2 rounded">
-                    <Checkbox 
-                      id={`ceremony-${index}`} 
-                      name="ceremonies" 
-                      value={ceremony} 
+                    <Checkbox
+                      id={`ceremony-${index}`}
+                      name="ceremonies"
+                      value={ceremony}
                       checked={true}
                       onCheckedChange={(checked) => {
                         if (!checked) {
@@ -538,18 +544,6 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
                     <Label htmlFor={`ceremony-${index}`}>{ceremony}</Label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="mehendi" name="ceremonies" value="Mehendi" checked={formData.ceremonies.includes('Mehendi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Mehendi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="mehendi">Mehendi</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="haldi" name="ceremonies" value="Haldi" checked={formData.ceremonies.includes('Haldi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Haldi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="haldi">Haldi</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="sangeet" name="ceremonies" value="Sangeet" checked={formData.ceremonies.includes('Sangeet')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Sangeet', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="sangeet">Sangeet</Label>
-                </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
                 <Input 
@@ -588,6 +582,7 @@ const SecondPartnerOnboardingForm: React.FC<SecondPartnerOnboardingFormProps> = 
             <div className="grid gap-4">
               <div>
                 <Label htmlFor="budgetRange">Estimated Budget for Your Side's Responsibilities:</Label>
+                <p className="text-sm text-gray-500 mb-1">Please note: This budget is specifically for your side's responsibilities, not the overall wedding budget.</p>
                 <Input type="text" id="budgetRange" name="budgetRange" value={formData.budgetRange} onChange={handleChange} placeholder="e.g., $10,000 or 8 Lakhs" />
               </div>
               <div>

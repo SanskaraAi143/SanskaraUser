@@ -9,8 +9,8 @@ const FloatingChatButton: React.FC = () => {
   return (
     <Button
       variant="default" // Or a custom variant if a specific style is defined
-      className="fixed bottom-6 right-6 z-50 bg-gradient-primary text-white shadow-xl rounded-full p-4 h-auto hover:scale-105 transition-all duration-300"
-      onClick={() => navigate('/dashboard/chat')}
+      className="fixed bottom-6 right-6 z-50 bg-gradient-primary text-gray-600 shadow-xl rounded-full p-4 h-auto hover:scale-105 transition-all duration-300"
+      onClick={() => navigate('/chat')}
       aria-label="Chat with Sanskara AI"
     >
       <MessageCircle size={28} />

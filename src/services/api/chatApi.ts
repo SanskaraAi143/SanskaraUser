@@ -43,7 +43,8 @@ export const sendChatMessage = async (
   weddingId: string,
   sessionId?: string,
   category?: string,
-  attachments?: string[]
+  attachments?: string[],
+  vendorId?: string // Add vendorId here
 ): Promise<{ messages: ChatMessage[], session_id: string }> => {
   try {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -69,6 +70,7 @@ export const sendChatMessage = async (
         session_id: sessionId,
         category,
         attachments, // optional array of artifact_ids (backend may ignore)
+        vendor_id: vendorId, // Add vendor_id to the body
       }),
     });
     
@@ -139,24 +141,29 @@ export const getChatSessions = async (weddingId: string): Promise<ChatSession[]>
   }
 };
 
-export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]> => {
+export const getChatMessages = async (
+  _weddingId: string, // weddingId is unused but kept for consistency
+  sessionId: string,
+  options: { limit: number; offset: number }
+): Promise<{ history: any[]; total_count: number }> => {
   try {
-    const { data, error } = await supabase
+    const { limit, offset } = options;
+    const { data, error, count } = await supabase
       .from('chat_messages')
-      .select('message_id, sender_type, sender_name, content, timestamp')
+      .select('message_id, sender_type, sender_name, content, timestamp, event_type, metadata, event_id', { count: 'exact' })
       .eq('session_id', sessionId)
-      .order('timestamp', { ascending: true });
-      
-    if (error) throw new ApiError(`Failed to fetch chat messages: ${error.message}`, 500, error);
-    
-    return data.map(message => ({
-      id: message.message_id,
-      sender_type: message.sender_type,
-      sender_name: message.sender_name,
-      content: message.content,
-      timestamp: new Date(message.timestamp),
-      message: message.content.text || '', // For backward compatibility
-    }));
+      .order('timestamp', { ascending: false }) // Fetch newest first for pagination
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new ApiError(`Failed to fetch chat messages: ${error.message}`, 500, error);
+    }
+
+    // The history is reversed in the hook, so we send it as is
+    return {
+      history: data || [],
+      total_count: count || 0,
+    };
   } catch (error: any) {
     logError(error, { context: 'getChatMessages', sessionId: sessionId });
     toast({
@@ -164,6 +171,6 @@ export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]>
       description: error instanceof ApiError ? error.message : "Could not load messages.",
       variant: "destructive",
     });
-    throw error; // Re-throw to propagate error for further handling if needed
+    throw error;
   }
 };

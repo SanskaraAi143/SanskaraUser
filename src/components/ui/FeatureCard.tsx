@@ -5,13 +5,13 @@ interface FeatureCardProps {
   title: string;
   description: string;
   // Allow any other props to be passed down to the div if necessary
-  [key: string]: React.HTMLAttributes<HTMLDivElement>;
+  [key: string]: any;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, ...rest }) => {
   return (
     <div
-      className="glass-card p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col"
+      className="feature-card"
       {...rest}
     >
       <div className="h-14 w-14 rounded-full bg-gradient-primary flex items-center justify-center mb-6 shadow-lg flex-shrink-0">

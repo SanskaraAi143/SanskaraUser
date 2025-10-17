@@ -11,8 +11,11 @@ type User = {
   name?: string;
   wedding_id?: string | null;
   role?: string;
-  wedding_status?: string | null; 
-  wedding_details_json?: Record<string, unknown>; 
+  wedding_status?: string | null;
+  wedding_details_json?: {
+    wedding_id?: string | null;
+    [key: string]: unknown; // Allow other properties
+  };
 };
 
 export type AuthContextType = {
@@ -21,6 +24,7 @@ export type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
+  refreshUser: async () => {},
 });
 
 // ---------- Hook for Access -----------
@@ -198,6 +203,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Expose a way to refresh the user + wedding state (used after onboarding submit)
+  const refreshUser = useCallback(async () => {
+    const session = await supabase.auth.getSession();
+    const sbUser = session.data.session?.user || null;
+    if (sbUser) {
+      setLoading(true);
+      const data = await fetchInternalUserAndWeddingId(sbUser);
+      setUser(data);
+      setLoading(false);
+    }
+  }, [fetchInternalUserAndWeddingId]);
+
   const isLoading = loading || !sessionRestored;
 
   const memoizedValue = React.useMemo(() => ({
@@ -206,7 +223,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
-  }), [user, isLoading, signIn, signUp, signOut]);
+    refreshUser,
+  }), [user, isLoading, signIn, signUp, signOut, refreshUser]);
 
   return (
     <AuthContext.Provider value={memoizedValue}>

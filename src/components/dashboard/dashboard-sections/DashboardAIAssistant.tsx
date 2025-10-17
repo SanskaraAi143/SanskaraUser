@@ -25,7 +25,7 @@ const DashboardAIAssistant: React.FC = () => {
         <CardContent>
           <p className="text-sm text-gray-600 mb-4">Have questions about your wedding planning? Ask our AI assistant for help!</p>
           <Button className="w-full bg-wedding-red hover:bg-wedding-deepred" asChild>
-            <Link to="/dashboard/chat">Ask SanskaraAI</Link>
+            <Link to="/chat">Ask SanskaraAI</Link>
           </Button>
         </CardContent>
       </Card>

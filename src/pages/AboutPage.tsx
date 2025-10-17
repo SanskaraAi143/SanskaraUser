@@ -35,12 +35,12 @@ const AboutPage = () => {
                 Meets Modern <span className="title-gradient">Intelligence</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-                We're not just disrupting wedding planning—we're honoring 5,000 years of sacred traditions 
-                while leveraging cutting-edge AI to create experiences that are both spiritually authentic 
+                We're not just disrupting wedding planning—we're honoring 5,000 years of sacred traditions
+                while leveraging cutting-edge AI to create experiences that are both spiritually authentic
                 and effortlessly luxurious.
               </p>
             </div>
-            
+
             {/* Metrics Row */}            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
               <div className="text-center">
                 <div className="text-4xl font-bold text-wedding-gold mb-2">500+</div>
@@ -72,7 +72,7 @@ const AboutPage = () => {
             </h2>
             <div className="text-xl leading-relaxed text-gray-700 space-y-6">
               <p>
-                In an era where efficiency often comes at the expense of meaning, Sanskara AI stands as a bridge 
+                In an era where efficiency often comes at the expense of meaning, Sanskara AI stands as a bridge
                 between the profound wisdom of Hindu traditions and the precision of artificial intelligence.
               </p>
               <p className="text-2xl font-medium text-wedding-gold italic">
@@ -80,8 +80,8 @@ const AboutPage = () => {
                 seamlessly, authentically, and with unprecedented luxury."
               </p>
               <p>
-                Every ritual, every tradition, every sacred moment is preserved in its full spiritual significance 
-                while being enhanced by intelligent technology that anticipates your needs, connects you with 
+                Every ritual, every tradition, every sacred moment is preserved in its full spiritual significance
+                while being enhanced by intelligent technology that anticipates your needs, connects you with
                 the finest vendors, and ensures that your celebration is nothing short of extraordinary.
               </p>
             </div>
@@ -98,7 +98,7 @@ const AboutPage = () => {
                 The $50B Problem We're Solving
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-                The Indian wedding industry is massive, but planning remains fragmented, stressful, 
+                The Indian wedding industry is massive, but planning remains fragmented, stressful,
                 and disconnected from cultural authenticity.
               </p>
             </div>
@@ -114,7 +114,7 @@ const AboutPage = () => {
                     <li>• Overwhelming stress, lost joy</li>
                   </ul>
                 </div>
-                
+
                 <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-secondaryGold">
                   <h3 className="font-bold text-xl text-wedding-secondaryGold mb-3">The Sanskara AI Way</h3>                  <ul className="space-y-2 text-yellow-800">
                     <li>• 3-month streamlined planning</li>
@@ -125,7 +125,7 @@ const AboutPage = () => {
                   </ul>
                 </div>
               </div>
-              
+
               <div className="relative">
                 <div className="bg-gradient-to-br from-wedding-cream to-wedding-gold/20 rounded-2xl p-8">
                   <div className="text-center">
@@ -176,29 +176,29 @@ const AboutPage = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">AI-Powered Intelligence</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Machine learning algorithms trained on thousands of successful Hindu weddings, 
+                  Machine learning algorithms trained on thousands of successful Hindu weddings,
                   understanding cultural nuances and modern preferences.
                 </p>
               </div>
-              
+
               <div className="text-center glass-card p-8 rounded-xl">
                 <div className="inline-flex items-center justify-center p-4 bg-wedding-secondaryGold/20 rounded-full mb-6">
                   <Heart className="h-8 w-8 text-wedding-red" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">Cultural Authenticity</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Deep respect for sacred traditions, with expert guidance on rituals, 
+                  Deep respect for sacred traditions, with expert guidance on rituals,
                   ensuring spiritual significance is preserved and celebrated.
                 </p>
               </div>
-              
+
               <div className="text-center glass-card p-8 rounded-xl">
                 <div className="inline-flex items-center justify-center p-4 bg-wedding-gold/20 rounded-full mb-6">
                   <Shield className="h-8 w-8 text-wedding-secondaryGold" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">Luxury Service Standards</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  White-glove experience with personalized attention, premium vendor networks, 
+                  White-glove experience with personalized attention, premium vendor networks,
                   and concierge-level service throughout your journey.
                 </p>
               </div>
@@ -243,7 +243,7 @@ const AboutPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="glass-card p-6 rounded-xl shadow-lg border-l-4 border-wedding-red">
                   <div className="flex items-center mb-4">
                     <Users className="h-6 w-6 text-wedding-red mr-3" />
@@ -269,7 +269,7 @@ const AboutPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-gradient-to-br from-wedding-cream to-wedding-gold/20 rounded-xl p-8 border border-wedding-gold/30">
                 <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">Market Validation</h3>
                 <div className="space-y-6">
@@ -277,7 +277,7 @@ const AboutPage = () => {
                     "Sanskara AI saved us 8 months of planning and ₹3 lakhs. The cultural guidance was invaluable."
                   </blockquote>
                   <div className="text-center text-sm text-gray-600">— Priya & Arjun, Mumbai</div>
-                  
+
                   <blockquote className="italic text-gray-700 text-center">
                     "Finally, technology that respects our traditions while making everything effortless."
                   </blockquote>
@@ -303,10 +303,10 @@ const AboutPage = () => {
             </h2>
             <div className="text-xl leading-relaxed text-gray-700 space-y-6 mb-12">
               <p>
-                We envision a world where every Hindu wedding seamlessly honors ancient traditions 
+                We envision a world where every Hindu wedding seamlessly honors ancient traditions
                 while embracing the convenience and precision of modern technology.
               </p>              <p className="text-2xl font-medium text-wedding-red">
-                Our goal: To become the global standard for culturally authentic, 
+                Our goal: To become the global standard for culturally authentic,
                 AI-powered wedding planning.
               </p>
             </div>
@@ -315,19 +315,19 @@ const AboutPage = () => {
                 <Globe className="h-12 w-12 text-wedding-orange mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-3">Global Expansion</h3>
                 <p className="text-gray-700">Serving Hindu couples worldwide with local expertise</p>
-              </div>              
+              </div>
               <div className="p-6 bg-gradient-to-br from-wedding-cream to-wedding-secondaryGold/20 rounded-xl border border-wedding-secondaryGold/30">
                 <Brain className="h-12 w-12 text-wedding-secondaryGold mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-3">AI Innovation</h3>
                 <p className="text-gray-700">Next-generation intelligence for hyper-personalization</p>
               </div>
-              
+
               <div className="p-6 bg-gradient-to-br from-wedding-cream to-wedding-red/20 rounded-xl border border-wedding-red/30">
                 <Heart className="h-12 w-12 text-wedding-red mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-3">Cultural Preservation</h3>
                 <p className="text-gray-700">Digitizing and preserving traditions for future generations</p>
               </div></div>
-            
+
             <AuthActionButton
               navigateTo="/dashboard"
               className="cta-button text-lg px-8 py-4"
@@ -366,7 +366,7 @@ const AboutPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="text-left">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Business Hours</h3>
                   <div className="space-y-2 text-gray-600">
@@ -377,7 +377,7 @@ const AboutPage = () => {
                 </div>
               </div>
             </div>
-            
+
             <AuthActionButton
               navigateTo="/dashboard"
               className="cta-button text-lg px-8 py-4"

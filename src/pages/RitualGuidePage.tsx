@@ -114,7 +114,7 @@ const RitualGuidePage: React.FC = () => {
               meaningful for your family traditions and create a personalized ceremony timeline.
             </p>
             <Link 
-              to="/dashboard/chat"
+              to="/chat"
               className="cta-button text-white px-8 py-4 rounded-full font-semibold text-lg"
             >
               Chat with AI Guide

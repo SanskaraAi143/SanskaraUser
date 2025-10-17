@@ -44,15 +44,23 @@ const MobileDashboardLayout = () => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  // If user hasn't completed onboarding, redirect to onboarding page
-  if (!user.wedding_id || user.wedding_status !== 'active') {
+  // If user hasn't started onboarding, redirect to onboarding page.
+  // Allow dashboard access once a wedding_id exists (even if status is onboarding_in_progress)
+  if (!user.wedding_id) {
+    return <Navigate to="/onboarding" state={{ from: location }} replace />;
+  }
+
+  // If this is the invited partner and onboarding is still in progress, keep them in onboarding flow
+  const details: any = user.wedding_details_json || {};
+  const isInvitedPartner = user.role === 'invited_partner' || details?.other_partner_email_expected === user.email;
+  if (isInvitedPartner && user.wedding_status === 'onboarding_in_progress') {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
   }
 
   const sidebarLinks = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
-    { name: "Chat with AI", icon: MessageCircle, href: "/dashboard/chat" },
+    { name: "Chat with AI", icon: MessageCircle, href: "/chat" },
     { name: "Tasks", icon: CheckSquare, href: "/dashboard/tasks" },
     { name: "Timeline", icon: CalendarDays, href: "/dashboard/timeline" },
     { name: "Mood Board", icon: Paintbrush, href: "/dashboard/moodboard" },
@@ -117,7 +125,7 @@ const MobileDashboardLayout = () => {
                     className="w-full text-wedding-red border-wedding-red hover:bg-wedding-red/10"
                     asChild
                   >
-                    <Link to="/dashboard/chat" onClick={() => setOpen(false)}>
+                    <Link to="/chat" onClick={() => setOpen(false)}>
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Ask AI
                     </Link>
@@ -146,7 +154,7 @@ const MobileDashboardLayout = () => {
             className="text-wedding-red border-wedding-red hover:bg-wedding-red/10"
             asChild
           >
-            <Link to="/dashboard/chat">
+            <Link to="/chat">
               <MessageCircle className="mr-1 h-4 w-4" />
               Ask AI
             </Link>
@@ -183,7 +191,7 @@ const MobileDashboardLayout = () => {
           })}
         </nav>
         <div className="px-4 py-4">          <Button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ffd700] to-[#ff8f00] text-white font-semibold text-lg shadow-lg hover:scale-105 transition-transform duration-200" asChild>
-            <Link to="/dashboard/chat">Ask AI</Link>
+            <Link to="/chat">Ask AI</Link>
           </Button>
         </div>
       </aside>
@@ -201,7 +209,7 @@ const MobileDashboardLayout = () => {
               className="text-wedding-red border-wedding-red hover:bg-wedding-red/10"
               asChild
             >
-              <Link to="/dashboard/chat">
+              <Link to="/chat">
                 <MessageCircle className="mr-1 h-4 w-4" />
                 Ask AI
               </Link>

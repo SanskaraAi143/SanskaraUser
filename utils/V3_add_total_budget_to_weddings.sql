@@ -1,0 +1,1 @@
+ALTER TABLE weddings ADD COLUMN total_budget NUMERIC DEFAULT 0;

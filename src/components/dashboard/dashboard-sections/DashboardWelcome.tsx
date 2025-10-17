@@ -1,5 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { MessageCircle } from 'lucide-react';
 import { UserProfile } from '@/services/api/userApi'; // Assuming UserProfile is exported from here
 
 interface DashboardWelcomeProps {
@@ -30,12 +32,31 @@ const DashboardWelcome: React.FC<DashboardWelcomeProps> = ({ profile, userName, 
       variants={cardVariants}
       className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-wedding-gold/20 shadow-lg"
     >
-      <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
-        Welcome back, {profile?.display_name || userName || "Friend"}!
-      </h1>
-      <p className="text-gray-600 animate-fadeIn delay-75">
-        {weddingDate ? `Your wedding is in ${daysUntilWedding} days (${weddingDate})` : `Let's plan your dream wedding!`}
-      </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-playfair text-wedding-gold mb-2 animate-fadeIn">
+            Welcome back, {profile?.display_name || userName || "Friend"}!
+          </h1>
+          <p className="text-gray-600 animate-fadeIn delay-75">
+            {weddingDate ? `Your wedding is in ${daysUntilWedding} days (${weddingDate})` : `Let's plan your dream wedding!`}
+            {weddingDate && daysUntilWedding !== '-' && (
+              <span className="block text-sm text-gray-500 mt-1">
+                {typeof daysUntilWedding === 'number' && daysUntilWedding <= 30 && daysUntilWedding > 7 && "Time to send out your digital invites!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding <= 7 && daysUntilWedding > 0 && "Finalize your Sangeet playlist!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding === 0 && "It's your wedding day! Enjoy!"}
+                {typeof daysUntilWedding === 'number' && daysUntilWedding > 30 && "Keep up the great planning!"}
+              </span>
+            )}
+          </p>
+        </div>
+        <Link
+          to="/chat"
+          className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-gray-900 rounded-lg shadow-md hover:bg-yellow-700 hover:text-gray-900 transition-colors"
+        >
+          <MessageCircle size={18} />
+          <span>Start Chat</span>
+        </Link>
+      </div>
     </motion.div>
   );
 };

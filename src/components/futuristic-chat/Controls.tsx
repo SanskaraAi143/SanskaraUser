@@ -1,0 +1,76 @@
+import React from 'react';
+import { Video, Mic, Phone, MicOff, VideoOff, MonitorPlay } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface ControlsProps {
+  isMuted?: boolean;
+  isVideoActive?: boolean;
+  activeVideoMode?: 'webcam' | 'screen' | null;
+  isRecording?: boolean;
+  onTalkClick: () => void;
+  onCameraClick: () => void;
+  onScreenShareClick: () => void;
+  onMuteClick: () => void;
+  onEndClick: () => void;
+}
+
+const Controls: React.FC<ControlsProps> = ({
+  isMuted,
+  isVideoActive,
+  activeVideoMode,
+  isRecording,
+  onTalkClick,
+  onCameraClick,
+  onScreenShareClick,
+  onMuteClick,
+  onEndClick
+}) => {
+  const baseButtonClasses = 'w-12 h-12 flex items-center justify-center rounded-full text-futuristic-text-secondary transition-all duration-300 hover:bg-[#f0eada] hover:text-futuristic-primary-accent';
+
+  return (
+    <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white via-white/80 to-transparent z-10">
+      <div className="flex justify-around items-center max-w-lg mx-auto">
+        <button
+          onClick={onCameraClick}
+          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isVideoActive && activeVideoMode === 'webcam' })}
+          title="Toggle Webcam"
+        >
+          {isVideoActive && activeVideoMode === 'webcam' ? <VideoOff size={24} /> : <Video size={24} />}
+        </button>
+        <button
+          onClick={onScreenShareClick}
+          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isVideoActive && activeVideoMode === 'screen' })}
+          title="Share Screen"
+        >
+          <MonitorPlay size={24} />
+        </button>
+        <button
+          onClick={onMuteClick}
+          className={cn(baseButtonClasses, 'text-black', { 'bg-[#f0eada] text-futuristic-primary-accent': isMuted })}
+          title="Mute/Unmute"
+        >
+          {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+        </button>
+        <button
+          onClick={onTalkClick}
+          className={cn(
+            'w-20 h-20 flex items-center justify-center rounded-full bg-futuristic-primary-accent text-black shadow-lg shadow-red-900/40 transition-all duration-300 hover:scale-105 hover:bg-red-800',
+            { 'scale-90 bg-futuristic-secondary-accent shadow-blue-900/50': isRecording }
+          )}
+          title={isRecording ? "Stop Talking" : "Tap to Talk"}
+        >
+          <Mic size={32} />
+        </button>
+        <button
+          onClick={onEndClick}
+          className={cn(baseButtonClasses, "text-futuristic-primary-accent hover:bg-red-100")}
+          title="End Session"
+        >
+          <Phone size={24} fill="currentColor" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Controls;

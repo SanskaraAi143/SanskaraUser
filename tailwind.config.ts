@@ -1,112 +1,165 @@
-import tailwindcssAnimate from "tailwindcss-animate";
+import tailwindcssAnimate from "tailwindcss-animate"
+import typography from "@tailwindcss/typography"
 
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+const config = {
   darkMode: ["class"],
   content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./index.html",
-  ],
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+	],
+  prefix: "",
   theme: {
     container: {
       center: true,
-      padding: '2rem',
+      padding: "2rem",
       screens: {
-        '2xl': '1400px'
-      }
+        "2xl": "1400px",
+      },
     },
-    extend: {      colors: {
-        'wedding-red': '#D62F32',
-        'wedding-orange': '#F7941D',
-        'wedding-gold': '#B8860B', // Darker gold for better contrast (4.5:1 ratio)
-        'wedding-secondaryGold': '#E67E00', // Darker secondary gold
+    extend: {
+      colors: {
+        'wedding-gold': '#FFD700',
+        'wedding-secondaryGold': '#FFC400',
         'wedding-cream': '#FFF8E1',
-        'wedding-brown': '#4A3728', // Dark brown for high contrast
-        'from-wedding-cream': '#FFF8E1', // alias for gradient usage
-        'to-wedding-gold': '#B8860B',    // Updated alias for gradient usage
-        border: 'hsl(43 30% 90%)',
-        input: 'hsl(45 30% 96%)',
-        ring: 'hsl(43 100% 50%)',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        'wedding-red': '#D62F32',
+        'wedding-purple': '#8A2BE2',
+        'futuristic-background': '#0A0A0A',
+        'futuristic-primary': '#1E1E1E',
+        'futuristic-secondary': '#333333',
+        'futuristic-accent': '#00BFFF',
+        'futuristic-primary-accent': '#FF4500',
+        'futuristic-secondary-accent': '#1E90FF',
+        'futuristic-text-primary': '#FFFFFF',
+        'futuristic-text-secondary': '#B0B0B0',
+        'futuristic-gold': '#FFD700', // Added futuristic-gold to resolve Tailwind warning
+
+        // New Design System Colors
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: 'oklch(60% 0.15 30)', // A warm, inviting primary color
+          foreground: 'oklch(95% 0.02 30)', // Light text on primary
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: 'oklch(85% 0.05 60)', // A soft, complementary secondary color
+          foreground: 'oklch(20% 0.02 60)', // Dark text on secondary
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: 'oklch(75% 0.1 90)', // A subtle accent color
+          foreground: 'oklch(20% 0.02 90)', // Dark text on accent
+        },
+        destructive: {
+          DEFAULT: 'oklch(60% 0.15 15)', // A clear, but not harsh, red
+          foreground: 'oklch(95% 0.02 15)', // Light text on destructive
+        },
+        background: 'oklch(98% 0.01 60)', // Soft, light background
+        foreground: 'oklch(20% 0.02 60)', // Dark text for readability
+        'text-secondary': 'oklch(45% 0.02 60)', // Lighter text for secondary information
+        border: 'oklch(90% 0.01 60)', // Subtle border color
+        'card-bg': 'oklch(100% 0.01 60)', // Slightly off-white for cards
+
+        // Existing HSL colors (will be updated in index.css)
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
-      },
-      backgroundImage: {
-        'gradient-primary': 'linear-gradient(135deg, #FFD700, #FF8F00)',
-        'gradient-glass': 'linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 253, 231, 0.9))',
-      },
-      screens: {
-        'xs': '475px',
-      },
-      fontFamily: {
-        playfair: ['"Playfair Display"', 'serif'],
-        poppins: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'], // Set Poppins as default for font-sans
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      spacing: {
+        '0': '0',
+        '1': '0.25rem',   // 4px
+        '2': '0.5rem',    // 8px
+        '3': '0.75rem',   // 12px
+        '4': '1rem',      // 16px
+        '5': '1.25rem',   // 20px
+        '6': '1.5rem',    // 24px
+        '8': '2rem',      // 32px
+        '10': '2.5rem',   // 40px
+        '12': '3rem',     // 48px
+        '16': '4rem',     // 64px
+        '20': '5rem',     // 80px
+        '24': '6rem',     // 96px
+        '32': '8rem',     // 128px
+        '40': '10rem',    // 160px
+        '48': '12rem',    // 192px
+        '56': '14rem',    // 224px
+        '64': '16rem',    // 256px
+      },
+      fontFamily: {
+        heading: ['Playfair Display', 'serif'],
+        body: ['Roboto', 'sans-serif'],
+        sans: ['Roboto', 'sans-serif'], // Default sans-serif
       },
       keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' }
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' }
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
-        'gradientShift': {
-          '0%, 100%': { opacity: '0.8', transform: 'scale(1)' },
-          '50%': { opacity: '1', transform: 'scale(1.05)' }
+        'gentle-pulse': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.8' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.05)', opacity: '1' },
         },
-        'float': {
-          '0%': { transform: 'translateY(100vh) rotate(0deg)', opacity: '0' },
-          '10%': { opacity: '0.7' },
-          '90%': { opacity: '0.7' },
-          '100%': { transform: 'translateY(-100px) rotate(360deg)', opacity: '0' }
+        'speaking-pulse': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0.9' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.1)', opacity: '1' },
         },
-        'fadeIn': {
-          from: { opacity: '0', transform: 'translateY(20px)' },
-          to: { opacity: '1', transform: 'translateY(0)' }
-        }
+        'speaking-ring-1': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.5' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.1)', opacity: '0.8' },
+        },
+        'speaking-ring-2': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '0.3' },
+          '50%': { transform: 'translate(-50%, -50%) scale(1.15)', opacity: '0.6' },
+        },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        'gradient-shift': 'gradientShift 20s ease-in-out infinite',
-        'float': 'float 15s infinite linear',
-        'fade-in': 'fadeIn 1s ease-out forwards'
-      }
-    }
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        'gentle-pulse': 'gentle-pulse 4s infinite 0.5s ease-in-out',
+        'speaking-pulse': 'speaking-pulse 1.2s infinite ease-in-out',
+        'speaking-ring-1': 'speaking-ring-1 1.2s infinite ease-in-out',
+        'speaking-ring-2': 'speaking-ring-2 1.2s infinite ease-in-out',
+      },
+    },
   },
-  plugins: [tailwindcssAnimate],
-};
+  plugins: [tailwindcssAnimate, typography, function ({ addUtilities }: any) {
+    addUtilities({
+      '.high-priority-day': {
+        'background-color': '#D62F32 !important' as const,
+        'color': 'white !important' as const,
+      },
+      '.medium-priority-day': {
+        'background-color': '#8A2BE2 !important' as const,
+        'color': 'white !important' as const,
+      },
+      '.low-priority-day': {
+        'background-color': '#FFD700 !important' as const,
+        'color': 'black !important' as const,
+      },
+      '.has-tasks-day': {
+        'font-weight': 'bold !important' as const,
+      },
+    })
+  }],
+}
 
-export default config;
+export default config

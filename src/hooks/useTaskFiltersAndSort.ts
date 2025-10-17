@@ -21,22 +21,42 @@ export const useTaskFiltersAndSort = (allTasks: Task[]) => {
       sortBy: 'due_date',
       sortOrder: 'asc',
       search: '',
+      filterStartDate: null, // New filter
+      filterEndDate: null,   // New filter
     };
   });
 
-  const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'incomplete'>(userPrefs.filterStatus);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'Backlog' | 'To Do' | 'Doing' | 'Done'>(userPrefs.filterStatus);
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>(userPrefs.filterPriority);
   const [filterCategory, setFilterCategory] = useState(userPrefs.filterCategory);
+  const [filterStartDate, setFilterStartDate] = useState<Date | null>(userPrefs.filterStartDate ? new Date(userPrefs.filterStartDate) : null);
+  const [filterEndDate, setFilterEndDate] = useState<Date | null>(userPrefs.filterEndDate ? new Date(userPrefs.filterEndDate) : null);
   const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'created_at'>(userPrefs.sortBy);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(userPrefs.sortOrder);
   const [search, setSearch] = useState(userPrefs.search);
 
   // Memoized filtered and sorted tasks
   const processedTasks = useMemo(() => {
-    let filtered = allTasks.filter(task => {
-      // Filter by completion status
-      if (filterStatus === 'complete' && !task.is_complete) return false;
-      if (filterStatus === 'incomplete' && task.is_complete) return false;
+    const tasksWithDefaultStatus = allTasks.map(task => ({
+      ...task,
+      status: (task.status === "No Status" || !task.status) ? 'Backlog' : task.status, // Map "No Status" or undefined/null to 'Backlog'
+    }));
+
+    let filtered = tasksWithDefaultStatus.filter(task => {
+      // Filter by task status (Backlog, To Do, Doing, Done)
+      if (filterStatus !== 'all' && task.status !== filterStatus) {
+        return false;
+      }
+
+      // Filter by date range
+      if (filterStartDate && task.due_date) {
+        const taskDueDate = new Date(task.due_date);
+        if (taskDueDate < filterStartDate) return false;
+      }
+      if (filterEndDate && task.due_date) {
+        const taskDueDate = new Date(task.due_date);
+        if (taskDueDate > filterEndDate) return false;
+      }
 
       // Filter by priority
       if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
@@ -47,7 +67,8 @@ export const useTaskFiltersAndSort = (allTasks: Task[]) => {
       // Filter by search term
       if (search !== '' &&
           !(task.title.toLowerCase().includes(search.toLowerCase()) ||
-            (task.description && task.description.toLowerCase().includes(search.toLowerCase()))))
+            (task.description && task.description.toLowerCase().includes(search.toLowerCase())) ||
+            (task.assignee && task.assignee.toLowerCase().includes(search.toLowerCase())))) // Added assignee to search
         return false;
 
       // Filter by lead_party based on user role
@@ -91,12 +112,14 @@ export const useTaskFiltersAndSort = (allTasks: Task[]) => {
     });
 
     return filtered;
-  }, [allTasks, filterStatus, filterPriority, filterCategory, sortBy, sortOrder, search, user?.role]);
+  }, [allTasks, filterStatus, filterPriority, filterCategory, filterStartDate, filterEndDate, sortBy, sortOrder, search, user?.role]);
 
   return {
     filterStatus, setFilterStatus,
     filterPriority, setFilterPriority,
     filterCategory, setFilterCategory,
+    filterStartDate, setFilterStartDate,
+    filterEndDate, setFilterEndDate,
     sortBy, setSortBy,
     sortOrder, setSortOrder,
     search, setSearch,

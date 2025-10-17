@@ -8,10 +8,12 @@ export interface Task {
   title: string;
   description?: string;
   is_complete: boolean;
-  due_date?: string;
+  due_date?: Date;
   priority: 'low' | 'medium' | 'high';
   category?: string;
-  status: 'No Status' | 'To Do' | 'Doing' | 'Done';
+  status: 'No Status' | 'Backlog' | 'To Do' | 'Doing' | 'Done';
+  assignee?: string; // New field for assignee
+  subtasks?: { title: string; is_complete: boolean; }[]; // New field for subtasks
   lead_party?: 'bride_side' | 'groom_side' | 'couple' | 'shared' | null;
   created_at?: string;
   updated_at?: string;
@@ -57,16 +59,20 @@ export const useAddUserTask = () => {
       due_date,
       priority,
       category,
-      status = 'No Status',
+      status = 'Backlog', // Changed default from 'No Status' to 'Backlog'
+      assignee, // Added assignee
+      subtasks, // Added subtasks
       lead_party,
     }: {
       wedding_id: string;
       title: string;
       description: string;
-      due_date: string;
+      due_date?: Date;
       priority: 'low' | 'medium' | 'high';
       category?: string;
-      status?: 'No Status' | 'To Do' | 'Doing' | 'Done';
+      status?: 'Backlog' | 'To Do' | 'Doing' | 'Done'; // Updated status type
+      assignee?: string; // Added assignee type
+      subtasks?: { title: string; is_complete: boolean; }[]; // Added subtasks type
       lead_party?: 'bride_side' | 'groom_side' | 'couple' | 'shared' | string;
     }) => {
       const { error } = await supabase.from('tasks').insert([
@@ -75,10 +81,12 @@ export const useAddUserTask = () => {
           title,
           description,
           is_complete: false,
-          due_date,
+          due_date: due_date?.toISOString(), // Convert Date to ISO string
           priority,
           category,
           status,
+          assignee, // Added assignee to insert
+          subtasks, // Added subtasks to insert
           lead_party: lead_party === "" ? null : lead_party, // Handle empty string for lead_party
         },
       ]);
@@ -100,9 +108,12 @@ export const useUpdateUserTask = () => {
       task_id: string;
       updates: Partial<Omit<Task, 'task_id' | 'wedding_id'>>;
     }) => {
+      const formattedUpdates = updates.due_date instanceof Date
+        ? { ...updates, due_date: updates.due_date.toISOString() }
+        : updates;
       const { error } = await supabase
         .from('tasks')
-        .update(updates)
+        .update(formattedUpdates)
         .eq('task_id', task_id);
       if (error) throw error;
     },
