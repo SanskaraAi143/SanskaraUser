@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import FirstPartnerOnboardingForm from '@/components/onboarding/FirstPartnerOnboardingForm';
 import SecondPartnerOnboardingForm from '@/components/onboarding/SecondPartnerOnboardingForm';
+import OnboardingPrerequisites from '@/components/onboarding/OnboardingPrerequisites';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const OnboardingPage: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [prerequisitesAcknowledged, setPrerequisitesAcknowledged] = useState(false);
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -46,9 +49,14 @@ const OnboardingPage: React.FC = () => {
 
   // Case 1: No wedding ID - user is brand new or hasn't started onboarding
   if (!user?.wedding_id) {
+    if (!prerequisitesAcknowledged) {
+      return (
+        <OnboardingPrerequisites onContinue={() => setPrerequisitesAcknowledged(true)} />
+      );
+    }
     return (
       <div className="onboarding-container">
-        <h1>Welcome! Let's Plan Your Wedding.</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Welcome! Let's Plan Your Wedding.</h1>
         <FirstPartnerOnboardingForm />
       </div>
     );

@@ -3,18 +3,19 @@ import TaskDetailModal, { TaskFormValues } from './TaskDetailModal';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import CategoryManager from './CategoryManager';
-import { PlusCircle, LayoutGrid, List, Calendar, Filter } from 'lucide-react';
+import { PlusCircle, LayoutGrid, List, Filter } from 'lucide-react';
+import { DateRange } from "react-day-picker";
 
 import type { Task } from '@/services/api/tasksApi';
 import { useTaskManagement } from '@/hooks/useTaskManagement';
 import { useTaskFiltersAndSort } from '@/hooks/useTaskFiltersAndSort';
 import TaskKanbanColumn from './task-tracker-sections/TaskKanbanColumn';
-import TaskRow from './task-tracker-sections/TaskCard';
-import TaskCalendarView from './task-tracker-sections/TaskCalendarView'; // Import TaskCalendarView
+import { TaskTableView } from './task-tracker-sections/TaskTableView';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 
 const TaskTracker = () => {
   const {
@@ -32,6 +33,8 @@ const TaskTracker = () => {
     filterStatus, setFilterStatus,
     filterPriority, setFilterPriority,
     filterCategory, setFilterCategory,
+    filterStartDate, setFilterStartDate,
+    filterEndDate, setFilterEndDate,
     sortBy, setSortBy,
     sortOrder, setSortOrder,
     search, setSearch,
@@ -40,7 +43,7 @@ const TaskTracker = () => {
 
   const [modalTask, setModalTask] = useState<Partial<Task> | null>(null);
   const [categories, setCategories] = useState<string[]>(() => JSON.parse(localStorage.getItem('categories') || '[]'));
-  const [currentView, setCurrentView] = useState<'board' | 'list' | 'calendar'>('board');
+  const [currentView, setCurrentView] = useState<'board' | 'table'>('table');
 
   const [tasksPerPage, setTasksPerPage] = useState(() => Number(localStorage.getItem('tasksPerPage')) || 10); // Increased default
   const [currentPage, setCurrentPage] = useState(1); // Will be used for pagination if implemented
@@ -76,7 +79,7 @@ const TaskTracker = () => {
     const taskToUpdate = tasks.find(t => t.task_id === draggableId);
     if (!taskToUpdate) return;
 
-    const newStatus = destination.droppableId as Task['status'];
+    const newStatus = destination.droppableId as 'Backlog' | 'To Do' | 'Doing' | 'Done';
     const newIsComplete = newStatus === 'Done';
 
     // Optimistic UI update
@@ -134,18 +137,10 @@ const TaskTracker = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentView('list')}
-                className={currentView === 'list' ? 'bg-wedding-gold text-white' : ''}
+                onClick={() => setCurrentView('table')}
+                className={currentView === 'table' ? 'bg-wedding-gold text-white' : ''}
               >
-                <List className="h-4 w-4 mr-2" /> List
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentView('calendar')}
-                className={currentView === 'calendar' ? 'bg-wedding-gold text-white' : ''}
-              >
-                <Calendar className="h-4 w-4 mr-2" /> Calendar
+                <List className="h-4 w-4 mr-2" /> Table
               </Button>
             </div>
 
@@ -160,9 +155,19 @@ const TaskTracker = () => {
                 <div className="grid gap-4">
                   <div className="space-y-2">
                     <h4 className="font-medium leading-none text-wedding-brown">Filter Tasks</h4>
-                    <p className="text-sm text-wedding-brown/80">Filter by category, priority, or assignee.</p>
+                    <p className="text-sm text-wedding-brown/80">Filter by category, priority, assignee, or date range.</p>
                   </div>
                   <div className="grid gap-2">
+                    {/* Date Range Filter */}
+                    <Label htmlFor="date-range" className="text-wedding-brown">Date Range</Label>
+                    <DatePickerWithRange
+                      date={{ from: filterStartDate || undefined, to: filterEndDate || undefined }}
+                      setDate={(range: DateRange | undefined) => {
+                        setFilterStartDate(range?.from || null);
+                        setFilterEndDate(range?.to || null);
+                      }}
+                    />
+
                     {/* Category Filter */}
                     <Label htmlFor="filter-category" className="text-wedding-brown">Category</Label>
                     <Select onValueChange={setFilterCategory} defaultValue={filterCategory}>
@@ -204,6 +209,20 @@ const TaskTracker = () => {
                         ))}
                       </SelectContent>
                     </Select>
+
+                    {/* Status Filter */}
+                    <Label htmlFor="filter-status" className="text-wedding-brown">Status</Label>
+                    <Select onValueChange={(value: "Backlog" | "To Do" | "Doing" | "Done" | "all") => setFilterStatus(value)} defaultValue={filterStatus}>
+                      <SelectTrigger className="w-full glass-card border-wedding-gold/30">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        {kanbanStatuses.map(status => (
+                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </PopoverContent>
@@ -239,25 +258,15 @@ const TaskTracker = () => {
             </DragDropContext>
           )}
 
-          {currentView === 'list' && (
-            <div className="space-y-3">
-              {processedTasks.map((task) => (
-                <TaskRow
-                  key={task.task_id}
-                  task={task}
-                  isSelected={false}
-                  onSelect={() => {}}
-                  onToggleComplete={toggleTaskCompletion}
-                  onDelete={deleteTask}
-                  onEdit={(taskId, updates) => updateTask(taskId, updates)}
-                />
-              ))}
-            </div>
+          {currentView === 'table' && (
+            <TaskTableView
+              tasks={processedTasks}
+              onTaskClick={setModalTask}
+              onDelete={deleteTask}
+              onToggleComplete={toggleTaskCompletion}
+            />
           )}
 
-          {currentView === 'calendar' && (
-            <TaskCalendarView />
-          )}
         </>
       )}
 

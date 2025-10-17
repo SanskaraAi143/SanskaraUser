@@ -29,8 +29,8 @@ const DonutChartComponent = ({ budget, expenses, onCategoryClick }: { budget: nu
   return (
     <div className="w-full flex justify-center py-4">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row items-center md:items-center px-4 md:px-8 py-8 gap-8 animate-fadein">
-        <div className="flex items-center justify-center w-full md:w-[320px] relative">
-          <RechartsPrimitive.ResponsiveContainer width={240} height={240}>
+        <div className="flex items-center justify-center w-full relative">
+          <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
             <RechartsPrimitive.PieChart>
               <RechartsPrimitive.Pie
                 data={pieData}

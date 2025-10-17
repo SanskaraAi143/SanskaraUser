@@ -79,9 +79,9 @@ const Pricing = () => {
 							}`}
 						>
 							{tier.mostPopular && (
-								<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-									<div className="bg-gradient-primary text-white px-8 py-1.5 rounded-full font-medium shadow-lg flex items-center gap-2">
-										<Crown size={16} />
+								<div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10">
+									<div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-xl border-2 border-white flex items-center gap-2 animate-pulse">
+										<Crown size={18} className="text-yellow-200" />
 										Most Popular
 									</div>
 								</div>

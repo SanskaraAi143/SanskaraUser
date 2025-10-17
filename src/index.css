@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 40 50% 98%; /* oklch(98% 0.01 60) */
-    --foreground: 60 5% 20%; /* oklch(20% 0.02 60) */
-    --card: 60 10% 100%; /* oklch(100% 0.01 60) */
-    --card-foreground: 60 5% 20%;
-    --popover: 60 10% 100%;
-    --popover-foreground: 60 5% 20%;
-    --primary: 30 85% 60%; /* oklch(60% 0.15 30) */
-    --primary-foreground: 30 50% 95%; /* oklch(95% 0.02 30) */
-    --secondary: 60 20% 85%; /* oklch(85% 0.05 60) */
-    --secondary-foreground: 60 5% 20%; /* oklch(20% 0.02 60) */
-    --muted: 60 10% 90%;
-    --muted-foreground: 60 5% 45%; /* oklch(45% 0.02 60) */
-    --accent: 90 50% 75%; /* oklch(75% 0.1 90) */
-    --accent-foreground: 90 5% 20%; /* oklch(20% 0.02 90) */
-    --destructive: 15 85% 60%; /* oklch(60% 0.15 15) */
-    --destructive-foreground: 15 50% 95%; /* oklch(95% 0.02 15) */
-    --border: 60 10% 90%; /* oklch(90% 0.01 60) */
-    --input: 60 10% 90%;
-    --ring: 30 85% 60%;
+    --background: oklch(99% 0.02 80); /* A very light, almost white yellow */
+    --foreground: oklch(20% 0.02 60);
+    --card: oklch(98% 0.03 85); /* A soft yellow for cards */
+    --card-foreground: oklch(20% 0.02 60);
+    --popover: oklch(98% 0.03 85);
+    --popover-foreground: oklch(20% 0.02 60);
+    --primary: oklch(75% 0.2 85); /* A vibrant yellow */
+    --primary-foreground: oklch(20% 0.02 60);
+    --secondary: oklch(90% 0.05 85); /* A lighter, supporting yellow */
+    --secondary-foreground: oklch(20% 0.02 60);
+    --muted: oklch(95% 0.03 85);
+    --muted-foreground: oklch(45% 0.02 60);
+    --accent: oklch(80% 0.15 50); /* A warmer, amber-like accent */
+    --accent-foreground: oklch(20% 0.02 60);
+    --destructive: oklch(60% 0.2 25); /* A deep, rich red for contrast */
+    --destructive-foreground: oklch(95% 0.02 15);
+    --border: oklch(90% 0.03 85);
+    --input: oklch(90% 0.03 85);
+    --ring: oklch(75% 0.2 85);
     --radius: 0.5rem;
   }
 

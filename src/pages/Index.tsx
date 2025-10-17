@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+import BetaNotice from '@/components/BetaNotice';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import RitualGuide from '@/components/RitualGuide';
@@ -17,23 +18,45 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioError, setAudioError] = useState(false);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [isBetaNoticeVisible, setIsBetaNoticeVisible] = useState(() => {
+    return localStorage.getItem('beta-notice-dismissed') !== 'true';
+  });
 
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
       if (!user) {
-        // User is not logged in, play audio
-        audio.play().catch(error => {
-          // Autoplay was prevented, which is common in modern browsers.
-          // We can't do much here, but we log it for debugging.
-          console.log("Audio autoplay was prevented by the browser.");
+        audio.muted = true;
+        audio.play().then(() => {
+          audio.muted = false;
+          setAudioPlaying(true);
+          setAudioError(false);
+        }).catch(error => {
+          setAudioError(true);
+          setAudioPlaying(false);
         });
       } else {
-        // User is logged in, pause audio
         audio.pause();
+        setAudioPlaying(false);
+        setAudioError(false);
       }
     }
   }, [user]);
+
+  const handleManualPlay = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.play().then(() => {
+        setAudioPlaying(true);
+        setAudioError(false);
+      }).catch(error => {
+        setAudioError(true);
+        console.log("Manual audio play failed:", error);
+      });
+    }
+  };
   
   const handleGetStarted = () => {
     if (user) {
@@ -54,7 +77,6 @@ const Index = () => {
     "sameAs": [
       "https://www.linkedin.com/company/sanskaraai/",
       "https://www.instagram.com/sanskaraai/"
-      // Add other social media links if available
     ],
     "contactPoint": {
       "@type": "ContactPoint",
@@ -78,29 +100,26 @@ const Index = () => {
     }
   };
 
-  // Considering LocalBusiness or Service for "wedding planner India"
-  // This is a more specific schema and might be better if the primary service is wedding planning.
-  // For now, Organization is a good general fit. If LocalBusiness is more accurate:
   const localBusinessSchema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness", // Could also be "ProfessionalService" or a more specific "WeddingPlanningService" if it exists
+    "@type": "LocalBusiness",
     "name": "Sanskara AI",
     "url": "https://sanskaraai.com/",
     "logo": "https://sanskaraai.com/logo.jpeg",
-    "image": "https://sanskaraai.com/logo.jpeg", // A representative image
+    "image": "https://sanskaraai.com/logo.jpeg",
     "description": "AI-powered Hindu wedding planning assistant. Personalized guidance, ritual explanations, and vendor recommendations for your perfect Indian wedding.",
-    "address": { // Assuming a general India focus, not a specific physical address unless available
+    "address": {
       "@type": "PostalAddress",
       "addressCountry": "IN"
     },
-    "telephone": "+91-XXX-XXXXXXX", // Add if available
+    "telephone": "+91-XXX-XXXXXXX",
     "email": "admin@sanskaraai.com",
     "areaServed": {
       "@type": "Country",
       "name": "India"
     },
-    "priceRange": "$$$", // Or more specific if applicable
-    "openingHoursSpecification": [ // Example, adjust if it's an online service primarily
+    "priceRange": "$$$",
+    "openingHoursSpecification": [
         {
             "@type": "OpeningHoursSpecification",
             "dayOfWeek": [
@@ -119,7 +138,7 @@ const Index = () => {
     "sameAs": [
       "https://www.linkedin.com/company/sanskaraai/",
       "https://www.instagram.com/sanskaraai/"
-    ]    // "potentialAction": { ... SearchAction could also be here ... }
+    ]
   };
 
   const serviceSchema = {
@@ -140,7 +159,6 @@ const Index = () => {
     "category": "Hindu Wedding Planning",
     "offers": {
       "@type": "Offer",
-      "description": "AI-powered wedding planning with ritual guidance",
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock"
     }
@@ -166,7 +184,7 @@ const Index = () => {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-20">
       <audio ref={audioRef} src="/audio_app.mp3" loop />
       <Helmet>
         {/* Existing meta tags from index.html will be overridden if also defined here,
@@ -204,9 +222,32 @@ const Index = () => {
         <script type="application/ld+json">
           {JSON.stringify(eventSchema)}
         </script>      </Helmet>
-      <header>
-        <Navbar />
-      </header>
+      <BetaNotice onDismiss={() => setIsBetaNoticeVisible(false)} onVisibilityChange={setIsBetaNoticeVisible} />
+
+      {audioPlaying && !user && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 flex items-center justify-center">
+          <span className="text-lg mr-2 animate-pulse">🎵</span>
+          <span className="font-medium text-sm">Wedding background music playing</span>
+        </div>
+      )}
+      {audioError && !user && (
+        <div className="fixed top-0 left-0 w-full bg-yellow-100 border-b-4 border-yellow-500 text-yellow-700 p-4 flex items-center justify-center z-50">
+          <div className="flex items-center space-x-4">
+            <span className="text-3xl">🎵</span>
+            <div>
+              <p className="font-bold text-lg">Background music couldn't start automatically</p>
+              <p className="text-base">Click here to experience our wedding ambiance!</p>
+            </div>
+            <Button
+              onClick={handleManualPlay}
+              className="bg-wedding-gold hover:bg-yellow-500 text-black px-6 py-3 rounded-full text-lg font-semibold"
+            >
+              Play Music
+            </Button>
+          </div>
+        </div>
+      )}
+      <Navbar isBetaNoticeVisible={isBetaNoticeVisible} />
       <main role="main" aria-label="Main content">
         <Hero />
         <Features />
@@ -242,18 +283,18 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-12 md:py-20 bg-gradient-to-r from-wedding-gold to-wedding-secondaryGold text-white">
+        <section className="py-12 md:py-20 bg-gradient-to-r from-yellow-200 to-yellow-400">
           <div className="container mx-auto px-4 text-center animate-fade-in">
-            <h2 className="text-2xl md:text-4xl font-playfair font-bold mb-4 md:mb-6">
+            <h2 className="text-2xl md:text-4xl font-playfair font-bold mb-4 md:mb-6 text-gray-900">
               Begin Your Wedding Journey Today
             </h2>
-            <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-6 md:mb-8">
-              Start planning your perfect Hindu wedding with personalized guidance, 
+            <p className="text-gray-800 text-base md:text-lg max-w-2xl mx-auto mb-6 md:mb-8">
+              Start planning your perfect Hindu wedding with personalized guidance,
               vendor recommendations, and cultural insights.
             </p>
             {user ? (
-              <Button 
-                className="bg-white text-wedding-gold hover:bg-wedding-cream transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium"
+              <Button
+                className="bg-gray-900 text-white hover:bg-gray-700 transition-colors py-2 md:py-3 px-6 md:px-8 rounded-full text-base md:text-lg font-medium"
                 onClick={handleGetStarted}
               >
                 Go to Dashboard
@@ -264,6 +305,7 @@ const Index = () => {
               </Button>
             )}
           </div>        </section>
+        <Footer />
       </main>
       <footer>
         <Footer />

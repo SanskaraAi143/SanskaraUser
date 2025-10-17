@@ -36,7 +36,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ isSpeaking, isListeni
       <div
         className={cn(
           visualizerBaseClasses,
-          'w-32 h-32 bg-gradient-radial from-futuristic-gold to-futuristic-gold/30 shadow-[0_0_20px_theme(colors.futuristic.gold),0_0_40px_rgba(255,215,0,0.5)]',
+          'w-32 h-32 bg-gradient-radial from-futuristic-gold to-futuristic-gold/30 shadow-[0_0_20px_theme(colors.futuristic-gold),0_0_40px_rgba(255,215,0,0.5)]',
           isSpeaking ? 'animate-speaking-pulse' : 'animate-gentle-pulse',
           {
             'scale-110 shadow-[0_0_30px_theme(colors.futuristic.primary-accent)]': isListening,

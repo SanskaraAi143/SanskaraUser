@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Bookmark, ChevronRight, Info } from 'lucide-react';
+import { Bookmark, Info, Sparkles, Flower, Music, Heart, HandHeart, Gem } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AuthActionButton from '@/components/auth/AuthActionButton';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Card, CardContent, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 
@@ -18,43 +11,43 @@ const rituals = [
     id: 1,
     name: "Mehndi",
     description: "A pre-wedding celebration where the bride's hands and feet are adorned with intricate henna designs symbolizing beauty, joy, and spiritual awakening.",
-    image: "/lovable-uploads/7d1ca230-11c7-4edb-9419-d5847fd86028.png",
-    alt: "Intricate Mehndi designs on a bride's hands during a Hindu wedding ceremony"
+    icon: Flower,
+    color: "text-orange-500"
   },
   {
     id: 2,
     name: "Haldi",
     description: "A cleansing ritual where turmeric paste is applied to the bride and groom, believed to purify and bless the couple before marriage.",
-    image: "https://images.unsplash.com/photo-1622556498246-755f44ca76f3?w=800&auto=format&fit=crop",
-    alt: "Bride and groom participating in a Haldi ceremony, with turmeric paste on their faces"
+    icon: Sparkles,
+    color: "text-yellow-500"
   },
   {
     id: 3,
     name: "Sangeet",
     description: "A musical celebration where families come together to sing, dance, and celebrate the upcoming union with performances and festivities.",
-    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop",
-    alt: "Guests dancing and celebrating during a Sangeet ceremony at an Indian wedding"
+    icon: Music,
+    color: "text-purple-500"
   },
   {
     id: 4,
     name: "Saptapadi",
     description: "The seven steps taken by the couple around the sacred fire, with each step representing a vow and blessing for their married life.",
-    image: "https://images.unsplash.com/photo-1600578248539-48bdb9db48f2?w=800&auto=format&fit=crop",
-    alt: "Bride and groom taking the seven sacred steps (Saptapadi) around the holy fire"
+    icon: Heart,
+    color: "text-red-500"
   },
   {
     id: 5,
     name: "Kanyadaan",
     description: "The giving away of the bride by her father, symbolizing the acceptance of the bride into her new family.",
-    image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&auto=format&fit=crop",
-    alt: "Father of the bride performing the Kanyadaan ritual, giving his daughter's hand to the groom"
+    icon: HandHeart,
+    color: "text-pink-500"
   },
   {
     id: 6,
     name: "Mangalsutra",
     description: "The tying of the sacred necklace by the groom around the bride's neck, symbolizing their union and the groom's commitment.",
-    image: "https://images.unsplash.com/photo-1626195790682-5481864033e0?w=800&auto=format&fit=crop",
-    alt: "Groom tying the Mangalsutra necklace around the bride's neck during a Hindu wedding"
+    icon: Gem,
+    color: "text-gold-500"
   }
 ];
 
@@ -103,35 +96,38 @@ const RitualGuide = () => {
           </div>
 
           <div className="order-1 lg:order-2">
-            <Carousel className="w-full">
-              <CarouselContent>
-                {rituals.map((ritual) => (
-                  <CarouselItem key={ritual.id}>
-                    <div className="p-1">
-                        <Card className="overflow-hidden">
-                            <CardContent className="p-0">
-                                <button
-                                  type="button"
-                                  aria-label={`View details for ${ritual.name}`}
-                                  className="aspect-[4/3] w-full block focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-lg"
-                                  onClick={() => setActiveRitual(ritual)}
-                                >
-                                  <img
-                                    src={ritual.image}
-                                    alt={ritual.alt || ritual.name}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                </button>
-                            </CardContent>
-                        </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {rituals.map((ritual) => {
+                const IconComponent = ritual.icon;
+                return (
+                  <Card
+                    key={ritual.id}
+                    className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                      activeRitual.id === ritual.id
+                        ? 'ring-2 ring-orange-400 shadow-lg bg-orange-50'
+                        : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => setActiveRitual(ritual)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className="mb-3 flex justify-center items-center">
+                        <div className={`p-3 rounded-full bg-gradient-to-br from-orange-100 to-yellow-100 ${
+                          activeRitual.id === ritual.id ? 'from-orange-200 to-yellow-200' : ''
+                        }`}>
+                          <IconComponent size={32} className={ritual.color} />
+                        </div>
+                      </div>
+                      <h3 className="font-semibold text-sm md:text-base text-gray-800 mb-1">
+                        {ritual.name}
+                      </h3>
+                      <p className="text-xs text-gray-600 leading-tight">
+                        {ritual.description.slice(0, 60)}...
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

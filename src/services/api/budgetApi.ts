@@ -85,10 +85,15 @@ export const useUpdateUserBudgetMax = () => {
 export const getExpenses = async (weddingId: string): Promise<Expense[]> => {
   const { data, error } = await supabase
     .from('budget_items')
-    .select('*')
+    .select('*, amount') // Select existing fields and the 'amount' field
     .eq('wedding_id', weddingId);
   if (error) throw error;
-  return data || [];
+
+  // Map the 'amount' field from the database to 'amount_paid' in the Expense interface
+  return (data || []).map(item => ({
+    ...item,
+    amount_paid: item.amount, // Assign 'amount' from DB to 'amount_paid'
+  }));
 };
 
 export const useExpenses = (weddingId: string) => {
@@ -100,9 +105,11 @@ export const useExpenses = (weddingId: string) => {
 };
 
 export const addExpense = async (expense: Omit<Expense, 'item_id'|'created_at'|'updated_at'>) => {
+  // Map amount_paid to 'amount' for the database insert
+  const { amount_paid, ...rest } = expense;
   const { data, error } = await supabase
     .from('budget_items')
-    .insert([{ ...expense, item_id: uuidv4(), created_at: new Date().toISOString() }]);
+    .insert([{ ...rest, item_id: uuidv4(), created_at: new Date().toISOString(), amount: amount_paid }]);
   if (error) throw error;
   return data;
 };
@@ -118,9 +125,11 @@ export const useAddExpense = () => {
 };
 
 export const updateExpense = async (expense: Expense) => {
+  // Map amount_paid to 'amount' for the database update
+  const { amount_paid, ...rest } = expense;
   const { data, error } = await supabase
     .from('budget_items')
-    .update(expense)
+    .update({ ...rest, amount: amount_paid }) // Assign 'amount_paid' to 'amount'
     .eq('item_id', expense.item_id);
   if (error) throw error;
   return data;

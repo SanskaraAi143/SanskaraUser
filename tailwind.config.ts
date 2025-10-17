@@ -21,6 +21,21 @@ const config = {
     },
     extend: {
       colors: {
+        'wedding-gold': '#FFD700',
+        'wedding-secondaryGold': '#FFC400',
+        'wedding-cream': '#FFF8E1',
+        'wedding-red': '#D62F32',
+        'wedding-purple': '#8A2BE2',
+        'futuristic-background': '#0A0A0A',
+        'futuristic-primary': '#1E1E1E',
+        'futuristic-secondary': '#333333',
+        'futuristic-accent': '#00BFFF',
+        'futuristic-primary-accent': '#FF4500',
+        'futuristic-secondary-accent': '#1E90FF',
+        'futuristic-text-primary': '#FFFFFF',
+        'futuristic-text-secondary': '#B0B0B0',
+        'futuristic-gold': '#FFD700', // Added futuristic-gold to resolve Tailwind warning
+
         // New Design System Colors
         primary: {
           DEFAULT: 'oklch(60% 0.15 30)', // A warm, inviting primary color
@@ -126,7 +141,25 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate, typography],
+  plugins: [tailwindcssAnimate, typography, function ({ addUtilities }: any) {
+    addUtilities({
+      '.high-priority-day': {
+        'background-color': '#D62F32 !important' as const,
+        'color': 'white !important' as const,
+      },
+      '.medium-priority-day': {
+        'background-color': '#8A2BE2 !important' as const,
+        'color': 'white !important' as const,
+      },
+      '.low-priority-day': {
+        'background-color': '#FFD700 !important' as const,
+        'color': 'black !important' as const,
+      },
+      '.has-tasks-day': {
+        'font-weight': 'bold !important' as const,
+      },
+    })
+  }],
 }
 
 export default config

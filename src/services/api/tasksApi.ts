@@ -11,7 +11,7 @@ export interface Task {
   due_date?: Date;
   priority: 'low' | 'medium' | 'high';
   category?: string;
-  status: 'Backlog' | 'To Do' | 'Doing' | 'Done'; // Renamed 'No Status' to 'Backlog'
+  status: 'No Status' | 'Backlog' | 'To Do' | 'Doing' | 'Done';
   assignee?: string; // New field for assignee
   subtasks?: { title: string; is_complete: boolean; }[]; // New field for subtasks
   lead_party?: 'bride_side' | 'groom_side' | 'couple' | 'shared' | null;

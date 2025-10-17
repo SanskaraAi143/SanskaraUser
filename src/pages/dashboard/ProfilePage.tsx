@@ -486,327 +486,336 @@ const ProfilePage = () => {
 
   return (
     <React.Fragment>
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl font-playfair font-semibold text-wedding-gold mb-6">My Profile</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <Card className="md:col-span-1 border-wedding-gold/30 shadow-lg">
-          <CardHeader className="text-center">
-            <Avatar className="w-24 h-24 mx-auto mb-2">
-              <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-xl">
-                {user?.name ? user.name.charAt(0).toUpperCase() : <span><UserIcon className="h-8 w-8" /></span>}
-              </AvatarFallback>
-            </Avatar>
-
-            <CardTitle className="text-xl text-wedding-gold">{user?.name || "User"}</CardTitle>
-            <CardDescription className="text-sm text-gray-600">{user?.email}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex items-center">
-              <Mail className="w-4 h-4 mr-2 text-gray-500" />
-              <span>Email: </span>
-              <span className="ml-auto font-medium text-wedding-gold">{user?.email}</span>
-            </div>
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-              <span>Account created: </span>
-              <span className="ml-auto font-medium text-wedding-gold">N/A</span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full border-wedding-gold text-wedding-gold hover:bg-wedding-gold/10">
-              <Lock className="w-4 h-4 mr-2" />
-              Change Password
-            </Button>
-          </CardFooter>
-        </Card>
-        {/* Edit Profile Form */}
-        <Card className="md:col-span-2 border-wedding-gold/30 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-wedding-gold">Edit Profile</CardTitle>
-            <CardDescription className="text-gray-600">Update your personal information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="bg-gray-50 border-wedding-gold text-gray-600"
-                />
-                <p className="text-xs text-gray-500">Email address cannot be changed</p>
-              </div>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
-                ) : (
-                  <><Save className="mr-2 h-4 w-4" />Save Changes</>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-        {/* Wedding Details Card */}
-        <Card className="md:col-span-2 border-wedding-gold/30 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-wedding-gold">Wedding Details</CardTitle>
-            <CardDescription className="text-gray-600">Information about your upcoming ceremony</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="space-y-2">
-                <Label htmlFor="weddingDate">Wedding Date</Label>
-                <Input
-                  id="weddingDate"
-                  type="date"
-                  value={weddingDate}
-                  onChange={e => setWeddingDate(e.target.value)}
-                  placeholder="Select date"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  value={location}
-                  onChange={e => setLocation(e.target.value)}
-                  placeholder="Wedding venue"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tradition">Wedding Tradition</Label>
-                <Input
-                  id="tradition"
-                  value={tradition}
-                  onChange={e => setTradition(e.target.value)}
-                  placeholder="e.g., Hindu, Sikh, Bengali"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="region">Region</Label>
-                <Select value={region} onValueChange={setRegion}>
-                  <SelectTrigger className="border-wedding-gold focus:ring-wedding-gold">
-                    <SelectValue placeholder="Select region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="North Indian">North Indian</SelectItem>
-                    <SelectItem value="South Indian">South Indian</SelectItem>
-                    <SelectItem value="East Indian">East Indian</SelectItem>
-                    <SelectItem value="West Indian">West Indian</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="community">Community</Label>
-                <Input
-                  id="community"
-                  value={community}
-                  onChange={e => setCommunity(e.target.value)}
-                  placeholder="e.g., Punjabi, Telugu Brahmin"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-            </div>
-
-            <h3 className="font-semibold mb-3 text-wedding-gold">Ceremonies</h3>
-            <div className="flex flex-wrap gap-3 mb-4">
-              {['Roka', 'Sangeet', 'Haldi', 'Mehendi', 'Wedding', 'Reception'].map(ceremony => (
-                <div key={ceremony} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={ceremony}
-                    checked={selectedCeremonies.includes(ceremony)}
-                    onCheckedChange={(checked) => handleCeremonyChange(ceremony, checked as boolean)}
-                  />
-                  <Label htmlFor={ceremony}>{ceremony}</Label>
+      <div className="w-full space-y-8 p-4">
+        <h1 className="text-4xl font-playfair font-semibold text-wedding-gold mb-8">My Profile</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Profile Card */}
+            <Card className="border-wedding-gold/30 shadow-lg p-6">
+              <CardHeader className="text-center pb-6">
+                <Avatar className="w-28 h-28 mx-auto mb-4 border-2 border-wedding-gold">
+                  <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-3xl font-bold">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : <span><UserIcon className="h-10 w-10" /></span>}
+                  </AvatarFallback>
+                </Avatar>
+                <CardTitle className="text-3xl text-wedding-gold">{user?.name || "User"}</CardTitle>
+                <CardDescription className="text-md text-gray-700">{user?.email}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6 text-lg">
+                <div className="flex items-center">
+                  <Mail className="w-6 h-6 mr-3 text-gray-600" />
+                  <span>Email: </span>
+                  <span className="ml-auto font-semibold text-wedding-gold">{user?.email}</span>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center space-x-2 mb-4">
-              <Input
-                id="customCeremony"
-                placeholder="Add custom ceremony"
-                value={customCeremonyInput}
-                onChange={(e) => setCustomCeremonyInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addCustomCeremony();
-                  }
-                }}
-                className="border-wedding-gold focus:ring-wedding-gold"
-              />
-              <Button type="button" onClick={addCustomCeremony} variant="outline">Add</Button>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              className="mt-2"
-              onClick={handleSuggestCeremonies}
-              disabled={suggestingCeremonies || !region}
-            >
-              {suggestingCeremonies ? 'Generating Suggestions...' : 'Suggest Ceremonies (AI)'}
-            </Button>
-            <p className="text-xs text-gray-500 mt-2">
-              <i>{suggestingCeremonies ? 'AI is generating ceremony suggestions...' : 'Uses AI to suggest traditional ceremonies based on your region'}</i>
-            </p>
+                <div className="flex items-center">
+                  <Calendar className="w-6 h-6 mr-3 text-gray-600" />
+                  <span>Account created: </span>
+                  <span className="ml-auto font-semibold text-wedding-gold">N/A</span>
+                </div>
+              </CardContent>
+              <CardFooter className="pt-6">
+                <Button variant="outline" className="w-full border-wedding-gold text-wedding-gold hover:bg-wedding-gold/10 text-lg py-3">
+                  <Lock className="w-5 h-5 mr-3" />
+                  Change Password
+                </Button>
+              </CardFooter>
+            </Card>
+            {/* Couple Profile Card */}
+            <Card className="border-wedding-gold/30 shadow-lg p-6">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl text-wedding-gold">Couple's Profile</CardTitle>
+                <CardDescription className="text-md text-gray-700">Introduce your partner and invite them to collaborate</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
+                  <div className="flex items-center flex-col">
+                    <Avatar className="w-20 h-20 border-2 border-wedding-gold mb-2">
+                      <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-2xl font-bold">{user?.name ? user.name.charAt(0).toUpperCase() : <span><UserIcon className="h-8 w-8" /></span>}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xl font-bold text-wedding-gold">{user?.name || "Your Name"}</span>
+                  </div>
+                  <span className="text-3xl font-bold text-gray-500">&</span>
+                  <div className="flex items-center flex-col">
+                    <Avatar className="w-20 h-20 border-2 border-wedding-gold mb-2">
+                      <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-2xl font-bold">{partnerName ? partnerName.charAt(0).toUpperCase() : <span><UserIcon className="h-8 w-8" /></span>}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xl font-bold text-wedding-gold">{partnerName || "Partner's Name"}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="partnerName" className="text-lg">Partner's Name</Label>
+                    <Input
+                      id="partnerName"
+                      value={partnerName}
+                      onChange={(e) => setPartnerName(e.target.value)}
+                      placeholder="Enter partner's name"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partnerEmail" className="text-lg">Partner's Email</Label>
+                    <Input
+                      id="partnerEmail"
+                      type="email"
+                      value={partnerEmail}
+                      onChange={(e) => setPartnerEmail(e.target.value)}
+                      placeholder="Enter partner's email"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end pt-6">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 text-lg py-3 px-6"
+                  onClick={handleInvitePartner}
+                  disabled={inviteLoading || !partnerEmail}
+                >
+                  {inviteLoading ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Inviting...</>
+                  ) : (
+                    <><Mail className="mr-2 h-5 w-5" />Invite Partner</>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
 
-          </CardContent>
-          <CardFooter>
-            <Button
-              type="button"
-              className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 ml-auto"
-              onClick={handleSaveWeddingDetails}
-              disabled={weddingDetailsLoading}
-            >
-              {weddingDetailsLoading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
-              ) : (
-                <><Save className="mr-2 h-4 w-4" />Save Details</>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-        {/* Couple Profile Card */}
-        <Card className="md:col-span-3 border-wedding-gold/30 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-wedding-gold">Couple's Profile</CardTitle>
-            <CardDescription className="text-gray-600">Introduce your partner and invite them to collaborate</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center space-x-4 mb-6">
-              <Avatar className="w-16 h-16">
-                <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-lg">{user?.name ? user.name.charAt(0).toUpperCase() : <span><UserIcon className="h-6 w-6" /></span>}</AvatarFallback>
-              </Avatar>
-              <span className="text-2xl font-bold text-wedding-gold">{user?.name || "Your Name"}</span>
-              <span className="text-2xl font-bold text-gray-500">&</span>
-              <span className="text-2xl font-bold text-wedding-gold">{partnerName || "Partner's Name"}</span>
-              <Avatar className="w-16 h-16">
-                <AvatarFallback className="bg-wedding-gold/10 text-wedding-gold text-lg">{partnerName ? partnerName.charAt(0).toUpperCase() : <span><UserIcon className="h-6 w-6" /></span>}</AvatarFallback>
-              </Avatar>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="partnerName">Partner's Name</Label>
-                <Input
-                  id="partnerName"
-                  value={partnerName}
-                  onChange={(e) => setPartnerName(e.target.value)}
-                  placeholder="Enter partner's name"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="partnerEmail">Partner's Email</Label>
-                <Input
-                  id="partnerEmail"
-                  type="email"
-                  value={partnerEmail}
-                  onChange={(e) => setPartnerEmail(e.target.value)}
-                  placeholder="Enter partner's email"
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button
-              type="button"
-              className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90"
-              onClick={handleInvitePartner}
-              disabled={inviteLoading || !partnerEmail}
-            >
-              {inviteLoading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Inviting...</>
-              ) : (
-                <><Mail className="mr-2 h-4 w-4" />Invite Partner</>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-        {/* Wedding Team / Family Card */}
-        <Card className="md:col-span-3 border-wedding-gold/30 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-wedding-gold">Wedding Team / Family</CardTitle>
-            <CardDescription className="text-gray-600">Invite family members or planners to collaborate</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <h3 className="font-semibold mb-2">Invite New Team Member</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  placeholder="Name"
-                  value={newTeamMemberName}
-                  onChange={(e) => setNewTeamMemberName(e.target.value)}
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={newTeamMemberEmail}
-                  onChange={(e) => setNewTeamMemberEmail(e.target.value)}
-                  className="border-wedding-gold focus:ring-wedding-gold"
-                />
-                <Select value={newTeamMemberRole} onValueChange={setNewTeamMemberRole}>
-                  <SelectTrigger className="border-wedding-gold focus:ring-wedding-gold">
-                    <SelectValue placeholder="Select Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="View Only">View Only</SelectItem>
-                    <SelectItem value="Editor">Editor</SelectItem>
-                    <SelectItem value="Guest Manager">Guest Manager</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type="button"
-                className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 w-full"
-                onClick={handleAddTeamMember}
-                disabled={!newTeamMemberName || !newTeamMemberEmail || !newTeamMemberRole}
-              >
-                <Mail className="mr-2 h-4 w-4" />Invite Team Member
-              </Button>
-
-              <h3 className="font-semibold mt-6 mb-2">Current Team Members</h3>
-              {teamMembers.length === 0 ? (
-                <p className="text-gray-500">No team members invited yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {teamMembers.map((member, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">{member.name} ({member.role})</p>
-                        <p className="text-sm text-gray-500">{member.email}</p>
-                      </div>
-                      <Button variant="destructive" size="sm" onClick={() => handleRemoveTeamMember(member.email)}>Remove</Button>
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Edit Profile Form */}
+            <Card className="border-wedding-gold/30 shadow-lg p-6">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl text-wedding-gold">Edit Profile</CardTitle>
+                <CardDescription className="text-md text-gray-700">Update your personal information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName" className="text-lg">Display Name</Label>
+                    <Input
+                      id="displayName"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-lg">Email Address</Label>
+                    <Input
+                      id="email"
+                      value={user?.email || ""}
+                      disabled
+                      className="bg-gray-50 border-wedding-gold text-gray-600 p-3 text-lg"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Email address cannot be changed</p>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 text-lg py-3 px-6"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Saving...</>
+                    ) : (
+                      <><Save className="mr-2 h-5 w-5" />Save Changes</>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+            {/* Wedding Details Card */}
+            <Card className="border-wedding-gold/30 shadow-lg p-6">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl text-wedding-gold">Wedding Details</CardTitle>
+                <CardDescription className="text-md text-gray-700">Information about your upcoming ceremony</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="weddingDate" className="text-lg">Wedding Date</Label>
+                    <Input
+                      id="weddingDate"
+                      type="date"
+                      value={weddingDate}
+                      onChange={e => setWeddingDate(e.target.value)}
+                      placeholder="Select date"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="location" className="text-lg">Location</Label>
+                    <Input
+                      id="location"
+                      value={location}
+                      onChange={e => setLocation(e.target.value)}
+                      placeholder="Wedding venue"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tradition" className="text-lg">Wedding Tradition</Label>
+                    <Input
+                      id="tradition"
+                      value={tradition}
+                      onChange={e => setTradition(e.target.value)}
+                      placeholder="e.g., Hindu, Sikh, Bengali"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="region" className="text-lg">Region</Label>
+                    <Select value={region} onValueChange={setRegion}>
+                      <SelectTrigger className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg">
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="North Indian">North Indian</SelectItem>
+                        <SelectItem value="South Indian">South Indian</SelectItem>
+                        <SelectItem value="East Indian">East Indian</SelectItem>
+                        <SelectItem value="West Indian">West Indian</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="community" className="text-lg">Community</Label>
+                    <Input
+                      id="community"
+                      value={community}
+                      onChange={e => setCommunity(e.target.value)}
+                      placeholder="e.g., Punjabi, Telugu Brahmin"
+                      className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                    />
+                  </div>
+                </div>
+                <h3 className="font-semibold text-xl mb-4 text-wedding-gold">Ceremonies</h3>
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {['Roka', 'Sangeet', 'Haldi', 'Mehendi', 'Wedding', 'Reception'].map(ceremony => (
+                    <div key={ceremony} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={ceremony}
+                        checked={selectedCeremonies.includes(ceremony)}
+                        onCheckedChange={(checked) => handleCeremonyChange(ceremony, checked as boolean)}
+                        className="w-5 h-5"
+                      />
+                      <Label htmlFor={ceremony} className="text-lg">{ceremony}</Label>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex items-center space-x-3 mb-6">
+                  <Input
+                    id="customCeremony"
+                    placeholder="Add custom ceremony"
+                    value={customCeremonyInput}
+                    onChange={(e) => setCustomCeremonyInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCustomCeremony();
+                      }
+                    }}
+                    className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                  />
+                  <Button type="button" onClick={addCustomCeremony} variant="outline" className="text-lg py-3 px-6">Add</Button>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="mt-2 text-lg py-3 px-6"
+                  onClick={handleSuggestCeremonies}
+                  disabled={suggestingCeremonies || !region}
+                >
+                  {suggestingCeremonies ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Generating Suggestions...</> : 'Suggest Ceremonies (AI)'}
+                </Button>
+                <p className="text-md text-gray-500 mt-3">
+                  <i>{suggestingCeremonies ? 'AI is generating ceremony suggestions...' : 'Uses AI to suggest traditional ceremonies based on your region'}</i>
+                </p>
+              </CardContent>
+              <CardFooter className="pt-6">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 ml-auto text-lg py-3 px-6"
+                  onClick={handleSaveWeddingDetails}
+                  disabled={weddingDetailsLoading}
+                >
+                  {weddingDetailsLoading ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Saving...</>
+                  ) : (
+                    <><Save className="mr-2 h-5 w-5" />Save Details</>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+
+          {/* Wedding Team / Family Card (Full Width) */}
+          <Card className="lg:col-span-2 border-wedding-gold/30 shadow-lg p-6">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-2xl text-wedding-gold">Wedding Team / Family</CardTitle>
+              <CardDescription className="text-md text-gray-700">Invite family members or planners to collaborate</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <h3 className="font-semibold text-xl mb-4">Invite New Team Member</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Input
+                    placeholder="Name"
+                    value={newTeamMemberName}
+                    onChange={(e) => setNewTeamMemberName(e.target.value)}
+                    className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={newTeamMemberEmail}
+                    onChange={(e) => setNewTeamMemberEmail(e.target.value)}
+                    className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg"
+                  />
+                  <Select value={newTeamMemberRole} onValueChange={setNewTeamMemberRole}>
+                    <SelectTrigger className="border-wedding-gold focus:ring-wedding-gold p-3 text-lg">
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="View Only">View Only</SelectItem>
+                      <SelectItem value="Editor">Editor</SelectItem>
+                      <SelectItem value="Guest Manager">Guest Manager</SelectItem>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-[#ffd700] to-[#ffecb3] text-[#8d6e63] hover:opacity-90 w-full text-lg py-3 px-6"
+                  onClick={handleAddTeamMember}
+                  disabled={!newTeamMemberName || !newTeamMemberName || !newTeamMemberEmail || !newTeamMemberRole}
+                >
+                  <Mail className="mr-2 h-5 w-5" />Invite Team Member
+                </Button>
+
+                <h3 className="font-semibold text-xl mt-8 mb-4">Current Team Members</h3>
+                {teamMembers.length === 0 ? (
+                  <p className="text-gray-500 text-lg">No team members invited yet.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {teamMembers.map((member, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-md bg-gray-50">
+                        <div>
+                          <p className="font-medium text-lg">{member.name} ({member.role})</p>
+                          <p className="text-md text-gray-600">{member.email}</p>
+                        </div>
+                        <Button variant="destructive" size="lg" onClick={() => handleRemoveTeamMember(member.email)}>Remove</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </React.Fragment>

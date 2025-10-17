@@ -51,7 +51,7 @@ const DashboardWelcome: React.FC<DashboardWelcomeProps> = ({ profile, userName, 
         </div>
         <Link
           to="/chat"
-          className="flex items-center gap-2 px-4 py-2 bg-wedding-gold text-white rounded-lg shadow-md hover:bg-wedding-gold/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-gray-900 rounded-lg shadow-md hover:bg-yellow-700 hover:text-gray-900 transition-colors"
         >
           <MessageCircle size={18} />
           <span>Start Chat</span>

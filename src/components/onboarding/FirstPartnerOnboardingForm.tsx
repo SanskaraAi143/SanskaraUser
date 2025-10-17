@@ -377,7 +377,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div>
                 <Label htmlFor="weddingStyle">Overall Style:</Label>
                 <Select name="weddingStyle" value={formData.weddingStyle} onValueChange={(value) => handleSelectChange('weddingStyle', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Select a style" />
                   </SelectTrigger>
                   <SelectContent>
@@ -444,10 +444,10 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 {formData.ceremonies.map((ceremony, index) => (
                   <div key={index} className="flex items-center space-x-2 bg-blue-50 p-2 rounded">
-                    <Checkbox 
-                      id={`ceremony-${index}`} 
-                      name="ceremonies" 
-                      value={ceremony} 
+                    <Checkbox
+                      id={`ceremony-${index}`}
+                      name="ceremonies"
+                      value={ceremony}
                       checked={true}
                       onCheckedChange={(checked) => {
                         if (!checked) {
@@ -461,18 +461,6 @@ const FirstPartnerOnboardingForm: React.FC = () => {
                     <Label htmlFor={`ceremony-${index}`}>{ceremony}</Label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="mehendi" name="ceremonies" value="Mehendi" checked={formData.ceremonies.includes('Mehendi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Mehendi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="mehendi">Mehendi</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="haldi" name="ceremonies" value="Haldi" checked={formData.ceremonies.includes('Haldi')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Haldi', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="haldi">Haldi</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="sangeet" name="ceremonies" value="Sangeet" checked={formData.ceremonies.includes('Sangeet')} onCheckedChange={(checked) => handleChange({ target: { name: 'ceremonies', value: 'Sangeet', type: 'checkbox', checked: checked as boolean } } as React.ChangeEvent<HTMLInputElement>)} />
-                  <Label htmlFor="sangeet">Sangeet</Label>
-                </div>
               </div>
               <div className="flex items-center space-x-2 mt-4">
                 <Input 
@@ -517,7 +505,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div>
                 <Label>Venue & Decor Selection:</Label>
                 <Select name="venueDecor" value={formData.venueDecor} onValueChange={(value) => handleSelectChange('venueDecor', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -530,7 +518,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div>
                 <Label>Catering & Menu Decisions:</Label>
                 <Select name="catering" value={formData.catering} onValueChange={(value) => handleSelectChange('catering', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -543,7 +531,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div>
                 <Label>Guest List & Invitations:</Label>
                 <Select name="guestList" value={formData.guestList} onValueChange={(value) => handleSelectChange('guestList', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -556,7 +544,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               <div>
                 <Label>Sangeet & Entertainment:</Label>
                 <Select name="sangeetEntertainment" value={formData.sangeetEntertainment} onValueChange={(value) => handleSelectChange('sangeetEntertainment', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -584,6 +572,7 @@ const FirstPartnerOnboardingForm: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="budgetRange">Estimated Budget for Your Side (range):</Label>
+                <p className="text-sm text-gray-500 mb-1">Please note: This budget is specifically for your side's responsibilities, not the overall wedding budget.</p>
                 <Input type="text" id="budgetRange" name="budgetRange" value={formData.budgetRange} onChange={handleChange} placeholder="e.g., $20,000 - $30,000 or 15-20 Lakhs" />
               </div>
               <div>

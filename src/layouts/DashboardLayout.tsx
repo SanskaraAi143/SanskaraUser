@@ -73,8 +73,7 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Motif Background */}
-      <div className="absolute inset-0 motif-background"></div>
+      {/* Background removed for cleaner look */}
 
       {/* Floating particles background */}
       <div className="fixed inset-0 pointer-events-none">
@@ -135,7 +134,7 @@ const DashboardLayout = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 ml-64">
+        <main className="flex-1 ml-64 relative z-10">
           {/* Header */}
           <header className="glass-card border-b border-wedding-gold/20 sticky top-0 z-50">
             <div className="px-8 py-4 flex items-center justify-between">

@@ -7,6 +7,7 @@ import FloatingChatButton from './components/ui/FloatingChatButton';
 import { useToast } from './hooks/use-toast';
 import { logError } from './utils/errorLogger';
 import { useAuth } from './context/AuthContext';
+import { useIsMobile } from './hooks/use-mobile';
 
 // Layouts - Keep eager for critical path
 import DashboardLayout from './layouts/DashboardLayout';
@@ -64,6 +65,7 @@ const ConditionalFloatingChatButton = () => {
 function App() {
   const { toast } = useToast();
   const { loading } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleOffline = () => {
@@ -123,7 +125,7 @@ function App() {
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/chat" element={<FuturisticChatPage />} />
                 <Route path="/virtual-venue" element={<VirtualVenuePage />} />
-                <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route path="/dashboard" element={isMobile ? <MobileDashboardLayout /> : <DashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="tasks" element={<TasksPage />} />

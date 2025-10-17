@@ -46,7 +46,7 @@ const Controls: React.FC<ControlsProps> = ({
         </button>
         <button
           onClick={onMuteClick}
-          className={cn(baseButtonClasses, { 'bg-[#f0eada] text-futuristic-primary-accent': isMuted })}
+          className={cn(baseButtonClasses, 'text-black', { 'bg-[#f0eada] text-futuristic-primary-accent': isMuted })}
           title="Mute/Unmute"
         >
           {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
@@ -54,7 +54,7 @@ const Controls: React.FC<ControlsProps> = ({
         <button
           onClick={onTalkClick}
           className={cn(
-            'w-20 h-20 flex items-center justify-center rounded-full bg-futuristic-primary-accent text-white shadow-lg shadow-red-900/40 transition-all duration-300 hover:scale-105 hover:bg-red-800',
+            'w-20 h-20 flex items-center justify-center rounded-full bg-futuristic-primary-accent text-black shadow-lg shadow-red-900/40 transition-all duration-300 hover:scale-105 hover:bg-red-800',
             { 'scale-90 bg-futuristic-secondary-accent shadow-blue-900/50': isRecording }
           )}
           title={isRecording ? "Stop Talking" : "Tap to Talk"}

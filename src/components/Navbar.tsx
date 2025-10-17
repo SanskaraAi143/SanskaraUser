@@ -7,7 +7,11 @@ import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 import { Link, useNavigate } from "react-router-dom";
 import AuthActionButton from '@/components/auth/AuthActionButton';
 
-const Navbar = () => {
+interface NavbarProps {
+  isBetaNoticeVisible: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isBetaNoticeVisible }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +24,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-wedding-cream/80 backdrop-blur-sm border-b border-wedding-gold/20">
+    <nav className={`fixed left-0 right-0 z-50 bg-wedding-cream/80 backdrop-blur-sm border-b border-wedding-gold/20 transition-all duration-300 ${isBetaNoticeVisible ? 'top-20' : 'top-0'}`}>
       <div className="container mx-auto flex justify-between items-center h-20 px-4">
         <Link to="/" className="flex items-center gap-3">
           <img src="/logo.jpeg" alt="Sanskara AI Logo" className="h-10 w-10 object-contain rounded-full" />

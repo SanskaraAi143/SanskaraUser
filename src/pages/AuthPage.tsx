@@ -79,6 +79,7 @@ const SignInForm = () => {
 // Sign Up Form Component
 const SignUpForm = () => {
     const { signUp } = useAuth();
+    const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm<SignUpFormValues>({
         resolver: zodResolver(signUpSchema),
@@ -89,7 +90,7 @@ const SignUpForm = () => {
         setIsSubmitting(true);
         try {
             await signUp(values.email, values.password, values.name);
-            // The useEffect on the main AuthPage will handle the redirect
+            navigate('/auth?mode=signin');
         } catch (error) {
             console.error("Sign up error:", error);
         } finally {
