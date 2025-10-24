@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import MultimodalClient from '../lib/multimodal-client.js';
-import { getSession, getChatMessages } from '../services/api';
+import ChatConnectionManager from '../lib/chat/ChatConnectionManager';
+import MessageManager from '../lib/chat/MessageManager';
+import HistoryService from '../lib/chat/HistoryService';
+import AudioRecordingManager from '../lib/chat/AudioRecordingManager';
+import VideoCaptureManager from '../lib/chat/VideoCaptureManager';
 
 export interface Message {
   sender: string;
@@ -8,7 +11,6 @@ export interface Message {
   isMarkdown?: boolean;
   timestamp?: string;
   eventId?: string;
-  // Additional fields for artifact uploads and system events
   artifactUrl?: string;
   artifactType?: string;
   systemEventType?: string;
@@ -18,363 +20,127 @@ type VideoMode = 'webcam' | 'screen' | null;
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
 export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
-  const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [activeVideoMode, setActiveVideoMode] = useState<VideoMode>(null);
-  const [transcript, setTranscript] = useState<Message[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // New state for loading history
-  const [historyError, setHistoryError] = useState<string | null>(null); // New state for history error
 
-  const clientRef = useRef<MultimodalClient | null>(null);
-  const assistantMessageInProgress = useRef(false);
-  const transcriptRef = useRef<Message[]>([]);
-  const reconnectAttemptsRef = useRef(0);
-  const manualReconnectRequestedRef = useRef(false);
-  const disconnectHandlersRef = useRef<(() => void)[]>([]);
-  const reconnectSuccessHandlersRef = useRef<(() => void)[]>([]);
-  const connectionStateRef = useRef<ConnectionState>('idle');
-  const initiatedRef = useRef(false);
-  // Track last user text we sent locally to avoid double-inserting when server echoes it back as `user_input`
-  const lastLocallySentUserTextRef = useRef<string | null>(null);
-
-  const registerOnDisconnect = (fn: () => void) => { disconnectHandlersRef.current.push(fn); };
-  const registerOnReconnectSuccess = (fn: () => void) => { reconnectSuccessHandlersRef.current.push(fn); };
-
-  // keep transcript ref synced
-  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
-  useEffect(() => { connectionStateRef.current = connectionState; }, [connectionState]);
-
-  const handleTextReceived = useCallback((message: { type: string; data: string }) => {
-    setTranscript(prevTranscript => {
-      const newTranscript = [...prevTranscript];
-      const lastMessage = newTranscript.length > 0 ? newTranscript[newTranscript.length - 1] : null;
-
-      if (message.type === 'user_input') {
-        assistantMessageInProgress.current = false;
-        if (lastLocallySentUserTextRef.current === message.data) {
-          lastLocallySentUserTextRef.current = null; // Consume echo
-        } else if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
-          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
-        } else {
-          newTranscript.push({ sender: 'user', text: message.data });
-        }
-      } else if (message.type === 'text') {
-        if (assistantMessageInProgress.current && lastMessage?.sender === 'assistant') {
-          // This is the key fix: create a new object to ensure re-render
-          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: lastMessage.text + message.data };
-        } else {
-          assistantMessageInProgress.current = true;
-          newTranscript.push({ sender: 'assistant', text: message.data, isMarkdown: true });
-        }
-      } else if (message.type === 'user_transcription') {
-        assistantMessageInProgress.current = false;
-        if (lastMessage?.sender === 'user' && lastMessage.text === '...') {
-          newTranscript[newTranscript.length - 1] = { ...lastMessage, text: message.data };
-        } else {
-          newTranscript.push({ sender: 'user', text: message.data });
-        }
-      }
-      return newTranscript;
-    });
-  }, []);
-
-  const handleTurnComplete = useCallback(() => {
-    assistantMessageInProgress.current = false;
-    setIsSpeaking(false);
-    setIsAssistantSpeaking(false);
-    setIsAssistantTyping(false);
-  }, []);
-
-  const handleInterrupted = useCallback(() => {
-    assistantMessageInProgress.current = false;
-    setIsSpeaking(false);
-    setIsAssistantSpeaking(false);
-    if (clientRef.current && (clientRef.current as any).interrupt) {
-      (clientRef.current as any).interrupt();
-    }
-  }, []);
-
-  const handleAudioReceived = useCallback(() => {
-    setIsSpeaking(true);
-    setIsAssistantSpeaking(true);
-  }, []);
-
-  const setTypingHeuristic = useCallback(() => {
-    if (assistantMessageInProgress.current) {
-      setIsAssistantTyping(true);
-      return;
-    }
-    setIsAssistantTyping(false);
-  }, []);
+  const connectionManager = useRef(new ChatConnectionManager()).current;
+  const messageManager = useRef(new MessageManager()).current;
+  const historyService = useRef(new HistoryService('/api')).current;
+  const audioManager = useRef(new AudioRecordingManager()).current;
+  const videoManager = useRef(new VideoCaptureManager()).current;
 
   useEffect(() => {
-    const id = setInterval(setTypingHeuristic, 800);
-    return () => clearInterval(id);
-  }, [setTypingHeuristic]);
-
-  const scheduleReconnect = useCallback(() => {
-    // rely on external state refs to avoid dependency churn
-    if (manualReconnectRequestedRef.current) return;
-    if (!userId) return;
-    if (connectionStateRef.current === 'failed') return;
-    reconnectAttemptsRef.current += 1;
-    const attempt = reconnectAttemptsRef.current;
-    if (attempt > 8) {
-      setConnectionState('failed');
-      disconnectHandlersRef.current.forEach(h => h());
-      return;
+    if (userId && weddingId) {
+      connectionManager.connect(userId, weddingId);
     }
-    setConnectionState('reconnecting');
-    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 15000);
-    setTimeout(() => { attemptConnect(); }, delay);
-  }, [userId]);
 
-  const tearDownClient = useCallback(() => {
-    if (clientRef.current) {
-      try { clientRef.current.close(); } catch {}
-      clientRef.current = null;
-    }
-  }, []);
-
-  const attemptConnect = useCallback(() => {
-    if (!userId) return;
-    // Avoid creating a new client if current is open/connecting
-    const existing = clientRef.current as any;
-    if (existing && existing.ws && [WebSocket.OPEN, WebSocket.CONNECTING].includes(existing.ws.readyState)) {
-      return; // already trying/connected
-    }
-    tearDownClient();
-    setConnectionState(reconnectAttemptsRef.current > 0 ? 'reconnecting' : 'connecting');
-    const client = new MultimodalClient(userId, serverUrl);
-    clientRef.current = client;
-    client.onReady = () => {
-      setIsConnected(true);
-      setConnectionState('connected');
-      reconnectAttemptsRef.current = 0;
-      manualReconnectRequestedRef.current = false;
-      reconnectSuccessHandlersRef.current.forEach(h => h());
-    };
-    client.onSessionIdReceived = (id: string) => {
-      console.log('[useMultimodalClient] sessionId received:', id);
-      setSessionId(id);
-    };
-    client.onTextReceived = handleTextReceived;
-    client.onTurnComplete = handleTurnComplete;
-    client.onInterrupted = handleInterrupted;
-    client.onAudioReceived = handleAudioReceived;
-    client.onError = (err: any) => {
-      console.error('Multimodal client error', err);
-      setIsConnected(false);
-      scheduleReconnect();
-    };
-    client.onClose = () => {
-      setIsConnected(false);
-      disconnectHandlersRef.current.forEach(h => h());
-      scheduleReconnect();
-    };
-    client.connect().catch(err => {
-      console.error('Connect failed', err);
-      setIsConnected(false);
-      scheduleReconnect();
-    });
-  }, [userId, serverUrl, handleTextReceived, handleTurnComplete, handleInterrupted, handleAudioReceived, scheduleReconnect, tearDownClient]);
-
-  // Initial connect (once) – avoids dependency on attemptConnect to stop loop
-  useEffect(() => {
-    if (!userId) return;
-    if (initiatedRef.current) return;
-    initiatedRef.current = true;
-    attemptConnect();
-  }, [userId, attemptConnect]); // Added attemptConnect to dependency array for completeness
-
-  const [hasMoreHistory, setHasMoreHistory] = useState(true);
-  const [historyOffset, setHistoryOffset] = useState(0);
-  const historyLimit = 20;
-
-  // Fetch session history when sessionId becomes available or when loading more
-  useEffect(() => {
-    if (userId && weddingId && sessionId) {
-      const fetchSessionHistory = async () => {
-        setIsLoadingHistory(true);
-        setHistoryError(null);
-        try {
-          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId, offset: historyOffset });
-          const response = await getChatMessages(weddingId, sessionId, {
-            limit: historyLimit,
-            offset: historyOffset,
+    const unsubscribeState = connectionManager.onStateChange((state, data) => {
+      setConnectionState(state);
+      if (state === 'connected') {
+        messageManager.setSessionId(connectionManager.sessionId);
+        historyService.getSessionHistory(connectionManager.sessionId, { limit: 20 })
+          .then(history => {
+            messageManager.addMessage({type: 'history', data: history});
           });
+      }
+    });
 
-          if (response && response.history) {
-            const reversedHistory = response.history.reverse();
-            const formattedMessages = reversedHistory
-              .map((event: any) => {
-                // The event_type filter was too restrictive, let's see all events
-                if (event.event_type !== 'message') {
-                  console.log('Non-message event in history:', event);
-                }
-                return {
-                  sender: event.metadata?.sender_type === 'assistant' ? 'assistant' : 'user',
-                  text: event.content?.text || `[Unsupported event: ${event.event_type}]`,
-                  isMarkdown: event.metadata?.sender_type === 'assistant',
-                  timestamp: event.timestamp,
-                  eventId: event.event_id,
-                };
-              });
-
-            setHasMoreHistory(response.total_count > (historyOffset + historyLimit));
-
-            setTranscript(prev =>
-              historyOffset === 0 ? formattedMessages : [...formattedMessages, ...prev]
-            );
-          } else {
-            console.warn('[useMultimodalClient] no history in response');
-            setHasMoreHistory(false);
-          }
-        } catch (error: any) {
-          console.error('Failed to fetch session history:', error);
-          setHistoryError(error.message || 'Failed to load chat history.');
-        } finally {
-          setIsLoadingHistory(false);
+    const unsubscribeMessage = messageManager.onMessageUpdate((eventType, data) => {
+        if (eventType === 'add' || eventType === 'update' || eventType === 'history_loaded' || 'cleared') {
+            setMessages(messageManager.getMessages());
         }
-      };
-      fetchSessionHistory();
-    }
-  }, [userId, weddingId, sessionId, historyOffset, historyLimit]);
+    });
+
+    return () => {
+      unsubscribeState();
+      unsubscribeMessage();
+      connectionManager.disconnect();
+    };
+  }, [userId, weddingId, connectionManager, messageManager, historyService]);
+
+  const sendTextMessage = (text: string) => {
+    connectionManager.sendMessage({ type: 'text', data: text });
+    messageManager.addMessage({type: 'user', content: text});
+  };
 
   const loadMoreHistory = useCallback(() => {
-    if (!isLoadingHistory && hasMoreHistory) {
-      setHistoryOffset(prev => prev + historyLimit);
+    if (!messageManager.isLoadingHistory && messageManager.hasMoreHistory) {
+      historyService.getSessionHistory(messageManager.currentSessionId, {
+        offset: messageManager.messages.length,
+        limit: 50
+      }).then(history => {
+        messageManager.addMessage({type: 'history', data: history});
+      });
     }
-  }, [isLoadingHistory, hasMoreHistory]);
-
-  // Cleanup on unmount
-  useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
-
-  const reconnectNow = useCallback(() => {
-    manualReconnectRequestedRef.current = true;
-    reconnectAttemptsRef.current = 0;
-    attemptConnect();
-  }, [attemptConnect]);
+  }, [messageManager, historyService]);
 
   const startRecording = async () => {
-    const client = clientRef.current;
-    if (!client) return;
     try {
-      if (isAssistantSpeaking && (client as any).interrupt) {
-        (client as any).interrupt();
-        setIsAssistantSpeaking(false);
-      }
-      await (client as any).startRecording();
+      await audioManager.startRecording();
       setIsRecording(true);
-      setIsSpeaking(true);
-      const newTranscript = [...transcriptRef.current, { sender: 'user', text: '...' }];
-      transcriptRef.current = newTranscript;
-      setTranscript(newTranscript);
-      assistantMessageInProgress.current = false;
-    } catch (e) {
-      console.error('Error starting recording', e);
+    } catch (error) {
+      console.error('Error starting recording:', error);
     }
   };
 
   const stopRecording = () => {
-    const client = clientRef.current;
-    if (!client) return;
-    (client as any).stopRecording();
+    audioManager.stopRecording();
     setIsRecording(false);
-    setIsSpeaking(false);
-    const newTranscript = [...transcriptRef.current];
-    if (newTranscript.length > 0 && newTranscript[newTranscript.length - 1].sender === 'user' && newTranscript[newTranscript.length - 1].text === '...') {
-      newTranscript.pop();
-      transcriptRef.current = newTranscript;
-      setTranscript(newTranscript);
-    }
   };
 
   const initializeWebcam = async (videoEl: HTMLVideoElement) => {
-    const client = clientRef.current;
-    if (!client) return;
     try {
-      const ok = await (client as any).initializeWebcam(videoEl);
-      if (ok) {
+        await videoManager.startCameraCapture();
         setIsVideoActive(true);
-        setActiveVideoMode('webcam');
-        if ((client as any).isConnected) (client as any).startVideoStream(1);
-      }
-    } catch (e) {
-      console.error('Error initializing webcam', e);
+        setActiveVideoMode('camera');
+    } catch (error) {
+        console.error("Error initializing webcam", error);
     }
   };
 
   const initializeScreenShare = async (videoEl: HTMLVideoElement) => {
-    const client = clientRef.current;
-    if (!client) return;
     try {
-      const ok = await (client as any).initializeScreenShare(videoEl);
-      if (ok) {
+        await videoManager.startScreenCapture();
         setIsVideoActive(true);
         setActiveVideoMode('screen');
-        if ((client as any).isConnected) (client as any).startVideoStream(1);
-      }
-    } catch (e) {
-      console.error('Error initializing screen share', e);
+    } catch (error) {
+        console.error("Error initializing screen share", error);
     }
   };
 
   const stopVideo = () => {
-    const client = clientRef.current;
-    if (!client) return;
-    (client as any).stopVideo();
+    videoManager.stopCapture();
     setIsVideoActive(false);
     setActiveVideoMode(null);
   };
 
-  const sendTextMessage = (text: string) => {
-    const client = clientRef.current;
-    if (!client) return;
-    if (isAssistantSpeaking && (client as any).interrupt) {
-      (client as any).interrupt();
-      setIsAssistantSpeaking(false);
-    }
-    (client as any).sendText(text);
-    // Reset assistant message index so the next assistant response starts a fresh bubble
-    assistantMessageInProgress.current = false;
-    const newTranscript = [...transcriptRef.current, { sender: 'user', text }];
-    transcriptRef.current = newTranscript;
-    setTranscript(newTranscript);
-    // Remember locally-sent text to ignore server echo of the same content
-    lastLocallySentUserTextRef.current = text;
-  };
-
   const interruptAssistant = () => {
-    const client = clientRef.current;
-    if (!client || !isAssistantSpeaking) return;
-    if ((client as any).interrupt) {
-      (client as any).interrupt();
-      setIsAssistantSpeaking(false);
-      setIsSpeaking(false);
-    }
+    // This will be handled by the message manager in the future
+    setIsAssistantSpeaking(false);
+    setIsSpeaking(false);
   };
 
   return {
-    isConnected,
+    isConnected: connectionState === 'connected',
     connectionState,
     isRecording,
     isVideoActive,
     activeVideoMode,
-    transcript,
-    sessionId,
+    transcript: messages,
+    sessionId: connectionManager.sessionId,
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
-    isLoadingHistory,
-    historyError,
-    hasMoreHistory,
+    isLoadingHistory: messageManager.isLoadingHistory,
+    historyError: null, // Replace with error handling from ErrorHandler
+    hasMoreHistory: messageManager.hasMoreHistory,
     loadMoreHistory,
     startRecording,
     stopRecording,
@@ -383,8 +149,8 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     stopVideo,
     sendTextMessage,
     interruptAssistant,
-    reconnectNow,
-    registerOnDisconnect,
-    registerOnReconnectSuccess,
+    reconnectNow: () => connectionManager.connect(userId, weddingId),
+    registerOnDisconnect: () => {},
+    registerOnReconnectSuccess: () => {},
   };
 };

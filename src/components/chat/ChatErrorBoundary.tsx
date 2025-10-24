@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logError } from '@/utils/errorLogger';
+import { globalErrorHandler } from '@/lib/chat/ErrorHandler';
 
 interface Props {
   children: ReactNode;
@@ -19,6 +20,7 @@ interface State {
 
 class ChatErrorBoundary extends Component<Props, State> {
   private retryTimeoutRef: NodeJS.Timeout | null = null;
+  private unsubscribeFromGlobalErrorHandler: (() => void) | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -31,8 +33,27 @@ class ChatErrorBoundary extends Component<Props, State> {
     };
   }
 
+  componentDidMount() {
+    this.unsubscribeFromGlobalErrorHandler = globalErrorHandler.onError(this.handleGlobalError);
+  }
+
+  componentWillUnmount() {
+    if (this.retryTimeoutRef) {
+      clearTimeout(this.retryTimeoutRef);
+    }
+    if (this.unsubscribeFromGlobalErrorHandler) {
+      this.unsubscribeFromGlobalErrorHandler();
+    }
+  }
+
+  handleGlobalError = (errorData: any) => {
+    this.setState({
+      hasError: true,
+      error: errorData.originalError || new Error(errorData.message),
+    });
+  };
+
   static getDerivedStateFromError(error: Error): Partial<State> {
-    // Update state so the next render will show the fallback UI
     return {
       hasError: true,
       error,
@@ -40,7 +61,6 @@ class ChatErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log the error to monitoring service
     console.error('[ChatErrorBoundary] Chat error caught:', error, errorInfo);
     logError(error, {
       component: 'ChatErrorBoundary',
@@ -49,34 +69,23 @@ class ChatErrorBoundary extends Component<Props, State> {
       timestamp: new Date().toISOString(),
     });
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
-    // Update state with error details
     this.setState({
       error,
       errorInfo,
     });
 
-    // Attempt auto-retry for transient errors after a delay
     if (this.shouldRetry(error) && this.state.retryCount < this.state.maxRetries) {
       this.retryTimeoutRef = setTimeout(() => {
         this.handleRetry();
-      }, 2000); // 2 second delay
-    }
-  }
-
-  componentWillUnmount() {
-    // Clean up retry timeout on unmount
-    if (this.retryTimeoutRef) {
-      clearTimeout(this.retryTimeoutRef);
+      }, 2000);
     }
   }
 
   shouldRetry = (error: Error): boolean => {
-    // Define which errors should trigger auto-retry
     const retryableErrors = [
       'WebSocket connection error',
       'NetworkError',
@@ -102,7 +111,6 @@ class ChatErrorBoundary extends Component<Props, State> {
   };
 
   handleRefresh = () => {
-    // Clear all error state and force page refresh
     this.setState({
       hasError: false,
       error: null,
@@ -110,23 +118,19 @@ class ChatErrorBoundary extends Component<Props, State> {
       retryCount: 0,
     });
 
-    // Simple page refresh for critical errors
     window.location.reload();
   };
 
   handleGoHome = () => {
-    // Navigate to dashboard/home
     window.location.href = '/dashboard';
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default fallback UI
       const { error, retryCount, maxRetries } = this.state;
       const canRetry = retryCount < maxRetries;
       const autoRetrying = this.retryTimeoutRef !== null;
@@ -192,7 +196,6 @@ class ChatErrorBoundary extends Component<Props, State> {
             </Button>
           </div>
 
-          {/* Debug info in development */}
           {process.env.NODE_ENV === 'development' && error?.stack && (
             <details className="mt-4 w-full max-w-lg">
               <summary className="text-xs text-red-500 cursor-pointer hover:text-red-400">
