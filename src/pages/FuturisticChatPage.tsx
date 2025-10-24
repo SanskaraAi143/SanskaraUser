@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Paperclip, Image as ImageIcon, Loader2, X, MonitorPlay, Video, VideoOff } from 'lucide-react';
-import ChatLayout from '@/components/futuristic-chat/ChatLayout';
-import AudioVisualizer from '@/components/futuristic-chat/AudioVisualizer';
-import ChatHistory from '@/components/futuristic-chat/ChatHistory';
-import ChatInput from '@/components/futuristic-chat/ChatInput';
-import Controls from '@/components/futuristic-chat/Controls';
-import PlanningContextSidebar from '@/components/futuristic-chat/PlanningContextSidebar';
+import FuturisticChat from '@/components/futuristic-chat/FuturisticChat';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useMultimodalClient } from '@/hooks/useMultimodalClient';
@@ -209,113 +204,26 @@ const FuturisticChatPage: React.FC = () => {
   }, [sendTextMessage, selectedArtifacts, keepSelection, clearSelection]);
 
   return (
-    <ChatLayout sidebar={<PlanningContextSidebar />}>
-      {/* Main View */}
-      <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border transition-all duration-500 ease-in-out", { 'video-active': isVideoActive })}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-        <main className="audio-interface flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
-          <div className={cn("video-feeds absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center gap-4 p-4 transition-opacity duration-500", isVideoActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}>
-              <div className="video-feed partner-feed w-full flex-1 bg-gray-200 rounded-2xl flex justify-center items-center text-futuristic-text-secondary"><span>Partner's Video</span></div>
-              <div className="video-feed user-feed absolute w-32 h-40 bottom-48 right-4 border-2 border-white rounded-2xl shadow-lg overflow-hidden">
-                <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover"/>
-              </div>
-          </div>
-          <div className={cn("ai-visualizer-container transition-all duration-500", {"transform scale-40 -translate-x-[120%] -translate-y-[350%]": isVideoActive})}>
-            <AudioVisualizer isSpeaking={isAssistantSpeaking} isListening={isRecording} />
-          </div>
-          <div className={cn("transition-opacity duration-300", { "opacity-0 pointer-events-none": isVideoActive })}>
-            <h1 className="ai-name text-3xl font-medium text-futuristic-text-primary mb-2">Sanskara</h1>
-            <p className="ai-status text-base text-futuristic-text-secondary min-h-[24px]">
-            {aiStatus}
-            </p>
-          </div>
-        </main>
-        <Controls
-          isRecording={isRecording}
-          onTalkClick={handleTalkClick}
-          isVideoActive={isVideoActive}
-          activeVideoMode={activeVideoMode as 'webcam' | 'screen' | null}
-          onCameraClick={handleCameraToggle}
-          onScreenShareClick={handleScreenShareToggle}
-          isMuted={isMuted}
-          onMuteClick={handleMuteToggle}
-          onEndClick={handleEndClick}
-        />
-      </div>
-
-      {/* Chat Panel */}
-      <div className="flex-[2] flex flex-col bg-futuristic-container-bg">
-        <div className="flex justify-between items-center p-4 border-b border-futuristic-border shrink-0">
-          <h2 className="font-semibold">Conversation History</h2>
-          <button
-            onClick={() => navigate('/dashboard')} // Navigate to dashboard
-            className="flex items-center gap-2 text-sm text-futuristic-text-secondary hover:text-futuristic-primary-accent"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
-        </div>
-        <ChatErrorBoundary>
-          <EnhancedChatHistory
-            transcript={multimodalTranscript}
-            isLoadingHistory={isLoadingHistory}
-            hasMoreHistory={hasMoreHistory}
-            loadMoreHistory={loadMoreHistory}
-            virtualized={multimodalTranscript.length > 50}
-          />
-        </ChatErrorBoundary>
-
-        {/* Connection Status Indicator */}
-        <div className="p-4 border-t border-futuristic-border">
-          <ConnectionStatusIndicator showDetails={true} />
-        </div>
-        {/* Selected artifact pills */}
-        {selectedArtifacts.length > 0 && (
-          <div className="px-4 pt-2 pb-1 bg-futuristic-container-bg border-t border-futuristic-border flex gap-2 flex-wrap items-center">
-            {selectedArtifacts.map(fname => (
-              <span key={fname} className="flex items-center gap-1 text-[10px] bg-futuristic-secondary-bg border border-futuristic-border text-futuristic-text-secondary px-2 py-0.5 rounded-full">
-                {fname}
-                <button aria-label={`Remove ${fname}`} onClick={() => toggleSelect(fname)} className="hover:text-red-600"><X className="h-3 w-3" /></button>
-              </span>
-            ))}
-            <span className="ml-auto flex items-center gap-2">
-              <label className="flex items-center gap-1 text-[10px] text-futuristic-text-secondary">
-                <input type="checkbox" className="accent-futuristic-primary-accent" checked={keepSelection} onChange={e => setKeepSelection(e.target.checked)} />
-                Keep after send
-              </label>
-              {!keepSelection && <button className="text-[10px] text-futuristic-text-secondary hover:text-futuristic-primary-accent" onClick={clearSelection}>Clear</button>}
-            </span>
-          </div>
-        )}
-        <div className="flex items-end gap-2 p-4 border-t border-futuristic-border">
-          {userCanUseArtifacts && (
-            <Button size="icon" variant="ghost" className="h-9 w-9 text-futuristic-text-secondary hover:text-futuristic-primary-accent" title={artifactsReady ? 'Session Artifacts' : 'Waiting for session'} disabled={!artifactsReady} onClick={() => setShowArtifactPanel(p => !p)}>
-              {artifactsReady ? <Paperclip className="h-5 w-5" /> : <Loader2 className="h-5 w-5 animate-spin" />}
-            </Button>
-          )}
-          {/* Removed redundant paperclip button */}
-          <Button size="icon" variant="ghost" disabled className="h-9 w-9 opacity-40 text-futuristic-text-secondary" title="Images (future)">
-            <ImageIcon className="h-5 w-5" />
-          </Button>
-          <ChatInput onSendMessage={handleSend} disabled={!sessionId} />
-        </div>
-      </div>
-
-      {/* Session Artifact Panel */}
-      {showArtifactPanel && userCanUseArtifacts && artifactsReady && sessionId && user?.internal_user_id && (
-        <ArtifactSessionPanel
-          userId={user.internal_user_id}
-          sessionId={sessionId}
-          onInsertVersion={insertVersionReference}
-          onClose={() => setShowArtifactPanel(false)}
-        />
-      )}
-
-      {/* Drag Overlay */}
-      {dragActive && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-futuristic-primary-accent/10 backdrop-blur-sm border-4 border-dashed border-futuristic-primary-accent text-futuristic-primary-accent text-lg font-semibold" onDragLeave={() => setDragActive(false)}>Drop files to upload (session)</div>
-      )}
-    </ChatLayout>
+    <FuturisticChat
+      isRecording={isRecording}
+      isAssistantSpeaking={isAssistantSpeaking}
+      transcript={multimodalTranscript}
+      onTalkClick={handleTalkClick}
+      onEndClick={handleEndClick}
+      onCameraToggle={handleCameraToggle}
+      onScreenShareToggle={handleScreenShareToggle}
+      isMuted={isMuted}
+      onMuteToggle={handleMuteToggle}
+      isVideoActive={isVideoActive}
+      activeVideoMode={activeVideoMode}
+      videoRef={videoRef}
+      messages={multimodalTranscript}
+      onSendMessage={handleSend}
+      user={user}
+      isLoadingHistory={isLoadingHistory}
+      hasMoreHistory={hasMoreHistory}
+      loadMoreHistory={loadMoreHistory}
+    />
   );
 };
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import MultimodalClient from '../lib/multimodal-client.js';
 import { getSession, getChatMessages } from '../services/api';
 
-interface Message {
+export interface Message {
   sender: string;
   text: string;
   isMarkdown?: boolean;
@@ -14,13 +14,14 @@ interface Message {
   systemEventType?: string;
 }
 
+type VideoMode = 'webcam' | 'screen' | null;
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 
 export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
-  const [activeVideoMode, setActiveVideoMode] = useState<string | null>(null);
+  const [activeVideoMode, setActiveVideoMode] = useState<VideoMode>(null);
   const [transcript, setTranscript] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
