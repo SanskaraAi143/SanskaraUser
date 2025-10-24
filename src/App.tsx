@@ -8,10 +8,10 @@ import { useToast } from './hooks/use-toast';
 import { logError } from './utils/errorLogger';
 import { useAuth } from './context/AuthContext';
 import { useIsMobile } from './hooks/use-mobile';
+import Navbar from './components/Navbar'; // Import Navbar
 
 // Layouts - Keep eager for critical path
 import DashboardLayout from './layouts/DashboardLayout';
-import MobileDashboardLayout from './layouts/MobileDashboardLayout';
 
 // Core Pages - High priority
 const Index = lazy(() => import('./pages/Index'));
@@ -108,7 +108,8 @@ function App() {
       }}
     >
         <ErrorBoundary>
-          <div className="app-container">
+          <div className="app-container pt-20"> {/* Added padding-top to account for fixed navbar height */}
+            <Navbar /> {/* Render the Navbar component here */}
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -125,7 +126,7 @@ function App() {
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/chat" element={<FuturisticChatPage />} />
                 <Route path="/virtual-venue" element={<VirtualVenuePage />} />
-                <Route path="/dashboard" element={isMobile ? <MobileDashboardLayout /> : <DashboardLayout />}>
+                <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="tasks" element={<TasksPage />} />
