@@ -1,7 +1,7 @@
 
 class HistoryService {
-  constructor(baseUrl) {
-    this.baseUrl = baseUrl || '/api';
+  constructor() {
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     this.cache = new Map();
     this.maxCacheSize = 100;
   }
