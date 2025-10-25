@@ -1,5 +1,5 @@
 import { supabase } from '../supabase/config';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface WeddingDetails {
   wedding_id: string;
@@ -28,5 +28,28 @@ export const useWeddingDetails = (weddingId: string) => {
     queryKey: ['weddingDetails', weddingId],
     queryFn: () => getWeddingDetails(weddingId),
     enabled: !!weddingId,
+  });
+};
+
+export const updateWeddingBudget = async (weddingId: string, totalBudget: number) => {
+  const { data, error } = await supabase
+    .from('weddings')
+    .update({ total_budget: totalBudget })
+    .eq('wedding_id', weddingId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const useUpdateWeddingBudget = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ weddingId, totalBudget }: { weddingId: string, totalBudget: number }) => updateWeddingBudget(weddingId, totalBudget),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weddingDetails'] });
+    },
   });
 };
