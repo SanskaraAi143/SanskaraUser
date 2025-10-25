@@ -135,7 +135,7 @@ export const getChatMessages = async (
   if (params.limit) queryParams.append('limit', String(params.limit));
   if (params.offset) queryParams.append('offset', String(params.offset));
 
-  const url = `${API_BASE_URL}/sessions/${sessionId}/history${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const url = `${API_BASE_URL}/weddings/sessions/${sessionId}/history${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
   const response = await axios.get(url, {
     headers: {

@@ -147,22 +147,35 @@ export const getChatMessages = async (
   options: { limit: number; offset: number }
 ): Promise<{ history: any[]; total_count: number }> => {
   try {
-    const { limit, offset } = options;
-    const { data, error, count } = await supabase
-      .from('chat_messages')
-      .select('message_id, sender_type, sender_name, content, timestamp, event_type, metadata, event_id', { count: 'exact' })
-      .eq('session_id', sessionId)
-      .order('timestamp', { ascending: false }) // Fetch newest first for pagination
-      .range(offset, offset + limit - 1);
-
-    if (error) {
-      throw new ApiError(`Failed to fetch chat messages: ${error.message}`, 500, error);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    if (!API_BASE_URL) {
+      throw new Error('API_BASE_URL environment variable is not set');
     }
 
-    // The history is reversed in the hook, so we send it as is
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('User not authenticated');
+    const idToken = session.access_token;
+
+    const { limit, offset } = options;
+    const url = `${API_BASE_URL}/weddings/sessions/${sessionId}/history?limit=${limit}&offset=${offset}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
     return {
-      history: data || [],
-      total_count: count || 0,
+      history: responseData.history || [],
+      total_count: responseData.total_count || 0,
     };
   } catch (error: any) {
     logError(error, { context: 'getChatMessages', sessionId: sessionId });
