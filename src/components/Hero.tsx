@@ -1,81 +1,36 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Sparkles, Calendar, Heart, Wand2 } from 'lucide-react';
-import OptimizedImage from '@/components/ui/OptimizedImage';
-import { useIsMobile } from "@/hooks/use-mobile";
-import FloatingParticles from '@/components/effects/FloatingParticles';
-import AuthActionButton from '@/components/auth/AuthActionButton';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
-  const isMobile = useIsMobile();
-  
   return (
-    <div className="relative min-h-[90vh] flex items-center">
-      <div className="gradient-bg"></div>
-      <FloatingParticles count={20} />
+    <div className="relative min-h-[90vh] flex items-center justify-center bg-wedding-cream/50">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-wedding-cream/30 z-0"></div>
       
-      <div className="container mx-auto px-4 pt-20">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          <div className="lg:w-1/2">
-            <div className="glass-card p-8 md:p-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold leading-tight">
-                Plan Your Dream <br/>
-                <span className="title-gradient">Hindu Wedding</span><br/>
-                With AI
-              </h1>
-                <p className="mt-6 text-lg md:text-xl max-w-2xl" style={{color: '#374151'}}>
-                <strong>The Problem:</strong> Hindu wedding planning takes 12+ months with 15+ complex rituals and 50+ vendor decisions. 
-                <br/><br/>
-                <strong>Our Solution:</strong> AI-powered planning that reduces time from 12 months to 3 months. 
-                Join 500+ couples who saved 9+ months and ₹2+ lakhs with Sanskara AI.
-              </p>
-              
-              <div className="mt-8 md:mt-10 flex flex-col sm:flex-row gap-4">
-                <AuthActionButton
-                  navigateTo="/dashboard"
-                  className="cta-button text-lg"
-                >
-                  <Sparkles size={isMobile ? 18 : 22} className="mr-2" />
-                  Chat with Sanskara
-                </AuthActionButton>
-                <AuthActionButton
-                  navigateTo="/dashboard/timeline"
-                  variant="outline" 
-                  className="h-10 md:h-12 px-4 md:px-6 text-base md:text-lg border-wedding-red text-wedding-red hover:bg-wedding-red/10 w-full sm:w-auto"
-                >
-                  <Calendar size={isMobile ? 16 : 20} className="mr-2" />
-                  See Sample Plan
-                </AuthActionButton>
-                <AuthActionButton
-                  navigateTo="/virtual-venue"
-                  variant="outline"
-                  className="h-10 md:h-12 px-4 md:px-6 text-base md:text-lg border-purple-500 text-purple-500 hover:bg-purple-500/10 w-full sm:w-auto"
-                >
-                  <Wand2 size={isMobile ? 16 : 20} className="mr-2" />
-                  Virtual Try-On
-                </AuthActionButton>
-              </div>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 z-10">
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold leading-tight text-gray-800">
+            Host the Perfect Hindu Wedding Without the Chaos.
+            <br/>
+            <span className="title-gradient">Save 9 Months of Planning & ₹2 Lakhs in Mistakes.</span>
+            <br/>
+            Guaranteed.
+          </h1>
+          <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto text-gray-600">
+            Sanskara AI orchestrates everything from your Sangeet to your Saptapadi, connecting you with verified vendors and managing every ritual, so you can focus on your forever.
+          </p>
           
-          <div className="lg:w-1/2 relative animate-fade-in mt-8 lg:mt-0">
-            <div className="absolute -top-6 -left-6 w-24 h-24 md:w-40 md:h-40 bg-wedding-orange/10 rounded-full z-0"></div>
-            <div className="absolute -bottom-6 -right-6 w-24 h-24 md:w-40 md:h-40 bg-wedding-red/10 rounded-full z-0"></div>
-            <div className="relative z-10 bg-white p-3 md:p-4 rounded-2xl shadow-lg max-w-xs md:max-w-md mx-auto">
-              <div className="aspect-[4/5] rounded-xl overflow-hidden">                <img 
-                  src="/lovable-uploads/ef091a6d-01c3-422d-9dac-faf459fb74ab.webp" 
-                  alt="Hindu couple holding hands in traditional wedding attire" 
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                  width="400"
-                  height="500"
-                />
-              </div>
-              <div className="absolute -bottom-3 -right-3 md:-bottom-4 md:-right-4 bg-white p-2 md:p-3 rounded-xl shadow-md flex items-center gap-2">
-                <Heart size={isMobile ? 18 : 24} className="text-wedding-red" fill="#D62F32" />
-                <span className="text-sm md:text-base font-medium">Perfect match</span>
-              </div>
-            </div>
+          <div className="mt-10">
+            <Button asChild size="lg" className="cta-button text-lg">
+              <Link to="/ritual-navigator">
+                Instantly Map Your Wedding Timeline
+                <ArrowRight size={22} className="ml-2" />
+              </Link>
+            </Button>
+            <p className="mt-4 text-sm text-gray-500">
+              Get a Free, Personalized Ritual & Vendor Checklist for Your Wedding.
+            </p>
           </div>
         </div>
       </div>
