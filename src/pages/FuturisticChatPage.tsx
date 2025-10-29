@@ -18,6 +18,7 @@ const FuturisticChatPage: React.FC = () => {
   const { clearSelection, selectedArtifacts } = useSessionArtifactsStore();
 
   const {
+    isAgentReady,
     isRecording,
     isAssistantSpeaking,
     transcript: multimodalTranscript,
@@ -115,6 +116,8 @@ const FuturisticChatPage: React.FC = () => {
 
   return (
     <FuturisticChat
+      isAgentReady={isAgentReady}
+      connectionState={connectionState}
       isRecording={isRecording}
       isAssistantSpeaking={isAssistantSpeaking}
       // REMOVED: transcript={multimodalTranscript} // This was causing the TypeScript error

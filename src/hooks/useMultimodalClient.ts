@@ -15,10 +15,11 @@ export interface Message {
 }
 
 type VideoMode = 'webcam' | 'screen' | null;
-type ConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+type ConnectionState = 'idle' | 'connecting' | 'connected' | 'initializing' | 'reconnecting' | 'failed';
 
 export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
+  const [isAgentReady, setIsAgentReady] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [activeVideoMode, setActiveVideoMode] = useState<VideoMode>(null);
@@ -153,8 +154,12 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     setConnectionState(reconnectAttemptsRef.current > 0 ? 'reconnecting' : 'connecting');
     const client = new MultimodalClient(userId, serverUrl);
     clientRef.current = client;
-    client.onReady = () => {
+    client.onConnected = () => {
       setIsConnected(true);
+      setConnectionState('initializing');
+    };
+    client.onAgentReady = () => {
+      setIsAgentReady(true);
       setConnectionState('connected');
       reconnectAttemptsRef.current = 0;
       manualReconnectRequestedRef.current = false;
@@ -363,6 +368,7 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
 
   return {
     isConnected,
+    isAgentReady,
     connectionState,
     isRecording,
     isVideoActive,
