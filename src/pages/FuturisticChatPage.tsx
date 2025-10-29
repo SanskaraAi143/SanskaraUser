@@ -27,6 +27,7 @@ const FuturisticChatPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [showArtifactPanel, setShowArtifactPanel] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [keepSelection, setKeepSelection] = useState(false);
@@ -110,6 +111,15 @@ const FuturisticChatPage: React.FC = () => {
       resetForSession();
     }
   }, [sessionId, resetForSession]);
+
+  // Handle audio playback
+  useEffect(() => {
+    if (isAssistantSpeaking) {
+      audioRef.current?.play().catch(e => console.error("Audio play failed", e));
+    } else {
+      audioRef.current?.pause();
+    }
+  }, [isAssistantSpeaking]);
 
   // Drag & Drop overlay
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); if (!dragActive) setDragActive(true); };
@@ -214,10 +224,11 @@ const FuturisticChatPage: React.FC = () => {
       <div className={cn("flex-[3] relative flex flex-col border-r border-futuristic-border transition-all duration-500 ease-in-out", { 'video-active': isVideoActive })}
         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
         <main className="audio-interface flex-grow flex flex-col justify-center items-center text-center p-8 pb-44 relative">
+          <audio ref={audioRef} src="/audio_app.mp3" loop />
           <div className={cn("video-feeds absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center gap-4 p-4 transition-opacity duration-500", isVideoActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}>
               <div className="video-feed partner-feed w-full flex-1 bg-gray-200 rounded-2xl flex justify-center items-center text-futuristic-text-secondary"><span>Partner's Video</span></div>
               <div className="video-feed user-feed absolute w-32 h-40 bottom-48 right-4 border-2 border-white rounded-2xl shadow-lg overflow-hidden">
-                <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover"/>
+                <video ref={videoRef} playsInline muted className="h-full w-full object-cover"/>
               </div>
           </div>
           <div className={cn("ai-visualizer-container transition-all duration-500", {"transform scale-40 -translate-x-[120%] -translate-y-[350%]": isVideoActive})}>

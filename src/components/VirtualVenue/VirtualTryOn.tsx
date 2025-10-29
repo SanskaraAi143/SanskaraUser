@@ -33,6 +33,7 @@ interface VenuePhoto {
 export default function VirtualTryOn() {
   const [userPhotoDataUri, setUserPhotoDataUri] = useState<string | null>(null);
   const [outfitPhotoDataUri, setOutfitPhotoDataUri] = useState<string | null>(null);
+  const [uploadedVenuePhotoDataUri, setUploadedVenuePhotoDataUri] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -83,11 +84,24 @@ export default function VirtualTryOn() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (uploadedVenuePhotoDataUri) {
+      form.setValue('venuePhotoUrl', uploadedVenuePhotoDataUri, { shouldValidate: true });
+      setFetchedVenuePhotos([]); // Clear fetched photos when a custom one is uploaded
+      if (!form.getValues('venueName')) {
+        form.setValue('venueName', 'Custom Venue');
+      }
+    }
+  }, [uploadedVenuePhotoDataUri, form]);
+
   // New function to fetch venue photos from our backend
   const fetchVenuePhotos = async (placeId: string) => {
     setIsFetchingVenuePhotos(true); // Start loading
     try {
       const response = await fetch(`/api/venue-photos?place_id=${placeId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data.success && data.photos) {
         setFetchedVenuePhotos(data.photos);
@@ -153,6 +167,7 @@ export default function VirtualTryOn() {
   const handleReset = () => {
     setUserPhotoDataUri(null);
     setOutfitPhotoDataUri(null);
+    setUploadedVenuePhotoDataUri(null);
     setGeneratedImage(null);
     setFetchedVenuePhotos([]);
     setSelectedPlace(null);
@@ -227,11 +242,24 @@ export default function VirtualTryOn() {
                           ref={venueInputRef}
                           placeholder="Type a venue name..."
                           className="bg-white"
-                          disabled={isPending || isFetchingVenuePhotos}
+                          disabled={isPending || isFetchingVenuePhotos || !!uploadedVenuePhotoDataUri}
                         />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
+
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">OR</p>
+                  </div>
+
+                  <ImageUploadCard
+                    id="venue-photo-upload"
+                    title="Upload Venue Photo"
+                    description="Select a photo of your venue."
+                    icon={<Building className="w-12 h-12 text-primary" />}
+                    onImageChange={setUploadedVenuePhotoDataUri}
+                    disabled={isPending}
+                  />
 
                   {fetchedVenuePhotos.length > 0 && (
                      <FormField
