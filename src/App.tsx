@@ -51,6 +51,7 @@ const AuthPage = lazy(() => import('./pages/AuthPage'));
 const RitualGuidePage = lazy(() => import('./pages/RitualGuidePage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const VirtualVenuePage = lazy(() => import('./pages/VirtualVenuePage'));
+const AiPlannerPage = lazy(() => import('./pages/AiPlannerPage'));
 
 const ConditionalFloatingChatButton = () => {
   const location = useLocation();
@@ -113,7 +114,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/chat" element={<FuturisticChatPage />} /> {/* Move chat route here to exclude Navbar */}
-                <Route path="/dashboard/new-chat" element={<FuturisticChatPage />} /> {/* Also exclude Navbar for dashboard new-chat */}
+                <Route path="/ai-planner" element={<AiPlannerPage />} />
+                <Route path="/dashboard/new-chat" element={<FuturisticChatPash />} /> {/* Also exclude Navbar for dashboard new-chat */}
                 <Route path="*" element={<NavbarRoutes />} /> {/* New component to wrap routes that need Navbar */}
               </Routes>
             </Suspense>
