@@ -18,45 +18,9 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [audioError, setAudioError] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState(false);
   const [isBetaNoticeVisible, setIsBetaNoticeVisible] = useState(() => {
     return localStorage.getItem('beta-notice-dismissed') !== 'true';
   });
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      if (!user) {
-        audio.muted = true;
-        audio.play().then(() => {
-          audio.muted = false;
-          setAudioPlaying(true);
-          setAudioError(false);
-        }).catch(error => {
-          setAudioError(true);
-          setAudioPlaying(false);
-        });
-      } else {
-        audio.pause();
-        setAudioPlaying(false);
-        setAudioError(false);
-      }
-    }
-  }, [user]);
-
-  const handleManualPlay = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.play().then(() => {
-        setAudioPlaying(true);
-        setAudioError(false);
-      }).catch(error => {
-        setAudioError(true);
-        console.log("Manual audio play failed:", error);
-      });
-    }
-  };
   
   const handleGetStarted = () => {
     if (user) {
@@ -224,29 +188,7 @@ const Index = () => {
         </script>      </Helmet>
       <BetaNotice onDismiss={() => setIsBetaNoticeVisible(false)} onVisibilityChange={setIsBetaNoticeVisible} />
 
-      {audioPlaying && !user && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 flex items-center justify-center">
-          <span className="text-lg mr-2 animate-pulse">🎵</span>
-          <span className="font-medium text-sm">Wedding background music playing</span>
-        </div>
-      )}
-      {audioError && !user && (
-        <div className="fixed top-0 left-0 w-full bg-yellow-100 border-b-4 border-yellow-500 text-yellow-700 p-4 flex items-center justify-center z-50">
-          <div className="flex items-center space-x-4">
-            <span className="text-3xl">🎵</span>
-            <div>
-              <p className="font-bold text-lg">Background music couldn't start automatically</p>
-              <p className="text-base">Click here to experience our wedding ambiance!</p>
-            </div>
-            <Button
-              onClick={handleManualPlay}
-              className="bg-wedding-gold hover:bg-yellow-500 text-black px-6 py-3 rounded-full text-lg font-semibold"
-            >
-              Play Music
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Removed audio playing and error notices as per user request */}
       <Navbar isBetaNoticeVisible={isBetaNoticeVisible} />
       <main role="main" aria-label="Main content">
         <Hero />
@@ -305,11 +247,9 @@ const Index = () => {
               </Button>
             )}
           </div>        </section>
-        <Footer />
       </main>
-      <footer>
-        <Footer />
-      </footer>
+      <Footer />
+
     </div>
   );
 };

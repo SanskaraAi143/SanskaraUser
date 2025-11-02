@@ -17,14 +17,10 @@ export type Expense = {
   wedding_id: string;
   item_name: string;
   category: string;
-  estimated_cost?: number;
-  actual_cost?: number;
-  amount_paid: number; // This will be the main amount field
+  amount: number;
   vendor_name: string;
-  status: ExpenseStatus; // Updated: 'Quote Received', 'Deposit Paid', or 'Paid in Full'
-  paid_by?: string; // e.g., 'Bride\'s Father', 'Groom', 'Couple\'s Joint Account'
-  attachments?: string[]; // URLs to invoices or receipts
-  contribution_by?: string; // 'bride_side', 'groom_side', 'shared'
+  status: ExpenseStatus;
+  contribution_by?: string;
   created_at?: string;
   updated_at?: string;
 };
@@ -92,7 +88,7 @@ export const getExpenses = async (weddingId: string): Promise<Expense[]> => {
   // Map the 'amount' field from the database to 'amount_paid' in the Expense interface
   return (data || []).map(item => ({
     ...item,
-    amount_paid: item.amount, // Assign 'amount' from DB to 'amount_paid'
+    amount: item.amount,
   }));
 };
 
@@ -105,11 +101,9 @@ export const useExpenses = (weddingId: string) => {
 };
 
 export const addExpense = async (expense: Omit<Expense, 'item_id'|'created_at'|'updated_at'>) => {
-  // Map amount_paid to 'amount' for the database insert
-  const { amount_paid, ...rest } = expense;
   const { data, error } = await supabase
     .from('budget_items')
-    .insert([{ ...rest, item_id: uuidv4(), created_at: new Date().toISOString(), amount: amount_paid }]);
+    .insert([{ ...expense, item_id: uuidv4(), created_at: new Date().toISOString() }]);
   if (error) throw error;
   return data;
 };
@@ -125,11 +119,9 @@ export const useAddExpense = () => {
 };
 
 export const updateExpense = async (expense: Expense) => {
-  // Map amount_paid to 'amount' for the database update
-  const { amount_paid, ...rest } = expense;
   const { data, error } = await supabase
     .from('budget_items')
-    .update({ ...rest, amount: amount_paid }) // Assign 'amount_paid' to 'amount'
+    .update(expense)
     .eq('item_id', expense.item_id);
   if (error) throw error;
   return data;

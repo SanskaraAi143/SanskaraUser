@@ -16,7 +16,9 @@ export default class AudioClient {
         this.sessionId = null;
 
         // Callbacks
-        this.onReady = () => {};
+        this.onReady = () => {}; // Deprecated, use onAgentReady
+        this.onConnected = () => {};
+        this.onAgentReady = () => {};
         this.onAudioReceived = () => {};
         this.onTextReceived = () => {};
         this.onTurnComplete = () => {};
@@ -80,10 +82,7 @@ export default class AudioClient {
                     clearTimeout(connectionTimeout);
                     this.reconnectAttempts = 0; // Reset on successful connection
                     this.isConnected = true;
-                    if (!this._readyEmitted) {
-                        this._readyEmitted = true;
-                        try { this.onReady(); } catch(e) { console.error('onReady error', e); }
-                    }
+                    // The server will now send a 'connected' message, so we don't call onReady here.
                     resolve();
                 };
 
@@ -110,12 +109,27 @@ export default class AudioClient {
 
                             // Handle each message type
                             try {
-                                if (message.type === 'ready') {
-                                    // Legacy ready message – already handled on open, but keep for backward compat
+                                if (message.type === 'connected') {
+                                    this.isConnected = true;
+                                    try { this.onConnected(); } catch(e) { console.error('onConnected error', e); }
+                                }
+                                else if (message.type === 'agent_ready') {
                                     if (!this._readyEmitted) {
                                         this._readyEmitted = true;
-                                        this.isConnected = true;
-                                        this.onReady();
+                                        try {
+                                            this.onReady(); // For backward compatibility
+                                            this.onAgentReady();
+                                        } catch(e) { console.error('onAgentReady error', e); }
+                                    }
+                                }
+                                else if (message.type === 'ready') {
+                                    // Handle legacy 'ready' message as agent_ready for compatibility
+                                    if (!this._readyEmitted) {
+                                        this._readyEmitted = true;
+                                        try {
+                                            this.onReady(); // For backward compatibility
+                                            this.onAgentReady();
+                                        } catch(e) { console.error('onAgentReady error', e); }
                                     }
                                 }
                                 else if (message.type === 'audio') {
