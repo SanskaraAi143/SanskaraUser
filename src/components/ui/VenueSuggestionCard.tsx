@@ -8,11 +8,9 @@ export interface VenueData { // Exporting interface for potential reuse
   reviews: string;
 }
 
-interface VenueSuggestionCardProps {
+type VenueSuggestionCardProps = {
   venue: VenueData;
-  // Allow any other props to be passed down to the div if necessary
-  [key: string]: React.HTMLAttributes<HTMLDivElement>;
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 const VenueSuggestionCard: React.FC<VenueSuggestionCardProps> = ({ venue, ...rest }) => {
   return (

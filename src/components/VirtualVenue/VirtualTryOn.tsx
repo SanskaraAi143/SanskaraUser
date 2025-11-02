@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
+import { BASE_API_URL } from '@/config/api';
 const formSchema = z.object({
   venueName: z.string().min(1, "Please select a venue."),
   venuePhotoUrl: z.string().min(1, "Please select a venue image."),
@@ -87,7 +88,7 @@ export default function VirtualTryOn() {
   const fetchVenuePhotos = async (placeId: string) => {
     setIsFetchingVenuePhotos(true); // Start loading
     try {
-      const response = await fetch(`/api/venue-photos?place_id=${placeId}`);
+      const response = await fetch(`${BASE_API_URL}/api/venue-photos?place_id=${placeId}`);
       const data = await response.json();
       if (data.success && data.photos) {
         setFetchedVenuePhotos(data.photos);
@@ -118,7 +119,7 @@ export default function VirtualTryOn() {
       (async () => { // Wrapped in a self-executing async function
         setIsGeneratingVisualization(true); // Start visualization loading
         try {
-          const result = await fetch('/api/generate-visualization', {
+          const result = await fetch(`${BASE_API_URL}/api/generate-visualization`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

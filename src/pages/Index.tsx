@@ -21,34 +21,6 @@ const Index = () => {
   const [isBetaNoticeVisible, setIsBetaNoticeVisible] = useState(() => {
     return localStorage.getItem('beta-notice-dismissed') !== 'true';
   });
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      const playAudio = () => {
-        if (!user && audio.paused) {
-          audio.muted = false; // Ensure not muted
-          audio.play().catch(error => {
-            console.warn("Autoplay prevented:", error);
-            // Optionally, show a "Play Music" button here if autoplay fails
-          });
-        }
-      };
-
-      // Attempt to play on first user interaction
-      document.addEventListener('click', playAudio, { once: true });
-      document.addEventListener('keydown', playAudio, { once: true });
-
-      if (user) {
-        audio.pause();
-      }
-
-      return () => {
-        document.removeEventListener('click', playAudio);
-        document.removeEventListener('keydown', playAudio);
-      };
-    }
-  }, [user]);
   
   const handleGetStarted = () => {
     if (user) {
@@ -275,11 +247,9 @@ const Index = () => {
               </Button>
             )}
           </div>        </section>
-        <Footer />
       </main>
-      <footer>
-        <Footer />
-      </footer>
+      <Footer />
+
     </div>
   );
 };
