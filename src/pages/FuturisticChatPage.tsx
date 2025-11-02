@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FuturisticChat from '@/components/futuristic-chat/FuturisticChat';
 import { useAuth } from '@/context/AuthContext';
 import { useMultimodalClient } from '@/hooks/useMultimodalClient';
+import { useChatHistory } from '@/hooks/useChatHistory';
 import { useToast } from '@/components/ui/use-toast';
 import { useSessionArtifactsStore } from '@/store/sessionArtifactsStore';
 
@@ -30,15 +31,22 @@ const FuturisticChatPage: React.FC = () => {
     initializeWebcam,
     initializeScreenShare,
     stopVideo,
-    isLoadingHistory,
-    hasMoreHistory,
-    loadMoreHistory,
     startRecording,
     stopRecording,
   } = useMultimodalClient(
     user?.internal_user_id,
-    user?.wedding_id
+    undefined // serverUrl param, was undefined
   );
+
+  const { messages: historyMessages, isLoading: isLoadingHistory, hasMore: hasMoreHistory, loadMore: loadMoreHistory, error: historyError } = useChatHistory({
+    userId: user?.internal_user_id,
+    weddingId: user?.wedding_id,
+    sessionId,
+  });
+
+  const allMessages = useMemo(() => {
+    return [...historyMessages, ...multimodalTranscript];
+  }, [historyMessages, multimodalTranscript]);
 
   const handleTalkClick = () => {
     if (isRecording) {
@@ -131,7 +139,7 @@ const FuturisticChatPage: React.FC = () => {
       activeVideoMode={activeVideoMode}
       videoRef={videoRef}
       localVideoRef={localVideoRef}
-      messages={multimodalTranscript}
+      messages={allMessages}
       onSendMessage={handleSend}
       isLoadingHistory={isLoadingHistory}
       hasMoreHistory={hasMoreHistory}

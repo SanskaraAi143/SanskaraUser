@@ -122,6 +122,16 @@ export default class AudioClient {
                                         } catch(e) { console.error('onAgentReady error', e); }
                                     }
                                 }
+                                else if (message.type === 'ready') {
+                                    // Handle legacy 'ready' message as agent_ready for compatibility
+                                    if (!this._readyEmitted) {
+                                        this._readyEmitted = true;
+                                        try {
+                                            this.onReady(); // For backward compatibility
+                                            this.onAgentReady();
+                                        } catch(e) { console.error('onAgentReady error', e); }
+                                    }
+                                }
                                 else if (message.type === 'audio') {
                                     // Handle receiving audio data from server
                                     const audioData = message.data;

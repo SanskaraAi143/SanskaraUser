@@ -12,10 +12,14 @@ const getWebSocketUrl = (path = '/ws') => {
 };
 
 export default class MultimodalClient extends AudioClient {
-    constructor(userId, serverUrl = getWebSocketUrl('/ws')) {
+    constructor(userId, serverUrl = getWebSocketUrl('/ws'), sessionId = null) {
         const url = new URL(serverUrl);
         if (userId) {
             url.searchParams.set('user_id', userId);
+            url.searchParams.set('mode', 'live');
+        }
+        if (sessionId) {
+            url.searchParams.set('session_id', sessionId);
         }
         super(url.toString());
 
@@ -30,7 +34,7 @@ export default class MultimodalClient extends AudioClient {
 
         // Override reconnection settings from parent class
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 0; // Prevent automatic reconnection
+        this.maxReconnectAttempts = 5; // Allow automatic reconnection
         this.isReconnecting = false;
     }
 
@@ -239,6 +243,14 @@ export default class MultimodalClient extends AudioClient {
 
         try {
             await this.connect();
+            // Send session resumption if we have a session ID
+            if (this.sessionId && this.isConnected) {
+                this.ws.send(JSON.stringify({
+                    type: 'reconnect',
+                    session_id: this.sessionId
+                }));
+                console.log('Sent session resumption for:', this.sessionId);
+            }
             console.log('Reconnected successfully');
         } catch (error) {
             console.error('Reconnection failed:', error);
@@ -256,6 +268,18 @@ export default class MultimodalClient extends AudioClient {
             }));
         } else {
             console.error('Cannot send text: Not connected to server.');
+        }
+    }
+
+    // Send control message to server
+    sendControl(action) {
+        if (this.isConnected) {
+            this.ws.send(JSON.stringify({
+                type: 'control',
+                action: action
+            }));
+        } else {
+            console.error('Cannot send control: Not connected to server.');
         }
     }
 

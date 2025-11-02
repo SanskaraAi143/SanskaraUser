@@ -17,7 +17,7 @@ export interface Message {
 type VideoMode = 'webcam' | 'screen' | null;
 type ConnectionState = 'idle' | 'connecting' | 'connected' | 'initializing' | 'reconnecting' | 'failed';
 
-export const useMultimodalClient = (userId?: string, weddingId?: string, serverUrl?: string) => {
+export const useMultimodalClient = (userId?: string, serverUrl?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isAgentReady, setIsAgentReady] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -29,8 +29,6 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // New state for loading history
-  const [historyError, setHistoryError] = useState<string | null>(null); // New state for history error
 
   const clientRef = useRef<MultimodalClient | null>(null);
   const assistantMessageInProgress = useRef(false);
@@ -152,7 +150,7 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     }
     tearDownClient();
     setConnectionState(reconnectAttemptsRef.current > 0 ? 'reconnecting' : 'connecting');
-    const client = new MultimodalClient(userId, serverUrl);
+    const client = new MultimodalClient(userId, serverUrl, sessionId);
     clientRef.current = client;
     client.onConnected = () => {
       setIsConnected(true);
@@ -197,66 +195,6 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     initiatedRef.current = true;
     attemptConnect();
   }, [userId, attemptConnect]); // Added attemptConnect to dependency array for completeness
-
-  const [hasMoreHistory, setHasMoreHistory] = useState(true);
-  const [historyOffset, setHistoryOffset] = useState(0);
-  const historyLimit = 20;
-
-  // Fetch session history when sessionId becomes available or when loading more
-  useEffect(() => {
-    if (userId && weddingId && sessionId) {
-      const fetchSessionHistory = async () => {
-        setIsLoadingHistory(true);
-        setHistoryError(null);
-        try {
-          console.log('[useMultimodalClient] fetching history for', { weddingId, sessionId, offset: historyOffset });
-          const response = await getChatMessages(weddingId, sessionId, {
-            limit: historyLimit,
-            offset: historyOffset,
-          });
-
-          if (response && response.history) {
-            const reversedHistory = response.history.reverse();
-            const formattedMessages = reversedHistory
-              .map((event: any) => {
-                // The event_type filter was too restrictive, let's see all events
-                if (event.event_type !== 'message') {
-                  console.log('Non-message event in history:', event);
-                }
-                return {
-                  sender: event.metadata?.sender_type === 'assistant' ? 'assistant' : 'user',
-                  text: event.content?.text || `[Unsupported event: ${event.event_type}]`,
-                  isMarkdown: event.metadata?.sender_type === 'assistant',
-                  timestamp: event.timestamp,
-                  eventId: event.event_id,
-                };
-              });
-
-            setHasMoreHistory(response.total_count > (historyOffset + historyLimit));
-
-            setTranscript(prev =>
-              historyOffset === 0 ? formattedMessages : [...formattedMessages, ...prev]
-            );
-          } else {
-            console.warn('[useMultimodalClient] no history in response');
-            setHasMoreHistory(false);
-          }
-        } catch (error: any) {
-          console.error('Failed to fetch session history:', error);
-          setHistoryError(error.message || 'Failed to load chat history.');
-        } finally {
-          setIsLoadingHistory(false);
-        }
-      };
-      fetchSessionHistory();
-    }
-  }, [userId, weddingId, sessionId, historyOffset, historyLimit]);
-
-  const loadMoreHistory = useCallback(() => {
-    if (!isLoadingHistory && hasMoreHistory) {
-      setHistoryOffset(prev => prev + historyLimit);
-    }
-  }, [isLoadingHistory, hasMoreHistory]);
 
   // Cleanup on unmount
   useEffect(() => { return () => { tearDownClient(); }; }, [tearDownClient]);
@@ -378,10 +316,6 @@ export const useMultimodalClient = (userId?: string, weddingId?: string, serverU
     isSpeaking,
     isAssistantSpeaking,
     isAssistantTyping,
-    isLoadingHistory,
-    historyError,
-    hasMoreHistory,
-    loadMoreHistory,
     startRecording,
     stopRecording,
     initializeWebcam,
