@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendarAlt as faRegularCalendarAlt, faClock as faRegularClock } from '@fortawesome/free-regular-svg-icons';
 import { faOm, faHeart } from '@fortawesome/free-solid-svg-icons';
 import ProgressBar from '@/components/ProgressBar';
+import SankrantiJourney from '@/components/blog/SankrantiJourney';
 
 
 // Extended PostData for article page specifics
@@ -21,6 +22,7 @@ interface ArticlePostData extends PostData {
   calloutText?: string;
   calloutButtonText?: string;
   calloutButtonLink?: string;
+  customComponent?: string;
 }
 
 
@@ -40,10 +42,10 @@ const BlogDetailPage: React.FC = () => {
       const progress = (element.scrollTop / totalHeight) * 100;
       setScrollProgress(progress);
     } else { // Fallback to window scroll if ref not ready or not applicable
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrolled = (scrollTop / docHeight) * 100;
-        setScrollProgress(scrolled);
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = (scrollTop / docHeight) * 100;
+      setScrollProgress(scrolled);
     }
   };
 
@@ -149,9 +151,9 @@ const BlogDetailPage: React.FC = () => {
         </main>
         {/* Simplified Footer for error page */}
         <footer className="bg-white/60 backdrop-blur-md py-12 mt-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} SanskaraAI. All rights reserved.</p>
-            </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} SanskaraAI. All rights reserved.</p>
+          </div>
         </footer>
       </div>
     );
@@ -236,63 +238,69 @@ const BlogDetailPage: React.FC = () => {
         </Helmet>
 
         <header>
-          <Navbar />
+          <Navbar isBetaNoticeVisible={false} />
         </header>
 
-        {/* Main Article Content - applied max-w-3xl and mx-auto for centering */}
-        {/* Added pt-20 (or similar) to account for fixed Navbar height */}
-        <main role="main" aria-label="Blog post content" ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
-          <div className="mb-6 fade-in-up">
-            {post.category && <span className="tag-pill">{post.category}</span>}
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 fade-in-up">{post.title}</h1>
-          <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4 fade-in-up">
-            <span><FontAwesomeIcon icon={faUser} className="mr-1" /> {post.author}</span>
-            <span><FontAwesomeIcon icon={faRegularCalendarAlt} className="mr-1" />
-              {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
-            {post.readTime && <span><FontAwesomeIcon icon={faRegularClock} className="mr-1" /> {post.readTime}</span>}
-          </div>
-          {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-8 fade-in-up">
-              {post.tags.map(tag => <span key={tag} className="tag-pill">{tag}</span>)}
+        {post.customComponent === 'SankrantiJourney' ? (
+          <main role="main" aria-label="Blog post content" className="pt-20">
+            <SankrantiJourney />
+          </main>
+        ) : (
+          /* Main Article Content - applied max-w-3xl and mx-auto for centering */
+          /* Added pt-20 (or similar) to account for fixed Navbar height */
+          <main role="main" aria-label="Blog post content" ref={articleContentRef} className="max-w-3xl mx-auto px-4 py-12 pt-20 md:pt-24 lg:pt-28">
+            <div className="mb-6 fade-in-up">
+              {post.category && <span className="tag-pill">{post.category}</span>}
             </div>
-          )}
-
-          {/* Main Post Image - if available in frontmatter */}
-          {post.image && (
-              <div className="my-8 rounded-lg overflow-hidden shadow-xl fade-in-up">
-                  <img src={post.image} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 fade-in-up">{post.title}</h1>
+            <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4 fade-in-up">
+              <span><FontAwesomeIcon icon={faUser} className="mr-1" /> {post.author}</span>
+              <span><FontAwesomeIcon icon={faRegularCalendarAlt} className="mr-1" />
+                {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+              {post.readTime && <span><FontAwesomeIcon icon={faRegularClock} className="mr-1" /> {post.readTime}</span>}
+            </div>
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-8 fade-in-up">
+                {post.tags.map(tag => <span key={tag} className="tag-pill">{tag}</span>)}
               </div>
-          )}
+            )}
 
-          {/* Rendered Markdown Content with specific prose styling */}
-          <article
+            {/* Main Post Image - if available in frontmatter */}
+            {post.image && (
+              <div className="my-8 rounded-lg overflow-hidden shadow-xl fade-in-up">
+                <img src={post.image} alt={post.title} className="w-full h-auto object-cover" loading="lazy" />
+              </div>
+            )}
+
+            {/* Rendered Markdown Content with specific prose styling */}
+            <article
               className="prose-sanskara fade-in-up" // Custom prose styles from index.css
               dangerouslySetInnerHTML={{ __html: post.contentHtml || '' }}
-          />
+            />
 
-          {/* Callout Box - Content can be dynamic from frontmatter */}
-          {post.calloutTitle && (
-            <div className="callout-box fade-in-up">
-                <div style={{fontSize: '2.2rem', color: '#e07a3f', marginBottom: '0.5rem'}}>🌟</div>
+            {/* Callout Box - Content can be dynamic from frontmatter */}
+            {post.calloutTitle && (
+              <div className="callout-box fade-in-up">
+                <div style={{ fontSize: '2.2rem', color: '#e07a3f', marginBottom: '0.5rem' }}>🌟</div>
                 <h4>{post.calloutTitle}</h4>
-                {post.calloutText && <div style={{fontSize: '1.18rem', color: '#7a5a2f', marginBottom: '1.2rem'}} dangerouslySetInnerHTML={{ __html: post.calloutText }} />}
+                {post.calloutText && <div style={{ fontSize: '1.18rem', color: '#7a5a2f', marginBottom: '1.2rem' }} dangerouslySetInnerHTML={{ __html: post.calloutText }} />}
                 {post.calloutButtonText && post.calloutButtonLink && (
                   <a href={post.calloutButtonLink} target="_blank" rel="noopener noreferrer">
-                      <button className="callout-btn">{post.calloutButtonText}</button>
+                    <button className="callout-btn">{post.calloutButtonText}</button>
                   </a>
                 )}
-            </div>
-          )}          {/* Example of how further static content or links could be added as per article.html */}
-          <div className="prose-sanskara fade-in-up">
+              </div>
+            )}          {/* Example of how further static content or links could be added as per article.html */}
+            <div className="prose-sanskara fade-in-up">
               <h2>Take the First Step: Explore SanskaraAI Today! ✨</h2>
               <p>                  <a href="/features" target="_blank" rel="noopener noreferrer">Visit our Features Page</a><br />
-                  <a href="/get-started" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
-                  {/* Add social media links here */}
+                <a href="/get-started" target="_blank" rel="noopener noreferrer">Get Your Personalized Plan</a><br />
+                {/* Add social media links here */}
               </p>          </div>
 
-        </main>
+          </main>
+        )}
 
         <footer>
           <Footer />
