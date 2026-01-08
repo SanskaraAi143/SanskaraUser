@@ -307,7 +307,7 @@ const SankrantiJourney: React.FC = () => {
                     <span>{lang === 'en' ? 'Join WhatsApp Group to Order' : 'ఆర్డర్ చేయడానికి వాట్సాప్ గ్రూపులో చేరండి'}</span>
                 </a>
                 <div className="sj-upi-info">
-                    UPI ID: <strong>9642337777@ybl</strong>
+                    UPI ID: <strong>8639468919@ptsbi</strong>
                 </div>
             </footer>
         </div>
